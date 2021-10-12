@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  address    String   @unique
+  email      String   @unique
+  privateKey String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  profile    Profile?
+  storys     Story[]
+}
+
+model Profile {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  nickname       String
+  profileUrl     String?
+  avatarSvg      String?
+  defaultProfile Boolean  @default(true)
+  gender         String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Signature {
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  signature  String
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Story {
+  id              Int      @id @default(autoincrement())
+  userId          Int
+  mediaId         Int
+  name            String
+  description     String
+  backgroundColor String?
+  externalUrl     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id])
+  media           Media    @relation(fields: [mediaId], references: [id])
+
+}
+
+model Media {
+  id         Int      @id @default(autoincrement())
+  originUrl  String
+  contentUrl String?
+  type       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  Story      Story[]
+}
