@@ -32,26 +32,14 @@
 
 - [ ] `NFT Token 생성`
     - openzeppelin을 이용해서 구현
-
+  
 - [ ] `Klaytn 연동`
 
-- [ ] `serverless nextjs deploy - ISR`
+## 📝 TODO
 
-- [ ] `API Module  Typescript 수정`
+- [x] `회원가입 API`
 
-- [ ] `SEO`
-
-- [ ] `PWA`
-
-- [ ] `모바일 화면 구성`
- 
-- [ ] `NFT 상세 페이지`
-
-- [ ] `NFT 상세에서 히스토리 내역 (거래내역) 확인 가능`
-
-- [ ] `NFT 수정 페이지 (수정 기능 추가)`
-
-- [ ] `NFT 등록 페이지 (등록 기능 추가)`
+- [x] `로그인 API`
 
 
 ## 🚀 Getting started

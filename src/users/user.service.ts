@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import omit from 'lodash/omit';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 
 // common
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
@@ -10,6 +13,8 @@ import { JwtService } from 'src/jwt/jwt.service';
 
 // types
 import { SignupRequestDto } from './dtos/signup.request.dto';
+import { SigninRequestDto } from './dtos/signin.request.dto';
+import { SignatureToken } from './dtos/common.dto';
 
 @Injectable()
 export class UsersService {
@@ -39,7 +44,119 @@ export class UsersService {
     return exists;
   }
 
-  async create(input: SignupRequestDto) {
+  /**
+   * @description - This method is used to signin user
+   * @param {SigninRequestDto} input
+   */
+  async signin(input: SigninRequestDto) {
+    try {
+      const exists = await this.prisma.user.findFirst({
+        where: {
+          address: input.walletAddress,
+        },
+        include: {
+          profile: true,
+        },
+      });
+
+      // 해당 지갑 주소가 존재하는 경우
+      if (exists) {
+        // 현재 유저의 signature 정보를 가져온다.
+        const currentSignature = await this.prisma.signature.findFirst({
+          where: {
+            AND: [
+              {
+                userId: exists.id,
+              },
+              {
+                isVerified: true,
+              },
+            ],
+          },
+        });
+
+        const condition =
+          currentSignature && currentSignature.signature !== input.signature;
+
+        // 세션이 존재하고 이미 존재하는 세션하고 새로운 세샨이 다르면 업데이트
+        if (condition) {
+          await this.prisma.signature.update({
+            data: {
+              signature: input.signature,
+            },
+            where: {
+              id: currentSignature.id,
+            },
+          });
+        }
+
+        // 액세스 토큰을 생성한다.
+        const accessToken = this.jwtService.sign(
+          {
+            userId: exists.id,
+            email: exists.email,
+            address: exists.address,
+          },
+          {
+            subject: 'access_token',
+            expiresIn: '30d',
+          },
+        );
+
+        const { userId, createdAt, updatedAt, gender, ...info } =
+          exists.profile;
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            accessToken,
+            email: exists.email,
+            address: exists.address,
+            profile: {
+              ...info,
+            },
+          },
+        };
+      }
+
+      // 서명 스키마를 먼저 생성하고 이후에 사용자를 생성한다.
+      const signature = await this.prisma.signature.create({
+        data: {
+          signature: input.signature,
+        },
+      });
+
+      // 서명 토큰을 생성한다.
+      const signatureToken = this.jwtService.sign(
+        {
+          id: signature.id,
+          signature: signature.signature,
+        },
+        {
+          expiresIn: '1h',
+          subject: 'signature-auth',
+        },
+      );
+
+      // 존재하지 않는 경우 서명 토큰값을 넘겨준다.
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        message: '존재하지 않는 서명 정보입니다.',
+        result: signatureToken,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @description - This method is used to signup user
+   * @param {SignupRequestDto} input
+   */
+  async signup(input: SignupRequestDto) {
     try {
       const exists = await this.findEmailAndAddress(
         input.email,
@@ -57,6 +174,51 @@ export class UsersService {
           result: exists.email === input.email ? 'email' : 'address',
         };
       }
+
+      // check token
+      const decoded = this.jwtService.verify<SignatureToken>(
+        input.signatureToken,
+      );
+
+      if (decoded.sub !== 'signature-auth') {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.INVALID_TOKEN,
+          msg: '유효하지 않은 서명 토큰입니다.',
+        });
+      }
+      const diff = decoded.exp * 1000 - new Date().getTime();
+      if (diff > 1000 * 60 * 60) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.TOKEN_EXPIRED,
+          msg: '유효기간이 만료되었습니다.',
+        });
+      }
+
+      // 현재 회원가입을 할려고 하는 signature 정보를 가져온다.
+      const currentSignature = await this.prisma.signature.findFirst({
+        where: {
+          AND: [
+            {
+              isVerified: false,
+            },
+            {
+              signature: decoded.signature,
+            },
+            {
+              id: decoded.id,
+            },
+          ],
+        },
+      });
+
+      // 해당 정보가 존재하지 않으면 에러를 반환한다.
+      if (!currentSignature) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.INVALID,
+          msg: '유효하지 않은 서명 입니다.',
+        });
+      }
+
       // 유저 생성
       const [user] = await this.prisma.$transaction([
         this.prisma.user.create({
@@ -81,36 +243,13 @@ export class UsersService {
         }),
       ]);
 
-      // 현재 회원가입을 할려고 하는 signature 정보를 가져온다.
-      const currentSignature = await this.prisma.signature.findFirst({
-        where: {
-          AND: [
-            {
-              isVerified: false,
-            },
-            {
-              signature: input.signature,
-            },
-          ],
-        },
-      });
-
-      // 해당 정보가 존재하지 않으면 에러를 반환한다.
-      if (!currentSignature) {
-        return {
-          ok: false,
-          resultCode: EXCEPTION_CODE.INVALID,
-          message: '유효하지 않은 signature 입니다.',
-          result: null,
-        };
-      }
-
       // 회원가입 signature 정보를 업데이트 한다.
       await this.prisma.signature.update({
         where: {
           id: currentSignature.id,
         },
         data: {
+          userId: user.id,
           isVerified: true,
         },
       });
@@ -128,6 +267,8 @@ export class UsersService {
         },
       );
 
+      const { userId, createdAt, updatedAt, gender, ...info } = profile;
+
       return {
         ok: true,
         resultCode: EXCEPTION_CODE.OK,
@@ -135,12 +276,10 @@ export class UsersService {
         result: {
           accessToken,
           email: user.email,
-          profile: omit(profile, [
-            'userId',
-            'createdAt',
-            'updatedAt',
-            'gender',
-          ]),
+          address: user.address,
+          profile: {
+            ...info,
+          },
         },
       };
     } catch (error) {

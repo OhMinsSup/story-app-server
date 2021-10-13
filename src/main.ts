@@ -6,11 +6,13 @@ import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
+import { TransformInterceptor } from './middlewares/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors({
     origin: (origin, callback) => {

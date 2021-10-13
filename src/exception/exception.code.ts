@@ -18,4 +18,8 @@ export const EXCEPTION_CODE = {
   TOKEN_EXPIRED: 4001,
   // 리프레시 토큰 만료
   EXPIRED_REFRESH_TOKEN: 4002,
+  // 유효하지 않는 토큰
+  INVALID_TOKEN: 4003,
+  // 만료된 서명 토큰
+  SIGNATURE_TOKEN: 4004,
 };

@@ -8,6 +8,13 @@ export enum GenderEnum {
 
 export type GenderType = keyof typeof GenderEnum;
 
+export interface SignatureToken {
+  signature: string;
+  id: number;
+  sub: string;
+  exp: number;
+}
+
 export class CommonDTO {
   @IsEnum(GenderEnum)
   @ApiProperty({
