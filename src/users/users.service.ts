@@ -24,6 +24,22 @@ export class UsersService {
   ) {}
 
   /**
+   * @description - This method is used to get user info
+   * @param {number} userId
+   */
+  async findByUserId(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        profile: true,
+      },
+    });
+    return user;
+  }
+
+  /**
    * @description - This method is used to exists user info
    * @param {string} email
    * @param {string} address
@@ -229,7 +245,7 @@ export class UsersService {
         });
 
         // 프로필 생성
-        const profile = await tx.profile.create({
+        await tx.profile.create({
           data: {
             userId: user.id,
             nickname: input.nickname,
@@ -251,33 +267,11 @@ export class UsersService {
           },
         });
 
-        // 액세스 토큰 생성
-        const accessToken = this.jwtService.sign(
-          {
-            userId: user.id,
-            email: user.email,
-            address: user.address,
-          },
-          {
-            subject: 'access_token',
-            expiresIn: '30d',
-          },
-        );
-
-        const { userId, createdAt, updatedAt, gender, ...info } = profile;
-
         return {
           ok: true,
           resultCode: EXCEPTION_CODE.OK,
           message: null,
-          result: {
-            accessToken,
-            email: user.email,
-            address: user.address,
-            profile: {
-              ...info,
-            },
-          },
+          result: true,
         };
       });
 

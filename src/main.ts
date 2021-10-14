@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import * as helmet from 'helmet';
+import * as compression from 'compression';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
@@ -47,7 +49,9 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  app.use(helmet());
   app.use(cookieParser(process.env.COOKIE_SECRET));
+  app.use(compression());
 
   await app.listen(3000);
 }

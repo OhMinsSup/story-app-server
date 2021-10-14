@@ -5,7 +5,6 @@ import * as Joi from '@hapi/joi';
 // module
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { PrismaService } from './prisma/prisma.service';
 
 // middleware
 import { LoggerMiddleware } from './middlewares/logger.middleware';
@@ -13,6 +12,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 // modules
 import { JwtModule } from './jwt/jwt.module';
 import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -32,6 +32,7 @@ import { UsersModule } from './users/users.module';
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
+    AuthModule,
     UsersModule,
   ],
   controllers: [AppController],

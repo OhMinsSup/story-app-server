@@ -1,12 +1,14 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // service
-import { UsersService } from './user.service';
+import { UsersService } from './users.service';
 
 // types
 import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
+
+import type { Response } from 'express';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -20,8 +22,8 @@ export class UsersController {
     description: '회원가입 API',
     type: SignupRequestDto,
   })
-  signup(@Body() data: SignupRequestDto) {
-    return this.usersService.signup(data);
+  signup(@Body() input: SignupRequestDto) {
+    return this.usersService.signup(input);
   }
 
   @Post('signin')
@@ -31,7 +33,16 @@ export class UsersController {
     description: '로그인 API',
     type: SigninRequestDto,
   })
-  signin(@Body() data: SigninRequestDto) {
-    return this.usersService.signin(data);
+  async signin(@Res() res: Response, @Body() input: SigninRequestDto) {
+    const data = await this.usersService.signin(input);
+    // set cookie
+    if (typeof data.result !== 'string' && data.ok) {
+      res.cookie('access_token', data.result.accessToken, {
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+      });
+    }
+
+    return res.status(HttpStatus.OK).json(data);
   }
 }
