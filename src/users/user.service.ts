@@ -219,19 +219,17 @@ export class UsersService {
         });
       }
 
-      // 유저 생성
-      const [user] = await this.prisma.$transaction([
-        this.prisma.user.create({
+      const result = await this.prisma.$transaction(async (tx) => {
+        // 유저 생성
+        const user = await tx.user.create({
           data: {
             email: input.email,
             address: input.walletAddress,
           },
-        }),
-      ]);
+        });
 
-      // 프로필 생성
-      const [profile] = await this.prisma.$transaction([
-        this.prisma.profile.create({
+        // 프로필 생성
+        const profile = await tx.profile.create({
           data: {
             userId: user.id,
             nickname: input.nickname,
@@ -240,48 +238,50 @@ export class UsersService {
             avatarSvg: input.defaultProfile ? input.avatarSvg : null,
             defaultProfile: input.defaultProfile,
           },
-        }),
-      ]);
+        });
 
-      // 회원가입 signature 정보를 업데이트 한다.
-      await this.prisma.signature.update({
-        where: {
-          id: currentSignature.id,
-        },
-        data: {
-          userId: user.id,
-          isVerified: true,
-        },
+        // 회원가입 signature 정보를 업데이트 한다.
+        await tx.signature.update({
+          where: {
+            id: currentSignature.id,
+          },
+          data: {
+            userId: user.id,
+            isVerified: true,
+          },
+        });
+
+        // 액세스 토큰 생성
+        const accessToken = this.jwtService.sign(
+          {
+            userId: user.id,
+            email: user.email,
+            address: user.address,
+          },
+          {
+            subject: 'access_token',
+            expiresIn: '30d',
+          },
+        );
+
+        const { userId, createdAt, updatedAt, gender, ...info } = profile;
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            accessToken,
+            email: user.email,
+            address: user.address,
+            profile: {
+              ...info,
+            },
+          },
+        };
       });
 
-      // 액세스 토큰 생성
-      const accessToken = this.jwtService.sign(
-        {
-          userId: user.id,
-          email: user.email,
-          address: user.address,
-        },
-        {
-          subject: 'access_token',
-          expiresIn: '30d',
-        },
-      );
-
-      const { userId, createdAt, updatedAt, gender, ...info } = profile;
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          accessToken,
-          email: user.email,
-          address: user.address,
-          profile: {
-            ...info,
-          },
-        },
-      };
+      return result;
     } catch (error) {
       throw error;
     }

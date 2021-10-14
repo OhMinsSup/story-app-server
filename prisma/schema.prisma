@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -50,9 +51,8 @@ model Story {
   externalUrl     String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  user            User     @relation(fields: [userId], references: [id])
   media           Media    @relation(fields: [mediaId], references: [id])
-
+  user            User     @relation(fields: [userId], references: [id])
 }
 
 model Media {
