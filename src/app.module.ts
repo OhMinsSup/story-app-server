@@ -17,6 +17,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FilesModule } from './files/files.module';
+import { StoryModule } from './story/story.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { FilesModule } from './files/files.module';
     AuthModule,
     UsersModule,
     FilesModule,
+    StoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

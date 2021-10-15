@@ -15,4 +15,13 @@ export class UploadRequestDto {
     required: true,
   })
   storyType: StoryUploadType;
+
+  @IsString()
+  @ApiProperty({
+    example: 'KakaoTalk_Photo_2021-08-11-01-13-45.jpeg',
+    description: '업로드 파일',
+    type: 'string',
+    format: 'binary',
+  })
+  file: Express.Multer.File;
 }
