@@ -1,4 +1,11 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // service
@@ -9,6 +16,7 @@ import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
 
 import type { Response } from 'express';
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -36,7 +44,7 @@ export class UsersController {
   async signin(@Res() res: Response, @Body() input: SigninRequestDto) {
     const data = await this.usersService.signin(input);
     // set cookie
-    if (typeof data.result !== 'string' && data.ok) {
+    if (typeof data.result === 'object' && data.ok) {
       res.cookie('access_token', data.result.accessToken, {
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 30,
@@ -44,5 +52,13 @@ export class UsersController {
     }
 
     return res.status(HttpStatus.OK).json(data);
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: '로그아웃' })
+  @UseGuards(LoggedInGuard)
+  logout(@Res() res: Response) {
+    res.clearCookie('access_token', { httpOnly: true });
+    res.status(HttpStatus.OK).json(true);
   }
 }

@@ -1,5 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import * as Joi from '@hapi/joi';
 
 // module
@@ -13,6 +15,8 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { JwtModule } from './jwt/jwt.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
   imports: [
@@ -32,8 +36,17 @@ import { AuthModule } from './auth/auth.module';
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
+    MulterModule.register({
+      storage: memoryStorage(), // use memory storage for having the buffer
+    }),
+    CloudinaryModule.forRoot({
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+      cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    }),
     AuthModule,
     UsersModule,
+    FilesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

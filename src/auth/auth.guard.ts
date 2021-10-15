@@ -1,5 +1,4 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
 
 // service
 import { JwtService } from 'src/jwt/jwt.service';
@@ -50,6 +49,7 @@ export class AuthGuard implements CanActivate {
         }
       }
     }
+
     return true;
   }
 }
