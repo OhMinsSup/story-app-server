@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Post,
@@ -10,6 +11,7 @@ import {
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // guard
+import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { AuthUser } from 'src/decorators/get-user.decorator';
 
@@ -26,6 +28,15 @@ import type { User } from '.prisma/client';
 @Controller('/api/stories')
 export class StoriesController {
   constructor(private storiesService: StoriesService) {}
+
+  @Get(':id')
+  @UseGuards(NotLoggedInGuard)
+  @ApiOperation({
+    summary: '스토리 조회 API',
+  })
+  detail(@Param('id', ParseIntPipe) id: number) {
+    return this.storiesService.detail(id);
+  }
 
   @Post()
   @UseGuards(LoggedInGuard)

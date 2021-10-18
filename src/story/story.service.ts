@@ -22,6 +22,67 @@ export class StoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * @description - detail a story
+   * @param id
+   */
+  async detail(id: number) {
+    try {
+      const story = await this.prisma.story.findFirst({
+        where: {
+          id,
+        },
+        select: {
+          name: true,
+          description: true,
+          backgroundColor: true,
+          externalUrl: true,
+          createdAt: true,
+          updatedAt: true,
+          media: {
+            select: {
+              id: true,
+              contentUrl: true,
+              originUrl: true,
+              type: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              email: true,
+              address: true,
+              profile: {
+                select: {
+                  nickname: true,
+                  profileUrl: true,
+                  avatarSvg: true,
+                  defaultProfile: true,
+                  gender: true,
+                },
+              },
+            },
+          },
+        },
+      });
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: story,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * @description - update a story
    * @param user
    * @param id
