@@ -15,7 +15,12 @@ async function bootstrap() {
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) {
@@ -44,6 +49,7 @@ async function bootstrap() {
     .setDescription('Story NFT Market App API')
     .setVersion('1.0')
     .addBearerAuth()
+    .addCookieAuth('access_token')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
@@ -53,6 +59,6 @@ async function bootstrap() {
   app.use(cookieParser(process.env.COOKIE_SECRET));
   app.use(compression());
 
-  await app.listen(3000);
+  await app.listen(8080);
 }
 bootstrap();

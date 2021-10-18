@@ -1,6 +1,18 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+
+// guard
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
+import { AuthUser } from 'src/decorators/get-user.decorator';
+
+// service
 import { StoriesService } from './story.service';
+
+// dto
+import { CreateRequestDto } from './dtos/create.request.dto';
+
+// types
+import type { User } from '.prisma/client';
 
 @ApiTags('Stories')
 @Controller('/api/stories')
@@ -8,15 +20,16 @@ export class StoriesController {
   constructor(private storiesService: StoriesService) {}
 
   @Post()
+  @UseGuards(LoggedInGuard)
   @ApiOperation({
     summary: '스토리 생성 API',
   })
   @ApiBody({
     required: true,
     description: '스토리 생성 요청 데이터',
-    type: 'object',
+    type: CreateRequestDto,
   })
-  create() {
-    return true;
+  create(@AuthUser() user: User, @Body() input: CreateRequestDto) {
+    return this.storiesService.create(user, input);
   }
 }

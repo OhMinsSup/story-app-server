@@ -18,8 +18,10 @@ export class CloudinaryService {
     storeType: StoryUploadType,
   ) {
     const url = this.makeDataUrl(file);
+    const splitFileName: string[] = file.originalname.split('.');
+    const filename: string = splitFileName[0];
     const response = await v2.uploader.upload(url, {
-      public_id: `story-media/${userId}/${storeType}/${file.originalname}`,
+      public_id: `story-media/${userId}/${storeType}/${filename}`,
     });
     return response;
   }

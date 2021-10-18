@@ -4,10 +4,6 @@ import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import * as Joi from '@hapi/joi';
 
-// module
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
 // middleware
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 
@@ -50,8 +46,8 @@ import { StoriesModule } from './story/story.module';
     FilesModule,
     StoriesModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
