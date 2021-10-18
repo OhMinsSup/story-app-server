@@ -13,6 +13,8 @@ export const EXCEPTION_CODE = {
   INVALID: 2004,
   // 지원하지 않음.
   NOT_SUPPORTED: 2005,
+  // 중복된 값
+  DUPLICATE: 2006,
 
   // 만료된 토큰
   TOKEN_EXPIRED: 4001,

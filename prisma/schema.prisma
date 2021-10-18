@@ -45,7 +45,7 @@ model Story {
   id              Int      @id @default(autoincrement())
   userId          Int
   mediaId         Int
-  name            String
+  name            String   @unique
   description     String
   backgroundColor String?
   externalUrl     String?
@@ -56,11 +56,12 @@ model Story {
 }
 
 model Media {
-  id         Int      @id @default(autoincrement())
-  originUrl  String
-  contentUrl String?
-  type       String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  Story      Story[]
+  id           Int      @id @default(autoincrement())
+  originUrl    String
+  contentUrl   String?
+  thumbnailUrl String?
+  type         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  Story        Story[]
 }
