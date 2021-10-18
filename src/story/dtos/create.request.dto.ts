@@ -7,7 +7,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-export class CreateRequestDto {
+export class StoryCreateRequestDto {
   @IsString()
   @ApiProperty({
     example: 'Story',

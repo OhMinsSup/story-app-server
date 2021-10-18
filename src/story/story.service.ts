@@ -15,7 +15,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import type { User } from '.prisma/client';
 
 // dtos
-import { CreateRequestDto } from './dtos/create.request.dto';
+import { StoryCreateRequestDto } from './dtos/create.request.dto';
 
 @Injectable()
 export class StoriesService {
@@ -88,7 +88,7 @@ export class StoriesService {
    * @param id
    * @param input
    */
-  async update(user: User, id: number, input: CreateRequestDto) {
+  async update(user: User, id: number, input: StoryCreateRequestDto) {
     try {
       // 수정하는 스토리 정보가 존재하는지 체크
       const story = await this.prisma.story.findFirst({
@@ -159,7 +159,7 @@ export class StoriesService {
    * @param user
    * @param input
    */
-  async create(user: User, input: CreateRequestDto) {
+  async create(user: User, input: StoryCreateRequestDto) {
     try {
       const media = await this.prisma.media.findFirst({
         where: {

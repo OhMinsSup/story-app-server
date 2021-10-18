@@ -19,7 +19,7 @@ import { AuthUser } from 'src/decorators/get-user.decorator';
 import { StoriesService } from './story.service';
 
 // dto
-import { CreateRequestDto } from './dtos/create.request.dto';
+import { StoryCreateRequestDto } from './dtos/create.request.dto';
 
 // types
 import type { User } from '.prisma/client';
@@ -28,6 +28,13 @@ import type { User } from '.prisma/client';
 @Controller('/api/stories')
 export class StoriesController {
   constructor(private storiesService: StoriesService) {}
+
+  @Get()
+  @UseGuards(NotLoggedInGuard)
+  @ApiOperation({ summary: '스토리 리스트 조회' })
+  list() {
+    return true;
+  }
 
   @Get(':id')
   @UseGuards(NotLoggedInGuard)
@@ -46,9 +53,9 @@ export class StoriesController {
   @ApiBody({
     required: true,
     description: '스토리 생성 요청 데이터',
-    type: CreateRequestDto,
+    type: StoryCreateRequestDto,
   })
-  create(@AuthUser() user: User, @Body() input: CreateRequestDto) {
+  create(@AuthUser() user: User, @Body() input: StoryCreateRequestDto) {
     return this.storiesService.create(user, input);
   }
 
@@ -60,12 +67,12 @@ export class StoriesController {
   @ApiBody({
     required: true,
     description: '스토리 수정 요청 데이터',
-    type: CreateRequestDto,
+    type: StoryCreateRequestDto,
   })
   update(
     @AuthUser() user: User,
     @Param('id', ParseIntPipe) id: number,
-    @Body() input: CreateRequestDto,
+    @Body() input: StoryCreateRequestDto,
   ) {
     return this.storiesService.update(user, id, input);
   }
