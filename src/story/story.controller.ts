@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // guard
@@ -31,5 +39,23 @@ export class StoriesController {
   })
   create(@AuthUser() user: User, @Body() input: CreateRequestDto) {
     return this.storiesService.create(user, input);
+  }
+
+  @Put(':id')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({
+    summary: '스토리 수정 API',
+  })
+  @ApiBody({
+    required: true,
+    description: '스토리 수정 요청 데이터',
+    type: CreateRequestDto,
+  })
+  update(
+    @AuthUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() input: CreateRequestDto,
+  ) {
+    return this.storiesService.update(user, id, input);
   }
 }

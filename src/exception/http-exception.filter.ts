@@ -6,6 +6,14 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 
+type BadRequestExceptionType = {
+  statusCode: number;
+  message: string[];
+  error: string;
+};
+
+type CustomExceptionType = { resultCode: number; msg: string };
+
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
@@ -14,7 +22,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const err = exception.getResponse() as
       | string
-      | { resultCode: number; msg: string };
+      | CustomExceptionType
+      | BadRequestExceptionType;
 
     if (typeof err === 'string') {
       return response.status(status).json({
@@ -24,6 +33,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message: err,
       });
     }
+
+    if ('message' in err && 'error' in err) {
+      return response.status(status).json({
+        data: null,
+        ok: false,
+        resultCode: status,
+        message: err.message,
+      });
+    }
+
     return response.status(status).json({
       data: null,
       ok: false,

@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsHexColor, IsNumber, IsString, IsUrl } from 'class-validator';
+import {
+  IsHexColor,
+  IsNumber,
+  IsString,
+  IsUrl,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateRequestDto {
   @IsString()
@@ -28,19 +34,23 @@ export class CreateRequestDto {
 
   @IsString()
   @IsHexColor()
+  @ValidateIf((object, value) => value !== null)
   @ApiProperty({
     example: '#3ea6ff',
     description: '배경색',
     nullable: true,
+    required: false,
   })
   backgroundColor?: string | null;
 
   @IsString()
   @IsUrl()
+  @ValidateIf((object, value) => value !== null)
   @ApiProperty({
     example: 'https://www.example.com/',
     description: '추가 URL',
     nullable: true,
+    required: false,
   })
   externalUrl?: string | null;
 }

@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import isEmpty from 'lodash/isEmpty';
+import * as _ from 'lodash';
 
 // common
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
@@ -20,6 +20,78 @@ import { CreateRequestDto } from './dtos/create.request.dto';
 @Injectable()
 export class StoriesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * @description - update a story
+   * @param user
+   * @param id
+   * @param input
+   */
+  async update(user: User, id: number, input: CreateRequestDto) {
+    try {
+      // 수정하는 스토리 정보가 존재하는지 체크
+      const story = await this.prisma.story.findFirst({
+        where: {
+          AND: [
+            {
+              id,
+            },
+            {
+              userId: user.id,
+            },
+          ],
+        },
+      });
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      // 수정하려는 스토리 정보가 이미 존재하는지 체크
+      if (story.mediaId !== input.mediaId) {
+        const media = await this.prisma.media.findFirst({
+          where: {
+            id: input.mediaId,
+          },
+        });
+        if (!media) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 파일입니다.',
+          });
+        }
+      }
+
+      const updatedData = _.pickBy(
+        _.merge(
+          _.omit(story, ['createdAt', 'updatedAt', 'userId']),
+          _.omit(input, ['storyId']),
+        ),
+        _.identity,
+      );
+
+      await this.prisma.story.update({
+        where: {
+          id: story.id,
+        },
+        data: updatedData,
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: story.id,
+        },
+      };
+    } catch (error) {
+      console.log('error', error);
+      throw error;
+    }
+  }
 
   /**
    * @description - create a new story
@@ -44,7 +116,7 @@ export class StoriesService {
           name: input.name,
         },
       });
-      if (!isEmpty(nameDuplicate)) {
+      if (!_.isEmpty(nameDuplicate)) {
         throw new BadRequestException({
           resultCode: EXCEPTION_CODE.DUPLICATE,
           msg: '이미 존재하는 스토리 입니다.',
