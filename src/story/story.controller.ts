@@ -6,9 +6,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 // guard
 import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
@@ -32,8 +33,23 @@ export class StoriesController {
   @Get()
   @UseGuards(NotLoggedInGuard)
   @ApiOperation({ summary: '스토리 리스트 조회' })
-  list() {
-    return true;
+  @ApiQuery({
+    name: 'pageNo',
+    type: Number,
+    required: false,
+    description: '페이지 번호',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    type: Number,
+    required: false,
+    description: '페이지 사이즈',
+  })
+  list(
+    @Query('pageNo', ParseIntPipe) pageNo: number,
+    @Query('pageSize', ParseIntPipe) pageSize: number,
+  ) {
+    return this.storiesService.list(pageNo, pageSize);
   }
 
   @Get(':id')

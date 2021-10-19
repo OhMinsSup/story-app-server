@@ -20,6 +20,7 @@ export class CommonDTO {
   @ApiProperty({
     example: GenderEnum.MALE,
     default: GenderEnum.MALE,
+    enum: [GenderEnum.FEMALE, GenderEnum.MALE],
     description: '성별',
   })
   gender: GenderType;

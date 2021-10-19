@@ -16,6 +16,7 @@ import type { User } from '.prisma/client';
 
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
+import { storiesSelect } from 'src/common/select.option';
 
 @Injectable()
 export class StoriesService {
@@ -31,38 +32,7 @@ export class StoriesService {
         where: {
           id,
         },
-        select: {
-          name: true,
-          description: true,
-          backgroundColor: true,
-          externalUrl: true,
-          createdAt: true,
-          updatedAt: true,
-          media: {
-            select: {
-              id: true,
-              contentUrl: true,
-              originUrl: true,
-              type: true,
-            },
-          },
-          user: {
-            select: {
-              id: true,
-              email: true,
-              address: true,
-              profile: {
-                select: {
-                  nickname: true,
-                  profileUrl: true,
-                  avatarSvg: true,
-                  defaultProfile: true,
-                  gender: true,
-                },
-              },
-            },
-          },
-        },
+        select: storiesSelect,
       });
       if (!story) {
         throw new NotFoundException({
@@ -76,6 +46,41 @@ export class StoriesService {
         resultCode: EXCEPTION_CODE.OK,
         message: null,
         result: story,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @description - list a story
+   */
+  async list(
+    pageNo: number | undefined = 1,
+    pageSize: number | undefined = 25,
+  ) {
+    try {
+      const [total, list] = await Promise.all([
+        this.prisma.story.count(),
+        this.prisma.story.findMany({
+          skip: (pageNo - 1) * pageSize,
+          take: pageSize,
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: storiesSelect,
+        }),
+      ]);
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          list,
+          total,
+          pageNo,
+        },
       };
     } catch (error) {
       throw error;
