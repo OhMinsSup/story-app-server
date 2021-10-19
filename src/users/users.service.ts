@@ -32,8 +32,19 @@ export class UsersService {
       where: {
         id: userId,
       },
-      include: {
-        profile: true,
+      select: {
+        id: true,
+        email: true,
+        address: true,
+        profile: {
+          select: {
+            nickname: true,
+            profileUrl: true,
+            avatarSvg: true,
+            defaultProfile: true,
+            gender: true,
+          },
+        },
       },
     });
     return user;

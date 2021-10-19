@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
   Res,
@@ -14,14 +15,32 @@ import { UsersService } from './users.service';
 // types
 import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
-
+import { User } from '.prisma/client';
 import type { Response } from 'express';
+
+// decorators
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
+import { AuthUser } from 'src/decorators/get-user.decorator';
+import { EXCEPTION_CODE } from 'src/exception/exception.code';
 
 @ApiTags('Users')
 @Controller('api/users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+
+  @Get('/me')
+  @ApiOperation({
+    summary: '로그인한 유저 정보',
+  })
+  @UseGuards(LoggedInGuard)
+  me(@AuthUser() user: User) {
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: user,
+    };
+  }
 
   @Post('signup')
   @ApiOperation({ summary: '회원가입' })
