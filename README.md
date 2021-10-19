@@ -45,26 +45,28 @@
 
 - [x] `쿠키 및 header로 인증`
 
-- [ ] `내 정보 가져오기`
+- [x] `내 정보 가져오기`
 
 - [x] `파일 업로드 API`
 
-- [ ] `Story 등록 API`
+- [x] `Story 등록 API`
 
-- [ ] `Story 수정 API`
+- [x] `Story 수정 API`
 
-- [ ] `Story 상세 API`
+- [x] `Story 상세 API`
 
-- [ ] `Story 리스트 API`
- 
+- [x] `Story 리스트 API`
 
-## 🚀 Getting started
+- [ ] `Story 삭제 API`
 
-```bash
-yarn add // install
+- [ ] `거래 히스토리`
 
-yarn dev // dev server start
-```
+- [ ] `스마트 컨트랙트 연동`
+
+- [ ] `minting시 tokenId story schema와 연동`
+
+- [ ] `minting과 관련된 액션`
+
 
 ## 🐳 Issue
 
@@ -80,19 +82,24 @@ yarn dev // dev server start
 
 ```bash
 $ npm install
+
+$ yarn add
 ```
 
-## Running the app
+## 🚀 Running the app
 
 ```bash
 # development
 $ npm run start
+$ yarn start
 
 # watch mode
 $ npm run start:dev
+$ yarn start:dev
 
 # production mode
 $ npm run start:prod
+$ yarn start:prod
 ```
 
 ## Prisma
@@ -106,7 +113,7 @@ $ yarn prisma db pull
 
 $ yarn prisma generate
 
-$ yarn prisma migrate dev name
+$ yarn prisma migrate dev --name [...name]
 
 ```
 
