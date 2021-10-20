@@ -57,7 +57,7 @@
 
 - [x] `Story 리스트 API`
 
-- [ ] `Story 삭제 API`
+- [x] `Story 삭제 API`
 
 - [ ] `거래 히스토리`
 
@@ -66,6 +66,8 @@
 - [ ] `minting시 tokenId story schema와 연동`
 
 - [ ] `minting과 관련된 액션`
+
+- [ ] `scripts - download를 통해서 컨트랙트 파일 다운로드`
 
 
 ## 🐳 Issue

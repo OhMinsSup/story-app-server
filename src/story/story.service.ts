@@ -23,6 +23,45 @@ export class StoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * @description - delete a story
+   * @param user
+   * @param id
+   */
+  async delete(user: User, id: number) {
+    try {
+      const story = await this.prisma.story.findFirst({
+        where: { id, userId: user.id },
+      });
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      if (story.userId !== user.id) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NO_PERMISSION,
+          msg: '삭제 권한이 없습니다.',
+        });
+      }
+
+      await this.prisma.story.delete({
+        where: { id },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: true,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
    * @description - detail a story
    * @param id
    */

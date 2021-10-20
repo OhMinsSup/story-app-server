@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -50,6 +51,15 @@ export class StoriesController {
     @Query('pageSize', ParseIntPipe) pageSize: number,
   ) {
     return this.storiesService.list(pageNo, pageSize);
+  }
+
+  @Delete(':id')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({
+    summary: '스토리 삭제 API',
+  })
+  delete(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.storiesService.delete(user, id);
   }
 
   @Get(':id')
