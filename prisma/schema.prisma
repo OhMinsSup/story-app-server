@@ -17,6 +17,8 @@ model User {
   updatedAt  DateTime @updatedAt
   profile    Profile?
   storys     Story[]
+
+  @@index([address, email])
 }
 
 model Profile {
@@ -49,10 +51,14 @@ model Story {
   description     String
   backgroundColor String?
   externalUrl     String?
+  private         Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   media           Media    @relation(fields: [mediaId], references: [id])
   user            User     @relation(fields: [userId], references: [id])
+  tags            Tag[]    @relation(references: [id])
+
+  @@index([name])
 }
 
 model Media {
@@ -63,5 +69,13 @@ model Media {
   type         String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  Story        Story[]
+  stories      Story[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  stories   Story[]  @relation(references: [id])
 }
