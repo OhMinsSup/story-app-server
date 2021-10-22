@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { StoriesService } from './story.service';
+
+// controllers
 import { StoriesController } from './story.controller';
+
+// service
+import { StoriesService } from './story.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TagsService } from 'src/tags/tags.service';
 
 @Module({
-  providers: [StoriesService, PrismaService],
+  providers: [StoriesService, PrismaService, TagsService],
   controllers: [StoriesController],
 })
 export class StoriesModule {}

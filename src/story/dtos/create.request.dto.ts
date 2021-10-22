@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsArray,
+  IsBoolean,
   IsHexColor,
   IsNumber,
   IsString,
@@ -15,6 +17,25 @@ export class StoryCreateRequestDto {
     required: true,
   })
   name: string;
+
+  @IsArray()
+  @ApiProperty({
+    example: ['태그1', '태그2'],
+    description: 'NFT 태그',
+    required: false,
+    default: [],
+  })
+  tags: string[];
+
+  @IsBoolean()
+  @ApiProperty({
+    example: true,
+    description: 'NFT 노출 여부',
+    nullable: true,
+    required: false,
+    default: false,
+  })
+  isPrivate: boolean;
 
   @IsString()
   @ApiProperty({

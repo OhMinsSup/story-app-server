@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FilesModule } from './files/files.module';
 import { StoriesModule } from './story/story.module';
+import { TagsModule } from './tags/tags.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { StoriesModule } from './story/story.module';
     UsersModule,
     FilesModule,
     StoriesModule,
+    TagsModule,
   ],
   controllers: [],
   providers: [],

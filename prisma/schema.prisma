@@ -56,8 +56,8 @@ model Story {
   updatedAt       DateTime @updatedAt
   media           Media    @relation(fields: [mediaId], references: [id])
   user            User     @relation(fields: [userId], references: [id])
-  tags            Tag[]    @relation(references: [id])
 
+  storyTags StoryTags[]
   @@index([name])
 }
 
@@ -72,10 +72,18 @@ model Media {
   stories      Story[]
 }
 
+model StoryTags {
+  id      Int    @id @default(autoincrement())
+  story   Story? @relation(fields: [storyId], references: [id])
+  tag     Tag?   @relation(fields: [tagId], references: [id])
+  storyId Int?
+  tagId   Int?
+}
+
 model Tag {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  stories   Story[]  @relation(references: [id])
+  id        Int         @id @default(autoincrement())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  storyTags StoryTags[]
 }

@@ -13,6 +13,16 @@ export const storiesSelect = {
       type: true,
     },
   },
+  storyTags: {
+    select: {
+      tag: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+  },
   user: {
     select: {
       id: true,

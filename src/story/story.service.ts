@@ -12,15 +12,38 @@ import { EXCEPTION_CODE } from 'src/exception/exception.code';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 // types
-import type { User } from '.prisma/client';
+import type { Story, StoryTags, Tag, User } from '.prisma/client';
 
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
 import { storiesSelect } from 'src/common/select.option';
+import { SearchParams } from './dtos/story.interface';
 
 @Injectable()
 export class StoriesService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * @description - serialize a story
+   * @param story
+   */
+  serialize(story: unknown) {
+    type SerializedTags = (StoryTags & {
+      tag: Tag;
+    })[];
+
+    const result = _.pick(story, ['storyTags']) as {
+      storyTags: SerializedTags;
+    };
+    const tags = result.storyTags.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+    }));
+    return {
+      ..._.omit(story as Story, ['storyTags']),
+      tags,
+    };
+  }
 
   /**
    * @description - delete a story
@@ -84,7 +107,7 @@ export class StoriesService {
         ok: true,
         resultCode: EXCEPTION_CODE.OK,
         message: null,
-        result: story,
+        result: this.serialize(story),
       };
     } catch (error) {
       throw error;
@@ -95,12 +118,27 @@ export class StoriesService {
    * @description - list a story
    */
   async list(
-    pageNo: number | undefined = 1,
-    pageSize: number | undefined = 25,
+    user: User,
+    { pageNo = 1, pageSize = 25, isPrivate = false }: Partial<SearchParams>,
   ) {
+    const query = {
+      ...(isPrivate && {
+        AND: [
+          {
+            private: isPrivate,
+          },
+          {
+            userId: user.id,
+          },
+        ],
+      }),
+    };
+
     try {
       const [total, list] = await Promise.all([
-        this.prisma.story.count(),
+        this.prisma.story.count({
+          where: query,
+        }),
         this.prisma.story.findMany({
           skip: (pageNo - 1) * pageSize,
           take: pageSize,
@@ -108,6 +146,7 @@ export class StoriesService {
             createdAt: 'desc',
           },
           select: storiesSelect,
+          where: query,
         }),
       ]);
 
@@ -116,7 +155,7 @@ export class StoriesService {
         resultCode: EXCEPTION_CODE.OK,
         message: null,
         result: {
-          list,
+          list: list.map(this.serialize),
           total,
           pageNo,
         },
@@ -205,56 +244,101 @@ export class StoriesService {
    */
   async create(user: User, input: StoryCreateRequestDto) {
     try {
-      const media = await this.prisma.media.findFirst({
-        where: {
-          id: input.mediaId,
-        },
-      });
-      if (!media) {
-        throw new NotFoundException({
-          resultCode: EXCEPTION_CODE.NOT_EXIST,
-          msg: '존재하지 않는 파일입니다.',
+      const result = await this.prisma.$transaction(async (tx) => {
+        const media = await tx.media.findFirst({
+          where: {
+            id: input.mediaId,
+          },
         });
-      }
-      const nameDuplicate = await this.prisma.story.findFirst({
-        where: {
-          name: input.name,
-        },
-      });
-      if (!_.isEmpty(nameDuplicate)) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.DUPLICATE,
-          msg: '이미 존재하는 스토리 입니다.',
+        if (!media) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 파일입니다.',
+          });
+        }
+        const nameDuplicate = await tx.story.findFirst({
+          where: {
+            name: input.name,
+          },
         });
-      }
+        if (!_.isEmpty(nameDuplicate)) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.DUPLICATE,
+            msg: '이미 존재하는 스토리 입니다.',
+          });
+        }
 
-      const story = await this.prisma.story.create({
-        data: {
-          userId: user.id,
-          mediaId: media.id,
-          name: input.name,
-          description: input.description,
-          ...(input.backgroundColor
-            ? {
-                backgroundColor: input.backgroundColor,
+        let createdTags: Tag[] = [];
+        if (!_.isEmpty(input.tags)) {
+          const tags = await Promise.all(
+            input.tags.map(async (tag) => {
+              const tagData = await tx.tag.findFirst({
+                where: {
+                  name: tag.trim(),
+                },
+              });
+              if (!tagData) {
+                return tx.tag.create({
+                  data: {
+                    name: tag.trim(),
+                  },
+                });
               }
-            : {
-                backgroundColor: '#ffffff',
-              }),
-          ...(input.externalUrl && {
-            externalUrl: input.externalUrl,
-          }),
-        },
+              return tagData;
+            }),
+          );
+          createdTags = tags;
+        }
+
+        console.log('createdTags', createdTags);
+
+        const story = await tx.story.create({
+          data: {
+            userId: user.id,
+            mediaId: media.id,
+            name: input.name,
+            description: input.description,
+            private: !!input.isPrivate,
+            ...(!_.isEmpty(createdTags) && {
+              storyTags: {
+                connectOrCreate: createdTags.map((tag) => ({
+                  where: {
+                    id: tag.id,
+                  },
+                  create: {
+                    tag: {
+                      connect: {
+                        id: tag.id,
+                      },
+                    },
+                  },
+                })),
+              },
+            }),
+            ...(input.backgroundColor
+              ? {
+                  backgroundColor: input.backgroundColor,
+                }
+              : {
+                  backgroundColor: '#ffffff',
+                }),
+            ...(input.externalUrl && {
+              externalUrl: input.externalUrl,
+            }),
+          },
+        });
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            dataId: story.id,
+          },
+        };
       });
 
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          dataId: story.id,
-        },
-      };
+      return result;
     } catch (error) {
       throw error;
     }

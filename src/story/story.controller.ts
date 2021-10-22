@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Post,
   Put,
@@ -13,7 +14,6 @@ import {
 import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 // guard
-import { NotLoggedInGuard } from 'src/auth/not-logged-in.guard';
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { AuthUser } from 'src/decorators/get-user.decorator';
 
@@ -32,7 +32,6 @@ export class StoriesController {
   constructor(private storiesService: StoriesService) {}
 
   @Get()
-  @UseGuards(NotLoggedInGuard)
   @ApiOperation({ summary: '스토리 리스트 조회' })
   @ApiQuery({
     name: 'pageNo',
@@ -46,11 +45,19 @@ export class StoriesController {
     required: false,
     description: '페이지 사이즈',
   })
+  @ApiQuery({
+    name: 'isPrivate',
+    type: Boolean,
+    required: false,
+    description: '개인 스토리 여부',
+  })
   list(
+    @AuthUser() user: User,
     @Query('pageNo', ParseIntPipe) pageNo: number,
     @Query('pageSize', ParseIntPipe) pageSize: number,
+    @Query('isPrivate', ParseBoolPipe) isPrivate: boolean,
   ) {
-    return this.storiesService.list(pageNo, pageSize);
+    return this.storiesService.list(user, { pageNo, pageSize, isPrivate });
   }
 
   @Delete(':id')
@@ -63,7 +70,6 @@ export class StoriesController {
   }
 
   @Get(':id')
-  @UseGuards(NotLoggedInGuard)
   @ApiOperation({
     summary: '스토리 조회 API',
   })

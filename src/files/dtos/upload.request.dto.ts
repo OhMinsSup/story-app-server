@@ -11,16 +11,20 @@ export class UploadRequestDto {
     example: Object.keys(StoryUploadTypeEnum)
       .map((key) => key)
       .join(', '),
+    enum: [
+      StoryUploadTypeEnum.ETC,
+      StoryUploadTypeEnum.STORY,
+      StoryUploadTypeEnum.PROFILE,
+    ],
     description: '업로드 파일 타입',
     required: true,
   })
   storyType: StoryUploadType;
 
-  @IsString()
   @ApiProperty({
     example: 'KakaoTalk_Photo_2021-08-11-01-13-45.jpeg',
     description: '업로드 파일',
-    type: 'string',
+    required: true,
     format: 'binary',
   })
   file: Express.Multer.File;
