@@ -52,33 +52,51 @@ export class StoriesService {
    */
   async delete(user: User, id: number) {
     try {
-      const story = await this.prisma.story.findFirst({
-        where: { id, userId: user.id },
-      });
-      if (!story) {
-        throw new NotFoundException({
-          resultCode: EXCEPTION_CODE.NOT_EXIST,
-          msg: '존재하지 않는 스토리입니다.',
+      const result = await this.prisma.$transaction(async (tx) => {
+        const story = await tx.story.findFirst({
+          where: { id, userId: user.id },
         });
-      }
+        if (!story) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 스토리입니다.',
+          });
+        }
 
-      if (story.userId !== user.id) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.NO_PERMISSION,
-          msg: '삭제 권한이 없습니다.',
+        if (story.userId !== user.id) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.NO_PERMISSION,
+            msg: '삭제 권한이 없습니다.',
+          });
+        }
+
+        // delete story tags
+        await tx.storyTags.deleteMany({
+          where: {
+            storyId: id,
+          },
         });
-      }
 
-      await this.prisma.story.delete({
-        where: { id },
+        // delete story
+        await tx.story.delete({
+          where: { id },
+        });
+
+        // delete story media
+        await tx.media.delete({
+          where: {
+            id: story.mediaId,
+          },
+        });
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: true,
+        };
       });
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: true,
-      };
+      return result;
     } catch (error) {
       throw error;
     }
@@ -173,64 +191,134 @@ export class StoriesService {
    */
   async update(user: User, id: number, input: StoryCreateRequestDto) {
     try {
-      // 수정하는 스토리 정보가 존재하는지 체크
-      const story = await this.prisma.story.findFirst({
-        where: {
-          AND: [
-            {
-              id,
-            },
-            {
-              userId: user.id,
-            },
-          ],
-        },
-      });
-      if (!story) {
-        throw new NotFoundException({
-          resultCode: EXCEPTION_CODE.NOT_EXIST,
-          msg: '존재하지 않는 스토리입니다.',
-        });
-      }
-
-      // 수정하려는 스토리 정보가 이미 존재하는지 체크
-      if (story.mediaId !== input.mediaId) {
-        const media = await this.prisma.media.findFirst({
+      const result = await this.prisma.$transaction(async (tx) => {
+        // 수정하는 스토리 정보가 존재하는지 체크
+        const story = await tx.story.findFirst({
           where: {
-            id: input.mediaId,
+            AND: [
+              {
+                id,
+              },
+              {
+                userId: user.id,
+              },
+            ],
+          },
+          include: {
+            storyTags: true,
           },
         });
-        if (!media) {
+        if (!story) {
           throw new NotFoundException({
             resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 파일입니다.',
+            msg: '존재하지 않는 스토리입니다.',
           });
         }
-      }
 
-      const updatedData = _.pickBy(
-        _.merge(
-          _.omit(story, ['createdAt', 'updatedAt', 'userId']),
-          _.omit(input, ['storyId']),
-        ),
-        _.identity,
-      );
+        // 수정하려는 스토리 정보가 이미 존재하는지 체크
+        if (story.mediaId !== input.mediaId) {
+          const media = await tx.media.findFirst({
+            where: {
+              id: input.mediaId,
+            },
+          });
+          if (!media) {
+            throw new NotFoundException({
+              resultCode: EXCEPTION_CODE.NOT_EXIST,
+              msg: '존재하지 않는 파일입니다.',
+            });
+          }
+        }
 
-      await this.prisma.story.update({
-        where: {
-          id: story.id,
-        },
-        data: updatedData,
+        let updatedTags: Tag[] = [];
+        if (!_.isEmpty(input.tags)) {
+          const tags = await Promise.all(
+            input.tags.map(async (tag) => {
+              const tagResult = await tx.tag.findFirst({
+                where: {
+                  name: tag.trim(),
+                },
+              });
+              if (!tagResult) {
+                const newTag = await tx.tag.create({
+                  data: {
+                    name: tag.trim(),
+                  },
+                });
+                return newTag;
+              }
+              return tagResult;
+            }),
+          );
+          updatedTags = tags.filter((tag) => tag);
+        }
+
+        if (!_.isEmpty(updatedTags)) {
+          // deep compare tags and storyTags to find deleted tags and create
+          //  new tags if not exist in storyTags array of story model
+          //  (storyTags is array of tag model)
+          const deletedTags = _.differenceWith(
+            story.storyTags,
+            updatedTags,
+            (tag1, tag2) => tag1.id === tag2.id,
+          );
+          const newTags = _.differenceWith(
+            updatedTags,
+            story.storyTags,
+            (tag1, tag2) => tag1.id === tag2.id,
+          );
+          await Promise.all([
+            ...deletedTags.map((tag) =>
+              tx.storyTags.delete({
+                where: {
+                  id: tag.id,
+                },
+              }),
+            ),
+            ...newTags.map((tag) =>
+              tx.storyTags.create({
+                data: {
+                  story: {
+                    connect: {
+                      id: story.id,
+                    },
+                  },
+                  tag: {
+                    connect: {
+                      id: tag.id,
+                    },
+                  },
+                },
+              }),
+            ),
+          ]);
+        }
+
+        const updatedData = _.pickBy(
+          _.merge(
+            _.omit(story, ['createdAt', 'updatedAt', 'userId', 'storyTags']),
+            _.omit(input, ['storyId', 'tags']),
+          ),
+          _.identity,
+        );
+
+        await tx.story.update({
+          where: {
+            id: story.id,
+          },
+          data: updatedData,
+        });
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            dataId: story.id,
+          },
+        };
       });
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          dataId: story.id,
-        },
-      };
+      return result;
     } catch (error) {
       console.log('error', error);
       throw error;
@@ -289,8 +377,6 @@ export class StoriesService {
           );
           createdTags = tags;
         }
-
-        console.log('createdTags', createdTags);
 
         const story = await tx.story.create({
           data: {
