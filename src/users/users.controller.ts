@@ -3,6 +3,8 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
+  ParseIntPipe,
   Post,
   Res,
   UseGuards,
@@ -40,6 +42,14 @@ export class UsersController {
       message: null,
       result: user,
     };
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: '유저 정보',
+  })
+  detail(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.detail(id);
   }
 
   @Post('signup')

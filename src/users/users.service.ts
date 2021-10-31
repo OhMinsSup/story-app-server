@@ -15,6 +15,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
 import { SignatureToken } from './dtos/common.dto';
+import { userProfileSelect } from 'src/common/select.option';
 
 @Injectable()
 export class UsersService {
@@ -32,22 +33,30 @@ export class UsersService {
       where: {
         id: userId,
       },
-      select: {
-        id: true,
-        email: true,
-        address: true,
-        profile: {
-          select: {
-            nickname: true,
-            profileUrl: true,
-            avatarSvg: true,
-            defaultProfile: true,
-            gender: true,
-          },
-        },
-      },
+      select: userProfileSelect,
     });
     return user;
+  }
+
+  /**
+   * @description - This method is used to user detail info
+   * @param userId
+   * @returns
+   */
+  async detail(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: userProfileSelect,
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: user,
+    };
   }
 
   /**
@@ -169,7 +178,7 @@ export class UsersService {
 
       // 존재하지 않는 경우 서명 토큰값을 넘겨준다.
       return {
-        ok: true,
+        ok: false,
         resultCode: EXCEPTION_CODE.NOT_EXIST,
         message: '존재하지 않는 서명 정보입니다.',
         result: signatureToken,
@@ -247,6 +256,20 @@ export class UsersService {
       }
 
       const result = await this.prisma.$transaction(async (tx) => {
+        const profile_exists = await tx.profile.findFirst({
+          where: {
+            nickname: input.nickname,
+          },
+        });
+        if (profile_exists) {
+          return {
+            ok: true,
+            resultCode: EXCEPTION_CODE.INVALID,
+            message: '이미 사용중인 닉네임 입니다. 다시 입력해 주세요.',
+            result: 'nickaname',
+          };
+        }
+
         // 유저 생성
         const user = await tx.user.create({
           data: {

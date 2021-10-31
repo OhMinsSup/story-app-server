@@ -1,3 +1,18 @@
+export const userProfileSelect = {
+  id: true,
+  email: true,
+  address: true,
+  profile: {
+    select: {
+      nickname: true,
+      profileUrl: true,
+      avatarSvg: true,
+      defaultProfile: true,
+      gender: true,
+    },
+  },
+};
+
 export const storiesSelect = {
   name: true,
   description: true,
