@@ -201,7 +201,7 @@ export class UsersService {
 
       if (exists) {
         return {
-          ok: true,
+          ok: false,
           resultCode: EXCEPTION_CODE.INVALID,
           message:
             exists.email === input.email
@@ -263,7 +263,7 @@ export class UsersService {
         });
         if (profile_exists) {
           return {
-            ok: true,
+            ok: false,
             resultCode: EXCEPTION_CODE.INVALID,
             message: '이미 사용중인 닉네임 입니다. 다시 입력해 주세요.',
             result: 'nickaname',

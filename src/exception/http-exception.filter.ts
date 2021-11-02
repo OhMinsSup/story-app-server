@@ -27,7 +27,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (typeof err === 'string') {
       return response.status(status).json({
-        data: null,
+        result: null,
         ok: false,
         resultCode: status,
         message: err,
@@ -36,7 +36,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if ('message' in err && 'error' in err) {
       return response.status(status).json({
-        data: null,
+        result: null,
         ok: false,
         resultCode: status,
         message: err.message,
@@ -44,7 +44,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     return response.status(status).json({
-      data: null,
+      result: null,
       ok: false,
       resultCode: err.resultCode,
       message: err.msg,
