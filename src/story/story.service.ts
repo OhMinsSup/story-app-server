@@ -78,22 +78,27 @@ export class StoriesService {
         });
 
         // delete story
-        await tx.story.delete({
+        await tx.story.update({
           where: { id },
-        });
-
-        // delete story media
-        await tx.media.delete({
-          where: {
-            id: story.mediaId,
+          data: {
+            isDelete: true,
           },
         });
+
+        // // delete story media
+        // await tx.media.delete({
+        //   where: {
+        //     id: story.mediaId,
+        //   },
+        // });
 
         return {
           ok: true,
           resultCode: EXCEPTION_CODE.OK,
           message: null,
-          result: true,
+          result: {
+            dataId: id,
+          },
         };
       });
       return result;
@@ -112,13 +117,25 @@ export class StoriesService {
         where: {
           id,
         },
-        select: storiesSelect,
+        select: {
+          ...storiesSelect,
+          isDelete: true,
+        },
       });
       if (!story) {
         throw new NotFoundException({
           resultCode: EXCEPTION_CODE.NOT_EXIST,
           msg: '존재하지 않는 스토리입니다.',
         });
+      }
+
+      if (story.isDelete) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.DELETED,
+          message: '삭제된 스토리입니다.',
+          result: null,
+        };
       }
 
       return {
@@ -140,16 +157,30 @@ export class StoriesService {
     { pageNo = 1, pageSize = 25, isPrivate = false }: Partial<SearchParams>,
   ) {
     const query = {
-      ...(isPrivate && {
-        AND: [
-          {
-            private: isPrivate,
-          },
-          {
-            userId: user.id,
-          },
-        ],
-      }),
+      ...(isPrivate
+        ? {
+            AND: [
+              {
+                private: true,
+              },
+              {
+                userId: user.id,
+              },
+              {
+                isDelete: false,
+              },
+            ],
+          }
+        : {
+            AND: [
+              {
+                private: false,
+              },
+              {
+                isDelete: false,
+              },
+            ],
+          }),
     };
 
     try {

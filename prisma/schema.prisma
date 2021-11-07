@@ -13,11 +13,13 @@ model User {
   address    String   @unique
   email      String   @unique
   privateKey String?
+  isDelete   Boolean  @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   profile    Profile?
   storys     Story[]
 
+  Story Story[] @relation("owner")
   @@index([address, email])
 }
 
@@ -54,8 +56,10 @@ model Story {
   private         Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  isDelete        Boolean  @default(false)
   media           Media    @relation(fields: [mediaId], references: [id])
   user            User     @relation(fields: [userId], references: [id])
+  owner           User     @relation(name: "owner", fields: [userId], references: [id])
 
   storyTags StoryTags[]
   @@index([name])
