@@ -10,9 +10,10 @@
 <a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
 <a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
 <a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+<a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
+<a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+<a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+
 </p>
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
@@ -21,18 +22,16 @@
 
 🙏🏻 NFT Market App Generate (Nextjs)
 
-
 ## ⚡ Features
 
 해당 본문은 앞으로 지원하는 기능 추가 및 계획된 기능들을 보여줍니다. 체크박스를 체크하면 해당 기능은 추가된 기능임을 의미합니다. 그렇지 않으면 아직 계획 및 구현 단계인 상태입니다. 구체적인 내용은 항목 설명을 참조하십시오.
 
-
 - [ ] `API 서버 분리해서 생성하기`
-    - 서버 구성은 nest / prisma를 사용 할 계획 입니다.
+
+  - 서버 구성은 nest / prisma를 사용 할 계획 입니다.
 
 - [ ] `NFT Token 생성`
-    - openzeppelin을 이용해서 구현
-  
+  - openzeppelin을 이용해서 구현
 - [ ] `Klaytn 연동`
 
 ## 📝 TODO
@@ -59,8 +58,6 @@
 
 - [x] `Story 삭제 API`
 
-- [ ] `거래 히스토리`
-
 - [ ] `스마트 컨트랙트 연동`
 
 - [ ] `minting시 tokenId story schema와 연동`
@@ -69,6 +66,17 @@
 
 - [ ] `scripts - download를 통해서 컨트랙트 파일 다운로드`
 
+- [ ] `Story 생성시 Owner 값 생성`
+
+- [ ] `거래 히스토리`
+
+- [ ] `Story Like & Views`
+
+- [ ] `이미지 리사이징`
+
+- [ ] `검색 기능`
+
+- [ ] `유저 상세에서 내 NFT 정보`
 
 ## 🐳 Issue
 
@@ -76,9 +84,7 @@
 
 2. NFT를 서버에 등록한다면 어떤식으로 저장을 할 것 인가??
 
-
 ## 💩 Bug
-
 
 ## Installation
 

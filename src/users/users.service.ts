@@ -139,8 +139,7 @@ export class UsersService {
           },
         );
 
-        const { userId, createdAt, updatedAt, gender, ...info } =
-          exists.profile;
+        const { id, createdAt, updatedAt, gender, ...info } = exists.profile;
 
         return {
           ok: true,
@@ -148,6 +147,7 @@ export class UsersService {
           message: null,
           result: {
             accessToken,
+            id: exists.id,
             email: exists.email,
             address: exists.address,
             profile: {
