@@ -392,16 +392,8 @@ export class StoriesService {
             ...newTags.map((tag) =>
               tx.storyTags.create({
                 data: {
-                  story: {
-                    connect: {
-                      id: story.id,
-                    },
-                  },
-                  tag: {
-                    connect: {
-                      id: tag.id,
-                    },
-                  },
+                  storyId: story.id,
+                  tagId: tag.id,
                 },
               }),
             ),
@@ -500,22 +492,6 @@ export class StoriesService {
             name: input.name,
             description: input.description,
             private: !!input.isPrivate,
-            ...(!_.isEmpty(createdTags) && {
-              storyTags: {
-                connectOrCreate: createdTags.map((tag) => ({
-                  where: {
-                    id: tag.id,
-                  },
-                  create: {
-                    tag: {
-                      connect: {
-                        id: tag.id,
-                      },
-                    },
-                  },
-                })),
-              },
-            }),
             ...(input.backgroundColor
               ? {
                   backgroundColor: input.backgroundColor,
@@ -528,6 +504,17 @@ export class StoriesService {
             }),
           },
         });
+
+        await Promise.all(
+          createdTags.map((tag) =>
+            tx.storyTags.create({
+              data: {
+                storyId: story.id,
+                tagId: tag.id,
+              },
+            }),
+          ),
+        );
 
         await tx.history.create({
           data: {
