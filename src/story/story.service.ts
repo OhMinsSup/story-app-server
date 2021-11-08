@@ -16,7 +16,7 @@ import type { Story, StoryTags, Tag, User } from '.prisma/client';
 
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
-import { storiesSelect } from 'src/common/select.option';
+import { historiesSelect, storiesSelect } from 'src/common/select.option';
 import { SearchParams } from './dtos/story.interface';
 
 @Injectable()
@@ -35,13 +35,96 @@ export class StoriesService {
     const result = _.pick(story, ['storyTags']) as {
       storyTags: SerializedTags;
     };
-    const tags = result.storyTags.map(({ tag }) => ({
+    const tags = result.storyTags?.map(({ tag }) => ({
       id: tag.id,
       name: tag.name,
     }));
     return {
       ..._.omit(story as Story, ['storyTags']),
       tags,
+    };
+  }
+
+  /**
+   * @description - 상세에서 해당 작품을 생성한 거래내역 정보
+   * @param storyUserId
+   * @param param
+   */
+  async histories(id: number) {
+    const histories = await this.prisma.history.findMany({
+      where: {
+        storyId: id,
+      },
+      select: {
+        ...historiesSelect,
+      },
+      take: 30,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: histories,
+      },
+    };
+  }
+
+  /**
+   * @description - 상세에서 해당 작품을 생성한 크리에이터의 또 다른 story를 가져온다ㄴ
+   * @param storyUserId
+   * @param param
+   */
+  async anotherStories(
+    userId: number,
+    { pageNo = 1, pageSize = 25 }: Partial<Omit<SearchParams, 'isPrivate'>>,
+  ) {
+    const query = {
+      AND: [
+        {
+          private: false,
+        },
+        {
+          isDelete: false,
+        },
+        {
+          userId,
+        },
+      ],
+    };
+
+    const [total, list] = await Promise.all([
+      this.prisma.story.count({
+        where: query,
+      }),
+      this.prisma.story.findMany({
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        select: {
+          ...storiesSelect,
+          owner: false,
+          storyTags: false,
+        },
+        where: query,
+      }),
+    ]);
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: list.map(this.serialize),
+        total,
+        pageNo,
+      },
     };
   }
 
@@ -412,6 +495,7 @@ export class StoriesService {
         const story = await tx.story.create({
           data: {
             userId: user.id,
+            ownerId: user.id,
             mediaId: media.id,
             name: input.name,
             description: input.description,
@@ -442,6 +526,15 @@ export class StoriesService {
             ...(input.externalUrl && {
               externalUrl: input.externalUrl,
             }),
+          },
+        });
+
+        await tx.history.create({
+          data: {
+            status: 'ISSUE',
+            storyId: story.id,
+            toId: user.id,
+            fromId: user.id,
           },
         });
 

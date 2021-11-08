@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { JsonWebTokenError } from 'jsonwebtoken';
 
 // common
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
@@ -311,6 +312,12 @@ export class UsersService {
 
       return result;
     } catch (error) {
+      if (error instanceof JsonWebTokenError) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_TOKEN,
+          msg: '유효하지 않은 토큰입니다.',
+        });
+      }
       throw error;
     }
   }

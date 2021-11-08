@@ -3,3 +3,8 @@ export interface SearchParams {
   pageSize: number;
   isPrivate: boolean;
 }
+
+export enum HistoryStatus {
+  ISSUE = 'ISSUE',
+  TRADE = 'TRADE',
+}

@@ -54,4 +54,57 @@ export const storiesSelect = {
       },
     },
   },
+  owner: {
+    select: {
+      id: true,
+      email: true,
+      address: true,
+      profile: {
+        select: {
+          nickname: true,
+          profileUrl: true,
+          avatarSvg: true,
+          defaultProfile: true,
+          gender: true,
+        },
+      },
+    },
+  },
+};
+
+export const historiesSelect = {
+  id: true,
+  status: true,
+  to: {
+    select: {
+      id: true,
+      email: true,
+      address: true,
+      profile: {
+        select: {
+          nickname: true,
+          profileUrl: true,
+          avatarSvg: true,
+          defaultProfile: true,
+          gender: true,
+        },
+      },
+    },
+  },
+  from: {
+    select: {
+      id: true,
+      email: true,
+      address: true,
+      profile: {
+        select: {
+          nickname: true,
+          profileUrl: true,
+          avatarSvg: true,
+          defaultProfile: true,
+          gender: true,
+        },
+      },
+    },
+  },
 };

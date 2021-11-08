@@ -17,9 +17,12 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   profile    Profile?
-  storys     Story[]
+  stories    Story[]
 
-  Story Story[] @relation("owner")
+
+  froms  History[] @relation("from")
+  tos    History[] @relation("to")
+  owners Story[]   @relation("owner")
   @@index([address, email])
 }
 
@@ -45,9 +48,24 @@ model Signature {
   updatedAt  DateTime @updatedAt
 }
 
+model History {
+  id        Int      @id @default(autoincrement())
+  status    String
+  toId      Int?
+  fromId    Int?
+  storyId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  story Story @relation(fields: [storyId], references: [id])
+  to    User? @relation(name: "to", fields: [toId], references: [id])
+  from  User? @relation(name: "from", fields: [fromId], references: [id])
+}
+
 model Story {
   id              Int      @id @default(autoincrement())
   userId          Int
+  ownerId         Int
   mediaId         Int
   name            String   @unique
   description     String
@@ -59,9 +77,10 @@ model Story {
   isDelete        Boolean  @default(false)
   media           Media    @relation(fields: [mediaId], references: [id])
   user            User     @relation(fields: [userId], references: [id])
-  owner           User     @relation(name: "owner", fields: [userId], references: [id])
+  owner           User     @relation(name: "owner", fields: [ownerId], references: [id])
 
   storyTags StoryTags[]
+  histories History[]
   @@index([name])
 }
 
@@ -90,4 +109,6 @@ model Tag {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
   storyTags StoryTags[]
+
+  @@index([name])
 }
