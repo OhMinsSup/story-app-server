@@ -14,6 +14,7 @@ export const userProfileSelect = {
 };
 
 export const storiesSelect = {
+  id: true,
   name: true,
   description: true,
   backgroundColor: true,
