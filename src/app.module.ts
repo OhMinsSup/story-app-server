@@ -15,6 +15,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { FilesModule } from './files/files.module';
 import { StoriesModule } from './story/story.module';
 import { TagsModule } from './tags/tags.module';
+import { KlaytnModule } from './klaytn/klaytn.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { TagsModule } from './tags/tags.module';
       cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
       cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
     }),
+    KlaytnModule.forRoot(),
     AuthModule,
     UsersModule,
     FilesModule,

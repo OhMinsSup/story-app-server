@@ -54,10 +54,9 @@ export class SignupRequestDto extends CommonDTO {
 
   @IsString()
   @ApiProperty({
-    description: '로그인시 발급한 서명 토큰',
+    description: '비밀번호',
     required: true,
-    example:
-      'f845f84325a0f3d0cd43661cabf53425535817c5058c27781f478cb5459874feaa462ed3a29aa06748abe186269ff10b8100a4b7d7fea274b53ea2905acbf498dc8b5ab1bf4fbc',
+    example: 'test1q2w3e',
   })
-  signatureToken: string;
+  password: string;
 }
