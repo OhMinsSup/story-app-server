@@ -12,7 +12,7 @@ export class KlaytnModule {
       providers: [
         {
           provide: KLAYTN,
-          useValue: () => new Caver(BAOBAB_TESTNET_RPC_URL),
+          useValue: new Caver(BAOBAB_TESTNET_RPC_URL),
         },
         KlaytnService,
       ],

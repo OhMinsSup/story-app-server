@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JsonWebTokenError } from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 // common
 import { EXCEPTION_CODE } from 'src/exception/exception.code';

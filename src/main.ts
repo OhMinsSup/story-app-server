@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as cookieParser from 'cookie-parser';
-import * as helmet from 'helmet';
-import * as compression from 'compression';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
+import compression from 'compression';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';

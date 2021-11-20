@@ -46,14 +46,6 @@ export class SignupRequestDto extends CommonDTO {
 
   @IsString()
   @ApiProperty({
-    example: '0xc1912fee45d61c87cc5ea59dae31190fffff232d',
-    description: '유저의 지갑 주소',
-    required: true,
-  })
-  walletAddress: string;
-
-  @IsString()
-  @ApiProperty({
     description: '비밀번호',
     required: true,
     example: 'test1q2w3e',

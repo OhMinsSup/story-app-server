@@ -1,7 +1,6 @@
 export const userProfileSelect = {
   id: true,
   email: true,
-  address: true,
   profile: {
     select: {
       nickname: true,
