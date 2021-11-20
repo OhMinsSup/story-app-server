@@ -31,4 +31,24 @@ export class KlaytnService {
   async sign(data: string, privateKey: string) {
     return this.caver.klay.accounts.sign(data, privateKey);
   }
+
+  /**
+   * @description 주어진 데이터에 서명하는 데 사용된 Klaytn 주소를 복구합니다.
+   * @param signature
+   * @param preFixed
+   */
+  async recover(signature: any, preFixed?: boolean) {
+    return this.caver.klay.accounts.recover(signature, preFixed);
+  }
+
+  /**
+   * @description 서명 ECDSA 서명 r, ECDSA 서명 s. ECDSA 리커버리 id v. recover
+   * @param signature
+   */
+  async makeSignList(signature: string) {
+    const v = '0x' + signature.substring(2).substring(128, 130);
+    const r = '0x' + signature.substring(2).substring(0, 64);
+    const s = '0x' + signature.substring(2).substring(64, 128);
+    return { v, r, s };
+  }
 }

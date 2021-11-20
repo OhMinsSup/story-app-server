@@ -13,7 +13,9 @@ import { JwtService } from 'src/jwt/jwt.service';
 // types
 import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
-import { userProfileSelect } from 'src/common/select.option';
+
+// select
+import { userAccountSelect, userProfileSelect } from 'src/common/select.option';
 
 @Injectable()
 export class UsersService {
@@ -50,6 +52,18 @@ export class UsersService {
     return exists;
   }
 
+  async findByWalletAddress(address: string) {
+    const exists = await this.prisma.user.findFirst({
+      where: {
+        account: {
+          address,
+        },
+      },
+      select: userAccountSelect,
+    });
+    return exists;
+  }
+
   /**
    * @description - This method is used to user detail info
    * @param userId
@@ -60,7 +74,7 @@ export class UsersService {
       where: {
         id: userId,
       },
-      select: userProfileSelect,
+      select: userAccountSelect,
     });
 
     return {
@@ -128,6 +142,7 @@ export class UsersService {
       const accessToken = this.jwtService.sign(
         {
           signature: signData.signature,
+          messageHash: signData.messageHash,
         },
         {
           subject: 'access_token',
