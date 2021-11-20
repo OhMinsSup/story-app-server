@@ -44,11 +44,19 @@ export class KlaytnService {
   /**
    * @description 서명 ECDSA 서명 r, ECDSA 서명 s. ECDSA 리커버리 id v. recover
    * @param signature
+   * @param messageHash
    */
-  async makeSignList(signature: string) {
+  async recoverSignature(signature: string, messageHash: string) {
     const v = '0x' + signature.substring(2).substring(128, 130);
     const r = '0x' + signature.substring(2).substring(0, 64);
     const s = '0x' + signature.substring(2).substring(64, 128);
-    return { v, r, s };
+
+    const address = await this.recover({
+      messageHash,
+      v,
+      r,
+      s,
+    });
+    return address;
   }
 }

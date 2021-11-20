@@ -52,8 +52,24 @@ export class UsersService {
     return exists;
   }
 
+  /**
+   * @description - 서명 정보를 가져오는 함수
+   * @param signature
+   */
+  async findBySignature(signature: string) {
+    return this.prisma.signature.findFirst({
+      where: {
+        signature,
+      },
+    });
+  }
+
+  /**
+   * @description 지갑 정보를 가져오는 함수
+   * @param address
+   */
   async findByWalletAddress(address: string) {
-    const exists = await this.prisma.user.findFirst({
+    return this.prisma.user.findFirst({
       where: {
         account: {
           address,
@@ -61,7 +77,6 @@ export class UsersService {
       },
       select: userAccountSelect,
     });
-    return exists;
   }
 
   /**
@@ -127,22 +142,28 @@ export class UsersService {
       }
 
       // create Sign message Data
-      const stringify = JSON.stringify({
-        userId: exists.id,
-        address: exists.account.address,
-      });
+      const message = `userId:${
+        exists.id
+      }\n timestamp:${Date.now()} LoginRequest`;
 
       // 서명 데이터 생성
-      const signData = await this.klaytnService.sign(
-        stringify,
+      const sign = await this.klaytnService.sign(
+        message,
         exists.account.privateKey,
       );
+
+      // 서명 데이터 저장
+      await this.prisma.signature.create({
+        data: {
+          signature: sign.signature,
+          messageHash: sign.messageHash,
+        },
+      });
 
       // 액세스 토큰을 생성한다.
       const accessToken = this.jwtService.sign(
         {
-          signature: signData.signature,
-          messageHash: signData.messageHash,
+          signature: sign.signature,
         },
         {
           subject: 'access_token',

@@ -25,6 +25,14 @@ model User {
   owners Story[]   @relation("owner")
 }
 
+model Signature {
+  id          Int      @id @default(autoincrement())
+  signature   String
+  messageHash String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Profile {
   id             Int      @id @default(autoincrement())
   userId         Int      @unique

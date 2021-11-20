@@ -7,7 +7,6 @@ import { UsersService } from 'src/users/users.service';
 
 export interface AccessTokenData {
   signature: string;
-  messageHash: string;
   sub: string;
   exp: number;
 }
@@ -42,16 +41,19 @@ export class AuthGuard implements CanActivate {
         if (diff > 0) {
           // https://forum.klaytn.com/t/kaikas-sign-list/2395
           // https://forum.klaytn.com/t/kaikas-sign/2137
-          const { signature, messageHash } = accessTokenData;
-          const signList = await this.klaytnService.makeSignList(signature);
-          const address = await this.klaytnService.recover({
-            messageHash,
-            ...signList,
-          });
-          // check if user exists
-          const user = await this.usersService.findByWalletAddress(address);
-          if (user) {
-            request.user = user;
+          const sign = await this.usersService.findBySignature(
+            accessTokenData.signature,
+          );
+          if (sign) {
+            const address = await this.klaytnService.recoverSignature(
+              sign.signature,
+              sign.messageHash,
+            );
+            // check if user exists
+            const user = await this.usersService.findByWalletAddress(address);
+            if (user) {
+              request.user = user;
+            }
           }
         }
       }
