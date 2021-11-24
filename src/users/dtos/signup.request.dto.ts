@@ -32,17 +32,9 @@ export class SignupRequestDto extends CommonDTO {
   @ApiProperty({
     example: 'iq67vb1nm4p',
     description: '사용자의 기본 아바타 코드',
-    required: false,
+    required: true,
   })
-  avatarSvg?: string;
-
-  @IsString()
-  @ApiProperty({
-    example: 'https://cdn.image.io/users',
-    description: '유저가 업로드한 이미지 사진',
-    required: false,
-  })
-  profileUrl?: string;
+  avatarSvg: string;
 
   @IsString()
   @ApiProperty({

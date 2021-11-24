@@ -29,6 +29,7 @@ model Signature {
   id          Int      @id @default(autoincrement())
   signature   String
   messageHash String
+  messageData String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

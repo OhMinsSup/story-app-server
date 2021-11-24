@@ -157,6 +157,7 @@ export class UsersService {
         data: {
           signature: sign.signature,
           messageHash: sign.messageHash,
+          messageData: message,
         },
       });
 
@@ -172,7 +173,7 @@ export class UsersService {
       );
 
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, createdAt, updatedAt, gender, ...info } = exists.profile;
+      const { id, createdAt, updatedAt, ...info } = exists.profile;
 
       return {
         ok: true,
@@ -182,8 +183,9 @@ export class UsersService {
           accessToken,
           id: exists.id,
           email: exists.email,
-          profile: {
-            ...info,
+          profile: info,
+          account: {
+            address: exists.account.address,
           },
         },
       };
@@ -252,8 +254,8 @@ export class UsersService {
               userId: user.id,
               nickname: input.nickname,
               gender: input.gender,
-              profileUrl: input.defaultProfile ? null : input.profileUrl,
-              avatarSvg: input.defaultProfile ? input.avatarSvg : null,
+              profileUrl: null,
+              avatarSvg: input.avatarSvg,
               defaultProfile: input.defaultProfile,
             },
           }),

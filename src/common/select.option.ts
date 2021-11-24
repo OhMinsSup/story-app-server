@@ -53,7 +53,6 @@ export const storiesSelect = {
     select: {
       id: true,
       email: true,
-      address: true,
       profile: {
         select: {
           nickname: true,
@@ -69,7 +68,6 @@ export const storiesSelect = {
     select: {
       id: true,
       email: true,
-      address: true,
       profile: {
         select: {
           nickname: true,
@@ -90,7 +88,11 @@ export const historiesSelect = {
     select: {
       id: true,
       email: true,
-      address: true,
+      account: {
+        select: {
+          address: true,
+        },
+      },
       profile: {
         select: {
           nickname: true,
@@ -106,7 +108,11 @@ export const historiesSelect = {
     select: {
       id: true,
       email: true,
-      address: true,
+      account: {
+        select: {
+          address: true,
+        },
+      },
       profile: {
         select: {
           nickname: true,
