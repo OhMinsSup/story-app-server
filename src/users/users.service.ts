@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import * as _ from 'lodash';
 import { JsonWebTokenError } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 
@@ -16,6 +21,7 @@ import { SigninRequestDto } from './dtos/signin.request.dto';
 
 // select
 import { userAccountSelect, userProfileSelect } from 'src/common/select.option';
+import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
 
 @Injectable()
 export class UsersService {
@@ -92,11 +98,78 @@ export class UsersService {
       select: userAccountSelect,
     });
 
+    if (!user) {
+      throw new NotFoundException({
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        msg: '존재하지 않는 유저입니다.',
+      });
+    }
+
     return {
       ok: true,
       resultCode: EXCEPTION_CODE.OK,
       message: null,
       result: user,
+    };
+  }
+
+  /**
+   * @description - 유저정보 수정
+   * @param userId
+   * @param input
+   */
+  async update(userId: number, input: ProfileUpdateRequestDto) {
+    const currentUser = await this.findByUserId(userId);
+    if (!currentUser) {
+      throw new NotFoundException({
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        msg: '존재하지 않는 유저입니다.',
+      });
+    }
+
+    const { profile } = currentUser;
+    // currentUser.profile Data compare with input diffence data update
+    const updateData: Record<string, any> = {};
+    if (input.nickname !== profile.nickname) {
+      updateData.nickname = input.nickname;
+    }
+
+    if (input.gender !== profile.gender) {
+      updateData.gender = input.gender;
+    }
+
+    if (input.defaultProfile !== profile.defaultProfile) {
+      updateData.defaultProfile = input.defaultProfile;
+      // 이미지를 업로드 한 경우
+      // 기본 이미지가 아닌데 프로필 이미지를 업로드 한 경우
+      if (!input.defaultProfile && input.profileUrl) {
+        updateData.profileUrl = input.profileUrl;
+        updateData.avatarSvg = '';
+        // 기본 이미지인데 svg key값을 넘긴 경우
+      } else if (input.defaultProfile && input.avatarSvg) {
+        updateData.avatarSvg = input.avatarSvg;
+        updateData.profileUrl = '';
+      }
+    }
+
+    if (!_.isEmpty(updateData)) {
+      await this.prisma.profile.update({
+        where: {
+          id: userId,
+        },
+        data: {
+          ...updateData,
+        },
+      });
+    }
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        dataId: userId,
+      },
     };
   }
 

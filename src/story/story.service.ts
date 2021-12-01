@@ -168,13 +168,6 @@ export class StoriesService {
           },
         });
 
-        // // delete story media
-        // await tx.media.delete({
-        //   where: {
-        //     id: story.mediaId,
-        //   },
-        // });
-
         return {
           ok: true,
           resultCode: EXCEPTION_CODE.OK,
@@ -205,6 +198,7 @@ export class StoriesService {
           isDelete: true,
         },
       });
+
       if (!story) {
         throw new NotFoundException({
           resultCode: EXCEPTION_CODE.NOT_EXIST,

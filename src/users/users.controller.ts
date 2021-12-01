@@ -6,6 +6,7 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ import type { Response } from 'express';
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { AuthUser } from 'src/decorators/get-user.decorator';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
+import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -50,6 +52,22 @@ export class UsersController {
   })
   detail(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.detail(id);
+  }
+
+  @Put(':id')
+  @ApiOperation({
+    summary: '유저 정보 수정',
+  })
+  @ApiBody({
+    required: true,
+    description: '유저 정보 수정',
+    type: ProfileUpdateRequestDto,
+  })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() input: ProfileUpdateRequestDto,
+  ) {
+    this.usersService.update(id, input);
   }
 
   @Post('signup')
