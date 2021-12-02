@@ -229,41 +229,44 @@ export class StoriesService {
   /**
    * @description - list a story
    */
-  async list(
-    user: User,
-    { pageNo = 1, pageSize = 25, isPrivate = false }: Partial<SearchParams>,
-  ) {
-    const query = {
-      ...(isPrivate
-        ? {
-            AND: [
-              {
-                private: true,
-              },
-              {
-                userId: user.id,
-              },
-              {
-                isDelete: false,
-              },
-            ],
-          }
-        : {
-            AND: [
-              {
-                private: false,
-              },
-              {
-                isDelete: false,
-              },
-            ],
-          }),
-    };
+  async list({
+    pageNo = 1,
+    pageSize = 25,
+    isPrivate = false,
+    userId = null,
+  }: Partial<SearchParams>) {
+    const where = {};
+
+    if (_.isString(pageNo)) {
+      pageNo = Number(pageNo);
+    }
+
+    if (_.isString(pageSize)) {
+      pageSize = Number(pageSize);
+    }
+
+    if (isPrivate && _.isString(isPrivate)) {
+      isPrivate = isPrivate === 'true' ? true : false;
+    }
+
+    const AND: Record<string, boolean | number | string>[] = [
+      { private: isPrivate },
+      { isDelete: false },
+    ];
+    if (userId) {
+      AND.push({ userId: Number(userId) });
+    }
+
+    if (!_.isEmpty(AND)) {
+      Object.assign(where, {
+        AND,
+      });
+    }
 
     try {
       const [total, list] = await Promise.all([
         this.prisma.story.count({
-          where: query,
+          where,
         }),
         this.prisma.story.findMany({
           skip: (pageNo - 1) * pageSize,
@@ -272,7 +275,7 @@ export class StoriesService {
             createdAt: 'desc',
           },
           select: storiesSelect,
-          where: query,
+          where,
         }),
       ]);
 

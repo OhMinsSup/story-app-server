@@ -25,6 +25,7 @@ import { StoryCreateRequestDto } from './dtos/create.request.dto';
 
 // types
 import type { User } from '.prisma/client';
+import { SearchParams } from './dtos/story.interface';
 
 @ApiTags('Stories')
 @Controller('/api/stories')
@@ -51,13 +52,14 @@ export class StoriesController {
     required: false,
     description: '개인 스토리 여부',
   })
-  list(
-    @AuthUser() user: User,
-    @Query('pageNo', ParseIntPipe) pageNo: number,
-    @Query('pageSize', ParseIntPipe) pageSize: number,
-    @Query('isPrivate', ParseBoolPipe) isPrivate: boolean,
-  ) {
-    return this.storiesService.list(user, { pageNo, pageSize, isPrivate });
+  @ApiQuery({
+    name: 'userId',
+    type: Number,
+    required: false,
+    description: '유저 아이디',
+  })
+  list(@Query() query: Partial<SearchParams>) {
+    return this.storiesService.list(query);
   }
 
   @Delete(':id')
