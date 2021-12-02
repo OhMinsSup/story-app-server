@@ -25,7 +25,7 @@ import { StoryCreateRequestDto } from './dtos/create.request.dto';
 
 // types
 import type { User } from '.prisma/client';
-import { SearchParams } from './dtos/story.interface';
+import type { SearchParams } from './dtos/story.interface';
 
 @ApiTags('Stories')
 @Controller('/api/stories')
