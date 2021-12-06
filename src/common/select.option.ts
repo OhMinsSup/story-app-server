@@ -8,6 +8,7 @@ export const userProfileSelect = {
       avatarSvg: true,
       defaultProfile: true,
       gender: true,
+      bio: true,
     },
   },
 };

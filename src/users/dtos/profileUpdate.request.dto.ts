@@ -1,17 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsBoolean } from 'class-validator';
+import { IsNotEmpty, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { CommonDTO } from './common.dto';
 
 export class ProfileUpdateRequestDto extends CommonDTO {
-  @IsString()
+  @IsOptional()
   @IsNotEmpty()
+  @IsString()
   @ApiProperty({
     example: 'nickname123',
     description: '닉네임',
-    required: true,
   })
   nickname: string;
 
+  @IsOptional()
+  @IsNotEmpty()
   @IsBoolean()
   @ApiProperty({
     example: true,
@@ -20,19 +22,30 @@ export class ProfileUpdateRequestDto extends CommonDTO {
   })
   defaultProfile: boolean;
 
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @ApiProperty({
     example: 'iq67vb1nm4p',
     description: '사용자의 기본 아바타 코드',
-    required: true,
   })
   avatarSvg: string;
 
+  @IsOptional()
+  @IsNotEmpty()
   @IsString()
   @ApiProperty({
     example: 'https://www.google.com/',
     description: '유저 프로필 주소',
-    required: true,
   })
   profileUrl: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    example: '간단한 설명...',
+    description: '유저 설명',
+  })
+  bio: string;
 }

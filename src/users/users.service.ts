@@ -130,24 +130,34 @@ export class UsersService {
     const { profile } = currentUser;
     // currentUser.profile Data compare with input diffence data update
     const updateData: Record<string, any> = {};
-    if (input.nickname !== profile.nickname) {
+
+    // 닉네임
+    if (input.nickname && input.nickname !== profile.nickname) {
       updateData.nickname = input.nickname;
     }
 
-    if (input.gender !== profile.gender) {
+    // 성별
+    if (input.gender && input.gender !== profile.gender) {
       updateData.gender = input.gender;
     }
 
-    if (input.defaultProfile !== profile.defaultProfile) {
-      updateData.defaultProfile = input.defaultProfile;
-      // 이미지를 업로드 한 경우
-      // 기본 이미지가 아닌데 프로필 이미지를 업로드 한 경우
-      if (!input.defaultProfile && input.profileUrl) {
+    // 내 소개
+    if (input.bio && input.bio !== profile.bio) {
+      updateData.bio = input.bio;
+    }
+
+    // 프로필 (업로드 사진)
+    if (input.profileUrl) {
+      if (input.profileUrl !== profile.profileUrl) {
         updateData.profileUrl = input.profileUrl;
+        updateData.defaultProfile = false;
         updateData.avatarSvg = '';
-        // 기본 이미지인데 svg key값을 넘긴 경우
-      } else if (input.defaultProfile && input.avatarSvg) {
+      }
+      // 프로필 (기본 사진)
+    } else if (input.avatarSvg) {
+      if (input.avatarSvg !== profile.avatarSvg) {
         updateData.avatarSvg = input.avatarSvg;
+        updateData.defaultProfile = true;
         updateData.profileUrl = '';
       }
     }
