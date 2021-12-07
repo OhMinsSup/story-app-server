@@ -16,6 +16,9 @@ import { FilesModule } from './files/files.module';
 import { StoriesModule } from './story/story.module';
 import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
+import { SearchController } from './search/search.controller';
+import { SearchService } from './search/search.service';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -49,9 +52,10 @@ import { KlaytnModule } from './klaytn/klaytn.module';
     FilesModule,
     StoriesModule,
     TagsModule,
+    SearchModule,
   ],
-  controllers: [],
-  providers: [],
+  controllers: [SearchController],
+  providers: [SearchService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
