@@ -400,7 +400,7 @@ export class StoriesService {
         const updatedData = _.pickBy(
           _.merge(
             _.omit(story, ['createdAt', 'updatedAt', 'userId', 'storyTags']),
-            _.omit(input, ['storyId', 'tags']),
+            _.omit(input, ['storyId', 'tags', 'dataId']),
           ),
           _.identity,
         );
