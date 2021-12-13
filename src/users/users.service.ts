@@ -151,15 +151,11 @@ export class UsersService {
       if (input.profileUrl !== profile.profileUrl) {
         updateData.profileUrl = input.profileUrl;
         updateData.defaultProfile = false;
-        updateData.avatarSvg = '';
       }
       // 프로필 (기본 사진)
-    } else if (input.avatarSvg) {
-      if (input.avatarSvg !== profile.avatarSvg) {
-        updateData.avatarSvg = input.avatarSvg;
-        updateData.defaultProfile = true;
-        updateData.profileUrl = '';
-      }
+    } else if (input.defaultProfile) {
+      updateData.defaultProfile = true;
+      updateData.profileUrl = '';
     }
 
     if (!_.isEmpty(updateData)) {

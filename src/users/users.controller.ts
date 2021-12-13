@@ -67,7 +67,7 @@ export class UsersController {
     @Param('id', ParseIntPipe) id: number,
     @Body() input: ProfileUpdateRequestDto,
   ) {
-    this.usersService.update(id, input);
+    return this.usersService.update(id, input);
   }
 
   @Post('signup')
