@@ -32,7 +32,7 @@ export class UsersService {
   ) {}
 
   /**
-   * @description - This method is used to get user info
+   * @description - 유저 아이디로 유저 찾기
    * @param {number} userId
    */
   async findByUserId(userId: number) {
@@ -46,7 +46,7 @@ export class UsersService {
   }
 
   /**
-   * @description - This method is used to exists user info
+   * @description - 유저 이메일로 유저 찾기
    * @param {string} email
    */
   async findByEmail(email: string) {
@@ -60,7 +60,7 @@ export class UsersService {
 
   /**
    * @description - 서명 정보를 가져오는 함수
-   * @param signature
+   * @param {string} signature
    */
   async findBySignature(signature: string) {
     return this.prisma.signature.findFirst({
@@ -72,7 +72,7 @@ export class UsersService {
 
   /**
    * @description 지갑 정보를 가져오는 함수
-   * @param address
+   * @param {string} address
    */
   async findByWalletAddress(address: string) {
     return this.prisma.user.findFirst({
@@ -86,9 +86,8 @@ export class UsersService {
   }
 
   /**
-   * @description - This method is used to user detail info
-   * @param userId
-   * @returns
+   * @description - 유저 상세
+   * @param {number} userId
    */
   async detail(userId: number) {
     const user = await this.prisma.user.findUnique({
@@ -115,8 +114,8 @@ export class UsersService {
 
   /**
    * @description - 유저정보 수정
-   * @param userId
-   * @param input
+   * @param {number} userId
+   * @param {ProfileUpdateRequestDto} input
    */
   async update(userId: number, input: ProfileUpdateRequestDto) {
     const currentUser = await this.findByUserId(userId);
@@ -180,7 +179,7 @@ export class UsersService {
   }
 
   /**
-   * @description - This method is used to signin user
+   * @description - 로그인
    * @param {SigninRequestDto} input
    */
   async signin(input: SigninRequestDto) {
@@ -274,7 +273,7 @@ export class UsersService {
   }
 
   /**
-   * @description - This method is used to signup user
+   * @description - 회원가입
    * @param {SignupRequestDto} input
    */
   async signup(input: SignupRequestDto) {
@@ -365,6 +364,32 @@ export class UsersService {
           msg: '유효하지 않은 토큰입니다.',
         });
       }
+      throw error;
+    }
+  }
+
+  /**
+   * @description 회원탈퇴
+   * @param {number} id
+   */
+  async unregister(id: number) {
+    try {
+      await this.prisma.user.update({
+        where: {
+          id,
+        },
+        data: {
+          isDelete: true,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: true,
+      };
+    } catch (error) {
       throw error;
     }
   }

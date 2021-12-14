@@ -108,4 +108,11 @@ export class UsersController {
     res.clearCookie('access_token', { httpOnly: true });
     res.status(HttpStatus.OK).json(true);
   }
+
+  @Put(':id/unregister')
+  @ApiOperation({ summary: '회원 탈퇴' })
+  @UseGuards(LoggedInGuard)
+  unregister(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.unregister(id);
+  }
 }
