@@ -24,6 +24,6 @@ export class SearchController {
     description: '페이지 사이즈',
   })
   list(@Query() query: Record<string, any>) {
-    return null;
+    return this.searchService.search('');
   }
 }
