@@ -118,25 +118,12 @@ export class StoriesController {
     return this.storiesService.histories(id);
   }
 
-  @Get(':id/anothers')
+  @Get(':id/anothers/:userId')
   @ApiOperation({ summary: '작품을 작성한 사람의 다른 작품 리스트 조회' })
-  @ApiQuery({
-    name: 'pageNo',
-    type: Number,
-    required: false,
-    description: '페이지 번호',
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    type: Number,
-    required: false,
-    description: '페이지 사이즈',
-  })
   anothers(
     @Param('id', ParseIntPipe) id: number,
-    @Query('pageNo', ParseIntPipe) pageNo: number,
-    @Query('pageSize', ParseIntPipe) pageSize: number,
+    @Param('userId', ParseIntPipe) userId: number,
   ) {
-    return this.storiesService.anotherStories(id, { pageNo, pageSize });
+    return this.storiesService.anotherStories(id, userId);
   }
 }

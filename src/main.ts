@@ -9,9 +9,13 @@ import compression from 'compression';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './exception/http-exception.filter';
 import { TransformInterceptor } from './middlewares/transform.interceptor';
+import { PrismaService } from './prisma/prisma.service';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  const prisma: PrismaService = app.get(PrismaService);
+  prisma.enableShutdownHooks(app);
 
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new TransformInterceptor());

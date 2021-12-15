@@ -75,46 +75,39 @@ export class StoriesService {
   }
 
   /**
-   * @description - 상세에서 해당 작품을 생성한 크리에이터의 또 다른 story를 가져온다ㄴ
-   * @param storyUserId
-   * @param param
+   * @description - 상세에서 해당 작품을 생성한 크리에이터의 또 다른 story를 가져온다ㄴs
    */
-  async anotherStories(
-    userId: number,
-    { pageNo = 1, pageSize = 25 }: Partial<Omit<SearchParams, 'isPrivate'>>,
-  ) {
-    const query = {
-      AND: [
-        {
-          private: false,
-        },
-        {
-          isDelete: false,
-        },
-        {
-          userId,
-        },
-      ],
-    };
+  async anotherStories(id: number, userId: number) {
+    const where = {};
 
-    const [total, list] = await Promise.all([
-      this.prisma.story.count({
-        where: query,
-      }),
-      this.prisma.story.findMany({
-        skip: (pageNo - 1) * pageSize,
-        take: pageSize,
-        orderBy: {
-          createdAt: 'desc',
+    const AND: Record<string, boolean | number | string>[] = [
+      { private: false },
+      { isDelete: false },
+      { userId },
+    ];
+
+    Object.assign(where, {
+      AND,
+    });
+
+    console.log(where);
+    const list = await this.prisma.story.findMany({
+      take: 5,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      select: storiesSelect,
+      where: {
+        userId: {
+          equals: userId,
         },
-        select: {
-          ...storiesSelect,
-          owner: false,
-          storyTags: false,
+        id: {
+          not: id,
         },
-        where: query,
-      }),
-    ]);
+      },
+    });
+
+    console.log(list);
 
     return {
       ok: true,
@@ -122,8 +115,6 @@ export class StoriesService {
       message: null,
       result: {
         list: list.map(this.serialize),
-        total,
-        pageNo,
       },
     };
   }
