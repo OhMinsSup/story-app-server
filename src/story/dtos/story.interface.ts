@@ -9,3 +9,9 @@ export enum HistoryStatus {
   ISSUE = 'ISSUE',
   TRADE = 'TRADE',
 }
+
+export interface StorySearchParams
+  extends Omit<SearchParams, 'userId' | 'isPrivate'> {
+  background?: string;
+  tags?: string[];
+}

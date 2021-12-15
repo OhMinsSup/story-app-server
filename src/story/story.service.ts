@@ -107,8 +107,6 @@ export class StoriesService {
       },
     });
 
-    console.log(list);
-
     return {
       ok: true,
       resultCode: EXCEPTION_CODE.OK,
@@ -244,6 +242,7 @@ export class StoriesService {
       { private: isPrivate },
       { isDelete: false },
     ];
+
     if (userId) {
       AND.push({ userId: Number(userId) });
     }
