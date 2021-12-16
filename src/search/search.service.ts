@@ -20,7 +20,7 @@ export class SearchService {
   async search({
     pageNo = 1,
     pageSize = 25,
-    background = undefined,
+    backgrounds = undefined,
     tags = undefined,
   }: StorySearchParams) {
     const where = {};
@@ -35,22 +35,41 @@ export class SearchService {
 
     const OR: Record<string, any>[] = [];
 
-    const hexRegex = /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/;
-    if (!_.isEmpty(background) && background.match(hexRegex)) {
+    if (!_.isEmpty(backgrounds)) {
+      let transform = [];
+      if (typeof backgrounds === 'string') {
+        // checked by regex comma or space delimiter
+        transform = backgrounds.split(/[,\s]+/);
+      } else if (Array.isArray(backgrounds)) {
+        // tags array
+        transform = backgrounds;
+      }
+
+      console.log(transform);
+
       OR.push({
         backgroundColor: {
-          contains: background,
+          in: transform,
         },
       });
     }
 
     if (!_.isEmpty(tags)) {
+      let transform = [];
+      if (typeof tags === 'string') {
+        // checked by regex comma or space delimiter
+        transform = tags.split(/[,\s]+/);
+      } else if (Array.isArray(tags)) {
+        // tags array
+        transform = tags;
+      }
+
       OR.push({
         storyTags: {
           some: {
             tag: {
               name: {
-                in: tags,
+                in: transform,
               },
             },
           },
@@ -87,10 +106,7 @@ export class SearchService {
             createdAt: 'desc',
           },
           select: storiesSelect,
-          where: {
-            ...where,
-            OR,
-          },
+          where,
         }),
       ]);
 

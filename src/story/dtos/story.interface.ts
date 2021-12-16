@@ -12,6 +12,6 @@ export enum HistoryStatus {
 
 export interface StorySearchParams
   extends Omit<SearchParams, 'userId' | 'isPrivate'> {
-  background?: string;
-  tags?: string[];
+  backgrounds?: string[] | string;
+  tags?: string[] | string;
 }

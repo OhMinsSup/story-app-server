@@ -26,8 +26,9 @@ export class SearchController {
     description: '페이지 사이즈',
   })
   @ApiQuery({
-    name: 'background',
+    name: 'backgrounds',
     type: String,
+    isArray: true,
     required: false,
     description: '배경 이미지',
   })
