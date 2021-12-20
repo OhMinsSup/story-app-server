@@ -526,4 +526,140 @@ export class StoriesService {
       throw error;
     }
   }
+
+  /**
+   * @description 좋아요
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async likes(user: User, storyId: number) {
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // 수정하는 스토리 정보가 존재하는지 체크
+        const story = await tx.story.findFirst({
+          where: {
+            AND: [
+              {
+                id: storyId,
+              },
+              {
+                userId: user.id,
+              },
+            ],
+          },
+        });
+
+        if (!story) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 스토리입니다.',
+          });
+        }
+
+        // 수정하려는 스토리 정보가 이미 존재하는지 체크
+        if (story.userId === user.id) {
+          return {
+            ok: false,
+            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+            message: '자신의 스토리는 좋아요를 할 수 없습니다.',
+            result: null,
+          };
+        }
+
+        await this.prisma.story.update({
+          where: {
+            id: storyId,
+          },
+          data: {
+            likes: {
+              connect: {
+                id: user.id,
+              },
+            },
+          },
+        });
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            dataId: storyId,
+          },
+        };
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @description 싫어요
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async unlikes(user: User, storyId: number) {
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        // 수정하는 스토리 정보가 존재하는지 체크
+        const story = await tx.story.findFirst({
+          where: {
+            AND: [
+              {
+                id: storyId,
+              },
+              {
+                userId: user.id,
+              },
+            ],
+          },
+        });
+
+        if (!story) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 스토리입니다.',
+          });
+        }
+
+        // 수정하려는 스토리 정보가 이미 존재하는지 체크
+        if (story.userId === user.id) {
+          return {
+            ok: false,
+            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+            message: '자신의 스토리는 좋아요를 취소할 수 없습니다.',
+            result: null,
+          };
+        }
+
+        await this.prisma.story.update({
+          where: {
+            id: storyId,
+          },
+          data: {
+            likes: {
+              disconnect: {
+                id: user.id,
+              },
+            },
+          },
+        });
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            dataId: storyId,
+          },
+        };
+      });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
