@@ -90,7 +90,6 @@ export class StoriesService {
       AND,
     });
 
-    console.log(where);
     const list = await this.prisma.story.findMany({
       take: 5,
       orderBy: {

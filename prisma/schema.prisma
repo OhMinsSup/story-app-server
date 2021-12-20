@@ -23,6 +23,7 @@ model User {
   froms  History[] @relation("from")
   tos    History[] @relation("to")
   owners Story[]   @relation("owner")
+  likes  Like[]
 }
 
 model Signature {
@@ -83,6 +84,7 @@ model Story {
   description     String
   backgroundColor String?
   externalUrl     String?
+  views           Int      @default(0)
   private         Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -93,6 +95,7 @@ model Story {
 
   storyTags StoryTags[]
   histories History[]
+  likes     Like[]
 }
 
 model Media {
@@ -122,4 +125,15 @@ model Tag {
   storyTags StoryTags[]
 
   @@index([name])
+}
+
+model Like {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  storyId   Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User  @relation(fields: [userId], references: [id])
+  story Story @relation(fields: [storyId], references: [id])
 }
