@@ -39,6 +39,19 @@ export class SearchController {
     isArray: true,
     description: '태그',
   })
+  @ApiQuery({
+    name: 'orderType',
+    type: String,
+    required: false,
+    description: '정렬 타입',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    type: String,
+    required: false,
+    example: 'desc, asc',
+    description: '정렬 기준',
+  })
   search(@Query() query: StorySearchParams) {
     return this.searchService.search(query);
   }

@@ -22,6 +22,8 @@ export class SearchService {
     pageSize = 25,
     backgrounds = undefined,
     tags = undefined,
+    orderBy = 'desc',
+    orderType = 'createdAt',
   }: StorySearchParams) {
     const where = {};
 
@@ -44,8 +46,6 @@ export class SearchService {
         // tags array
         transform = backgrounds;
       }
-
-      console.log(transform);
 
       OR.push({
         backgroundColor: {
@@ -82,11 +82,9 @@ export class SearchService {
       { isDelete: false },
     ];
 
-    if (!_.isEmpty(AND)) {
-      Object.assign(where, {
-        AND,
-      });
-    }
+    Object.assign(where, {
+      AND,
+    });
 
     if (!_.isEmpty(OR)) {
       Object.assign(where, {
@@ -103,7 +101,7 @@ export class SearchService {
           skip: (pageNo - 1) * pageSize,
           take: pageSize,
           orderBy: {
-            createdAt: 'desc',
+            [orderType]: orderBy,
           },
           select: storiesSelect,
           where,

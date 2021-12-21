@@ -14,4 +14,6 @@ export interface StorySearchParams
   extends Omit<SearchParams, 'userId' | 'isPrivate'> {
   backgrounds?: string[] | string;
   tags?: string[] | string;
+  orderBy?: 'asc' | 'desc';
+  orderType?: 'createdAt' | 'updatedAt' | 'views';
 }
