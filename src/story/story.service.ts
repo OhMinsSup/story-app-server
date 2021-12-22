@@ -566,16 +566,32 @@ export class StoriesService {
           };
         }
 
-        await this.prisma.story.update({
+        // 좋아요 정보가 이미 존재하는지 체크
+        const like = await tx.like.findFirst({
           where: {
-            id: storyId,
-          },
-          data: {
-            likes: {
-              connect: {
-                id: user.id,
+            AND: [
+              {
+                storyId,
               },
-            },
+              {
+                userId: user.id,
+              },
+            ],
+          },
+        });
+
+        if (!_.isEmpty(like)) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.DUPLICATE,
+            msg: '이미 좋아요를 누른 스토리입니다.',
+          });
+        }
+
+        // 좋아요 정보 생성
+        await tx.like.create({
+          data: {
+            userId: user.id,
+            storyId: story.id,
           },
         });
 
@@ -634,16 +650,31 @@ export class StoriesService {
           };
         }
 
-        await this.prisma.story.update({
+        // 좋아요 정보가 이미 존재하는지 체크
+        const like = await tx.like.findFirst({
           where: {
-            id: storyId,
-          },
-          data: {
-            likes: {
-              disconnect: {
-                id: user.id,
+            AND: [
+              {
+                storyId,
               },
-            },
+              {
+                userId: user.id,
+              },
+            ],
+          },
+        });
+
+        if (_.isEmpty(like)) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '좋아요를 누른 스토리가 없습니다.',
+          });
+        }
+
+        // 좋아요 정보 삭제
+        await tx.like.delete({
+          where: {
+            id: like.id,
           },
         });
 

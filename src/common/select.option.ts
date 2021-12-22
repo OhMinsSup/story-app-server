@@ -67,20 +67,7 @@ export const storiesSelect = {
   },
   likes: {
     select: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          profile: {
-            select: {
-              nickname: true,
-              profileUrl: true,
-              avatarSvg: true,
-              defaultProfile: true,
-            },
-          },
-        },
-      },
+      userId: true,
     },
   },
   owner: {
