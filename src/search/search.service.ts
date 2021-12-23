@@ -77,6 +77,20 @@ export class SearchService {
       });
     }
 
+    const order = {};
+
+    if (orderType === 'likes') {
+      Object.assign(order, {
+        likes: {
+          _count: orderBy,
+        },
+      });
+    } else {
+      Object.assign(order, {
+        [orderType]: orderBy,
+      });
+    }
+
     const AND: Record<string, boolean | number | string>[] = [
       { private: false },
       { isDelete: false },
@@ -100,9 +114,7 @@ export class SearchService {
         this.prisma.story.findMany({
           skip: (pageNo - 1) * pageSize,
           take: pageSize,
-          orderBy: {
-            [orderType]: orderBy,
-          },
+          orderBy: order,
           select: storiesSelect,
           where,
         }),

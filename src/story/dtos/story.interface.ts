@@ -15,5 +15,5 @@ export interface StorySearchParams
   backgrounds?: string[] | string;
   tags?: string[] | string;
   orderBy?: 'asc' | 'desc';
-  orderType?: 'createdAt' | 'updatedAt' | 'views';
+  orderType?: 'createdAt' | 'updatedAt' | 'views' | 'likes';
 }
