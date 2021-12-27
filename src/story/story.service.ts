@@ -532,20 +532,13 @@ export class StoriesService {
    * @param user {User}
    * @param storyId {number}
    */
-  async likes(user: User, storyId: number) {
+  async like(user: User, storyId: number) {
     try {
       const result = await this.prisma.$transaction(async (tx) => {
         // 수정하는 스토리 정보가 존재하는지 체크
         const story = await tx.story.findFirst({
           where: {
-            AND: [
-              {
-                id: storyId,
-              },
-              {
-                userId: user.id,
-              },
-            ],
+            id: storyId,
           },
         });
 
@@ -616,20 +609,13 @@ export class StoriesService {
    * @param user {User}
    * @param storyId {number}
    */
-  async unlikes(user: User, storyId: number) {
+  async unlike(user: User, storyId: number) {
     try {
       const result = await this.prisma.$transaction(async (tx) => {
         // 수정하는 스토리 정보가 존재하는지 체크
         const story = await tx.story.findFirst({
           where: {
-            AND: [
-              {
-                id: storyId,
-              },
-              {
-                userId: user.id,
-              },
-            ],
+            id: storyId,
           },
         });
 

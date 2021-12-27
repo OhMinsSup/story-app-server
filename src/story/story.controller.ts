@@ -131,13 +131,13 @@ export class StoriesController {
   @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '스토리 좋아요 API' })
   like(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
-    return this.storiesService.likes(user, id);
+    return this.storiesService.like(user, id);
   }
 
   @Delete(':id/like')
   @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '스토리 좋아요 취소 API' })
   unlike(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
-    return this.storiesService.unlikes(user, id);
+    return this.storiesService.unlike(user, id);
   }
 }

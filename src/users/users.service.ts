@@ -22,6 +22,7 @@ import { SigninRequestDto } from './dtos/signin.request.dto';
 // select
 import { userAccountSelect, userProfileSelect } from 'src/common/select.option';
 import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
+import { Story, StoryTags, Tag } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -388,6 +389,94 @@ export class UsersService {
         resultCode: EXCEPTION_CODE.OK,
         message: null,
         result: true,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @description 스토리 좋아요 리스트 조회 API
+   * @param userId {number}
+   */
+  async likes(userId: number, pageNo = 1, pageSize = 25) {
+    if (_.isString(pageNo)) {
+      pageNo = Number(pageNo);
+    }
+
+    if (_.isString(pageSize)) {
+      pageSize = Number(pageSize);
+    }
+
+    try {
+      const [total, list] = await Promise.all([
+        this.prisma.like.count({
+          where: {
+            userId,
+          },
+        }),
+        this.prisma.like.findMany({
+          skip: (pageNo - 1) * pageSize,
+          take: pageSize,
+          orderBy: {
+            createdAt: 'desc',
+          },
+          where: {
+            userId,
+          },
+          include: {
+            story: {
+              include: {
+                media: true,
+                storyTags: {
+                  include: {
+                    tag: true,
+                  },
+                },
+                user: {
+                  include: {
+                    profile: true,
+                  },
+                },
+                likes: {
+                  select: {
+                    userId: true,
+                  },
+                },
+              },
+            },
+          },
+        }),
+      ]);
+
+      const serialize = (data: unknown) => {
+        const story = (data as any).story;
+        type SerializedTags = (StoryTags & {
+          tag: Tag;
+        })[];
+
+        const result = _.pick(story, ['storyTags']) as {
+          storyTags: SerializedTags;
+        };
+        const tags = result.storyTags?.map(({ tag }) => ({
+          id: tag.id,
+          name: tag.name,
+        }));
+        return {
+          ..._.omit(story as Story, ['storyTags']),
+          tags,
+        };
+      };
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          list: list.map(serialize),
+          total,
+          pageNo,
+        },
       };
     } catch (error) {
       throw error;
