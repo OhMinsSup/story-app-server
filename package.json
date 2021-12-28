@@ -21,7 +21,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "compile": "truffle migrate --compile-all --reset --network ganache",
+    "console": "truffle console --network ganache"
   },
   "lint-staged": {
     "*.{js,ts}": [
@@ -87,7 +89,8 @@
     "ts-loader": "^9.2.3",
     "ts-node": "^10.0.0",
     "tsconfig-paths": "^3.10.1",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "truffle-hdwallet-provider-klaytn": "^1.4.2"
   },
   "jest": {
     "moduleFileExtensions": [
