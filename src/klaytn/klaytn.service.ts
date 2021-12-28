@@ -1,11 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { KLAYTN } from 'src/common/common.constants';
+import {
+  DEPLOYED_ABI,
+  KLAYTN,
+  DEPLOYED_ADDRESS,
+} from 'src/common/common.constants';
 
 import type Caver from 'caver-js';
+import { Contract } from 'caver-js';
 
 @Injectable()
 export class KlaytnService {
-  constructor(@Inject(KLAYTN) private readonly caver: Caver) {}
+  private contract: Contract | null;
+  constructor(@Inject(KLAYTN) private readonly caver: Caver) {
+    if ([DEPLOYED_ABI, DEPLOYED_ADDRESS].every(Boolean)) {
+      this.contract = new this.caver.klay.Contract(
+        DEPLOYED_ABI,
+        DEPLOYED_ADDRESS,
+      );
+    }
+  }
 
   /**
    * @description 지갑 생성
@@ -58,5 +71,23 @@ export class KlaytnService {
       s,
     });
     return address;
+  }
+
+  /**
+   * @description
+   */
+  async getStories() {
+    if (!this.contract) {
+      throw new Error('Contract is not deployed');
+    }
+
+    const totalCount = this.contract.methods.getTotalCount().call();
+    if (!totalCount) return [];
+    const stories = [];
+    for (let i = totalCount; i > 0; i--) {
+      const story = this.contract.methods.getStory(i).call();
+      stories.push(story);
+    }
+    return Promise.all(stories);
   }
 }

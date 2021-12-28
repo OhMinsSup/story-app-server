@@ -1,4 +1,7 @@
 const HDWalletProvider = require('truffle-hdwallet-provider-klaytn');
+require('dotenv').config({
+  path: '.env.development',
+});
 
 /**
  * 트러플 네트워크 변수
@@ -11,7 +14,7 @@ const GASLIMIT = '20000000';
  * PRIVATE_KEY: 거래대금을 지급하는 계좌의 Private Key (자신의 Private Key로 변경) */
 const URL = `https://api.baobab.klaytn.net:8651`;
 // truffle.js에 충분한 KLAY가 있는 `Private key`를 붙여넣습니다.
-const PRIVATE_KEY = '';
+const PRIVATE_KEY = process.env.KLAYTN_PRIVATE_KEY;
 
 module.exports = {
   networks: {
@@ -21,12 +24,12 @@ module.exports = {
       network_id: '*', // Match any network id
     },
 
-    // klaytn: {
-    //   provider: new HDWalletProvider(PRIVATE_KEY, URL),
-    //   network_id: NETWORK_ID,
-    //   gas: GASLIMIT,
-    //   gasPrice: null,
-    // },
+    klaytn: {
+      provider: new HDWalletProvider(PRIVATE_KEY, URL),
+      network_id: NETWORK_ID,
+      gas: GASLIMIT,
+      gasPrice: null,
+    },
   },
 
   // Specify the version of compiler, we use 0.5.6
