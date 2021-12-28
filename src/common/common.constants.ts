@@ -16,3 +16,5 @@ export const DEPLOYED_ADDRESS: any =
 
 export const DEPLOYED_ABI: any =
   fs.existsSync(abiPath) && JSON.parse(fs.readFileSync(abiPath, 'utf8'));
+
+export const GAS = 20000000;

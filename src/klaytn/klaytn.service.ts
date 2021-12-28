@@ -1,12 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Contract } from 'caver-js';
 import {
   DEPLOYED_ABI,
   KLAYTN,
+  GAS,
   DEPLOYED_ADDRESS,
 } from 'src/common/common.constants';
 
 import type Caver from 'caver-js';
-import { Contract } from 'caver-js';
+
+interface StoryToken {
+  tokenId: number;
+  storyId: number;
+  tokenUrl: string;
+  timestamp: number;
+  ownerHistory: any[];
+}
 
 @Injectable()
 export class KlaytnService {
@@ -17,6 +26,8 @@ export class KlaytnService {
         DEPLOYED_ABI,
         DEPLOYED_ADDRESS,
       );
+    } else {
+      this.contract = null;
     }
   }
 
@@ -74,18 +85,81 @@ export class KlaytnService {
   }
 
   /**
-   * @description
+   * @description 현재 배포된 모든 토큰 카운트값
+   */
+  async getTotalCount(): Promise<number | null> {
+    return this.contract?.methods.getTotalCount().call();
+  }
+
+  /**
+   * @description 특정 토큰 아이디를 통해서 토큰 정보를 가져오는 메소드
+   * @param tokenId
+   */
+  async getStory(tokenId: number): Promise<StoryToken | null> {
+    return this.contract?.methods.getStory(tokenId).call();
+  }
+
+  /**
+   * @description 토큰 발행
+   * @param storyId
+   * @param tokenUrl
+   */
+  async mintStory(storyId: number, tokenUrl: string) {
+    return this.contract?.methods
+      .mintStory(storyId, tokenUrl)
+      .send({
+        from: DEPLOYED_ADDRESS,
+        gas: GAS,
+      })
+      .once('transactionHash', (txHash) => {
+        console.log(txHash);
+      })
+      .once('receipt', (receipt) => {
+        console.log(receipt);
+      })
+      .once('error', (error) => {
+        console.log(error);
+      });
+  }
+
+  /**
+   * @description 소유권 이전
+   * @param address
+   * @param tokenId
+   * @param to
+   */
+  async transferOwnership(address: string, tokenId: number, to: string) {
+    // promies race transferOwnership
+    return this.contract?.methods
+      .transferOwnership(tokenId, to)
+      .send({
+        from: address,
+        gas: GAS,
+      })
+      .once('transactionHash', (txHash) => {
+        console.log(txHash);
+      })
+      .once('receipt', (receipt) => {
+        console.log(receipt);
+      })
+      .once('error', (error) => {
+        console.log(error);
+      });
+  }
+
+  /**
+   * @description 현재 배포된 모든 토큰을 가져옵니다.
    */
   async getStories() {
     if (!this.contract) {
       throw new Error('Contract is not deployed');
     }
 
-    const totalCount = this.contract.methods.getTotalCount().call();
+    const totalCount = await this.getTotalCount();
     if (!totalCount) return [];
     const stories = [];
     for (let i = totalCount; i > 0; i--) {
-      const story = this.contract.methods.getStory(i).call();
+      const story = this.getStory(i);
       stories.push(story);
     }
     return Promise.all(stories);
