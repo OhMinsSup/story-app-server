@@ -29,4 +29,6 @@ export const EXCEPTION_CODE = {
 
   // 자신이 생성한 아이템에 좋아요등의 액션을 할 수 없음
   NO_PERMISSION_ACTION: 4005,
+  // NFT 발생 실패
+  NFT_FAIL: 4006,
 };

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import * as _ from 'lodash';
@@ -10,18 +11,22 @@ import { EXCEPTION_CODE } from 'src/exception/exception.code';
 
 // service
 import { PrismaService } from 'src/prisma/prisma.service';
+import { KlaytnService } from 'src/klaytn/klaytn.service';
 
 // types
 import type { Story, StoryTags, Tag, User } from '.prisma/client';
+import type { SearchParams } from './dtos/story.interface';
 
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
 import { historiesSelect, storiesSelect } from 'src/common/select.option';
-import { SearchParams } from './dtos/story.interface';
 
 @Injectable()
 export class StoriesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly klaytnService: KlaytnService,
+  ) {}
 
   /**
    * @description - serialize a story
@@ -449,6 +454,7 @@ export class StoriesService {
         }
 
         let createdTags: Tag[] = [];
+        // 태크 체크
         if (!_.isEmpty(input.tags)) {
           const tags = await Promise.all(
             input.tags.map(async (tag) => {
@@ -470,6 +476,7 @@ export class StoriesService {
           createdTags = tags;
         }
 
+        // 스토리 생성
         const story = await tx.story.create({
           data: {
             userId: user.id,
@@ -491,6 +498,7 @@ export class StoriesService {
           },
         });
 
+        // 태그 생성
         await Promise.all(
           createdTags.map((tag) =>
             tx.storyTags.create({
@@ -502,14 +510,46 @@ export class StoriesService {
           ),
         );
 
-        await tx.history.create({
-          data: {
-            status: 'ISSUE',
-            storyId: story.id,
-            toId: user.id,
-            fromId: user.id,
-          },
-        });
+        // nft 발생
+        const receipt = await this.klaytnService.mint(story.id, story.name);
+        console.log('recetp', receipt);
+        if (!receipt) {
+          return {
+            ok: false,
+            resultCode: EXCEPTION_CODE.NFT_FAIL,
+            message: '스토리 생성에 실패하였습니다.',
+            result: null,
+          };
+        }
+
+        // 발생 NFT 토큰 ID
+        const tokenId = (receipt as any).events.StoryUploaded.returnValues[0];
+        console.log('tokenId', tokenId);
+        await Promise.all([
+          tx.nFT.create({
+            data: {
+              storyId: story.id,
+              tokenId,
+            },
+          }),
+          tx.history.create({
+            data: {
+              status: 'ISSUE',
+              storyId: story.id,
+              toId: user.id,
+              fromId: user.id,
+              // new
+              tokenId,
+              type: receipt.type,
+              toHash: receipt.to,
+              fromHash: receipt.from,
+              blockHash: receipt.blockHash,
+              blockNumber: receipt.blockNumber,
+              senderTxHash: receipt.senderTxHash,
+              transactionHash: receipt.transactionHash,
+            },
+          }),
+        ]);
 
         return {
           ok: true,

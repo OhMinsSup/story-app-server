@@ -1,7 +1,7 @@
 pragma solidity 0.5.16;
 
-import "./ERC721/ERC721.sol";
-import "./ERC721/ERC721Enumerable.sol";
+import './ERC721/ERC721.sol';
+import './ERC721/ERC721Enumerable.sol';
 
 contract Story is ERC721, ERC721Enumerable {
     event StoryUploaded(
@@ -102,7 +102,7 @@ contract Story is ERC721, ERC721Enumerable {
             uint256
         )
     {
-        require(_stories[tokenId].tokenId != 0, "Story does not exist");
+        require(_stories[tokenId].tokenId != 0, 'Story does not exist');
         return (
             _stories[tokenId].tokenId,
             _stories[tokenId].storyId,

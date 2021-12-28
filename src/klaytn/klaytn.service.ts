@@ -8,6 +8,7 @@ import {
 } from 'src/common/common.constants';
 
 import type Caver from 'caver-js';
+import type { SingleKeyring } from 'caver-js';
 
 interface StoryToken {
   tokenId: number;
@@ -29,6 +30,31 @@ export class KlaytnService {
     } else {
       this.contract = null;
     }
+  }
+
+  /**
+   * @description Keyring은 Klaytn 계정의 주소와 개인 키를 포함하는 구조입니다.
+   */
+  async keyring() {
+    const randomHex = this.caver.utils.randomHex(32);
+    const keyring: any = (this.caver.wallet as any).keyring;
+    return keyring.generate(randomHex) as SingleKeyring;
+  }
+
+  /**
+   * @description 개인키에서 계정 객체를 생성합니다.
+   * @param privateKey
+   */
+  privateKeyToAccount(privateKey: string) {
+    return this.caver.klay.accounts.privateKeyToAccount(privateKey);
+  }
+
+  /**
+   * @description 개인키 또는 계정 객체를 사용하여 계정을 지갑에 추가합니다.
+   * @todo 참고: 지갑에 동일한 주소가 있는 경우에는 오류가 반환됩니다. 지갑의 계정과 관련된 개인키를 변경하려면 caver.klay.accounts.wallet.updatePrivateKey를 사용하세요.
+   */
+  walletAdd(wallet: any) {
+    return this.caver.klay.accounts.wallet.add(wallet);
   }
 
   /**
@@ -104,22 +130,16 @@ export class KlaytnService {
    * @param storyId
    * @param tokenUrl
    */
-  async mintStory(storyId: number, tokenUrl: string) {
-    return this.contract?.methods
-      .mintStory(storyId, tokenUrl)
-      .send({
+  async mint(storyId: number, tokenUrl: string) {
+    return this.contract.send(
+      {
         from: DEPLOYED_ADDRESS,
         gas: GAS,
-      })
-      .once('transactionHash', (txHash) => {
-        console.log(txHash);
-      })
-      .once('receipt', (receipt) => {
-        console.log(receipt);
-      })
-      .once('error', (error) => {
-        console.log(error);
-      });
+      },
+      'mintStory',
+      storyId,
+      tokenUrl,
+    );
   }
 
   /**

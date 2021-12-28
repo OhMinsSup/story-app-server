@@ -312,11 +312,16 @@ export class UsersService {
         const hased = await bcrypt.hash(input.password, 12);
 
         // 지갑을 생성한다.
-        const wallet = await this.klaytnService.createWallet();
-        // 공개키를 생성한다.
-        const publicKey = await this.klaytnService.privateKeyToPublicKey(
-          wallet.privateKey,
-        );
+        // const wallet = await this.klaytnService.createWallet();
+        const keyring = await this.klaytnService.keyring();
+        const {
+          address,
+          key: { privateKey },
+        } = keyring;
+        // 개인키로 계정을 생성한다.
+        const wallet = this.klaytnService.privateKeyToAccount(privateKey);
+        // 트랜잭션을 보내려면 cav.klay.accounts.wallet.add(walletInstance)를 통해 지갑 인스턴스를 caver에 추
+        this.klaytnService.walletAdd(wallet);
 
         // 유저 생성
         const user = await tx.user.create({
@@ -342,9 +347,8 @@ export class UsersService {
           tx.account.create({
             data: {
               userId: user.id,
-              address: wallet.address,
-              privateKey: wallet.privateKey,
-              publicKey,
+              address,
+              privateKey,
             },
           }),
         ]);

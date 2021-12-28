@@ -10,27 +10,27 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  isDelete  Boolean  @default(false)
+  email     String   @unique // 유저 이메일
+  password  String // 비밀번로
+  isDelete  Boolean  @default(false) // 삭제 여부
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  profile   Profile?
-  account   Account?
-  stories   Story[]
+  profile   Profile? // 유저 프로필 관계
+  account   Account? // 유저 지갑 관계
+  stories   Story[] // 유저 story 관계 (생성한 유저)
 
 
-  froms  History[] @relation("from")
-  tos    History[] @relation("to")
-  owners Story[]   @relation("owner")
-  likes  Like[]
+  froms  History[] @relation("from") // 유저 거래 및 발행 내역
+  tos    History[] @relation("to") // 유저 거래 및 발행 내역
+  owners Story[]   @relation("owner") // 내 스토리 관계 (생성 및 거래)
+  likes  Like[] // 유저 좋아요 관계
 }
 
 model Signature {
   id          Int      @id @default(autoincrement())
-  signature   String
-  messageHash String
-  messageData String?
+  signature   String // 서명 데이터
+  messageHash String // 서명 데이터 hash값
+  messageData String? // 서명 데이터 정보
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -54,7 +54,6 @@ model Account {
   userId     Int      @unique
   address    String   @unique
   privateKey String   @unique
-  publicKey  String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -62,13 +61,21 @@ model Account {
 }
 
 model History {
-  id        Int      @id @default(autoincrement())
-  status    String
-  toId      Int?
-  fromId    Int?
-  storyId   Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              Int      @id @default(autoincrement())
+  status          String
+  toId            Int?
+  fromId          Int?
+  storyId         Int
+  tokenId         Int
+  type            String
+  toHash          String
+  fromHash        String
+  blockHash       String
+  blockNumber     String
+  senderTxHash    String
+  transactionHash String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   story Story @relation(fields: [storyId], references: [id])
   to    User? @relation(name: "to", fields: [toId], references: [id])
@@ -80,6 +87,7 @@ model Story {
   userId          Int
   ownerId         Int
   mediaId         Int
+  nftId           Int?
   name            String
   description     String
   backgroundColor String?
@@ -96,6 +104,16 @@ model Story {
   storyTags StoryTags[]
   histories History[]
   likes     Like[]
+  nft       NFT?        @relation(fields: [nftId], references: [id])
+}
+
+model NFT {
+  id        Int      @id @default(autoincrement())
+  tokenId   Int      @unique
+  storyId   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  story     Story[]
 }
 
 model Media {
