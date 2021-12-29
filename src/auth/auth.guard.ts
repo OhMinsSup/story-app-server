@@ -6,7 +6,8 @@ import { KlaytnService } from 'src/klaytn/klaytn.service';
 import { UsersService } from 'src/users/users.service';
 
 export interface AccessTokenData {
-  signature: string;
+  address: string;
+  id: number;
   sub: string;
   exp: number;
 }
@@ -39,22 +40,34 @@ export class AuthGuard implements CanActivate {
         // access token is valid expire date diff is less than 30 days
         const diff = accessTokenData.exp - Math.floor(Date.now() / 1000);
         if (diff > 0) {
-          // https://forum.klaytn.com/t/kaikas-sign-list/2395
-          // https://forum.klaytn.com/t/kaikas-sign/2137
-          const sign = await this.usersService.findBySignature(
-            accessTokenData.signature,
-          );
-          if (sign) {
-            const address = await this.klaytnService.recoverSignature(
-              sign.signature,
-              sign.messageHash,
-            );
-            // check if user exists
-            const user = await this.usersService.findByWalletAddress(address);
+          const { id, address } = accessTokenData;
+          if (this.klaytnService.isAddress(address)) {
+            const user = await this.usersService.findByUserId(id);
+            console.log(user);
             if (user) {
               request.user = user;
             }
           }
+          // https://forum.klaytn.com/t/kaikas-sign-list/2395
+          // https://forum.klaytn.com/t/kaikas-sign/2137
+          // const sign = await this.usersService.findBySignature(
+          //   accessTokenData.signature,
+          // );
+          // if (sign) {
+          //   const address = await this.klaytnService.recoverSignature(
+          //     sign.signature,
+          //     sign.messageHash,
+          //   );
+          // if (address) {
+          //   console.log('access token is address', address);
+          //   // check if user exists
+          //   const user = await this.usersService.findByWalletAddress(address);
+          //   console.log('access token is user', user);
+          //   if (user) {
+          //     request.user = user;
+          //   }
+          // }
+          // }
         }
       }
     }

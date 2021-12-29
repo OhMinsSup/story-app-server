@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import * as _ from 'lodash';
@@ -510,8 +509,21 @@ export class StoriesService {
           ),
         );
 
+        const account = await tx.account.findFirst({
+          where: {
+            userId: user.id,
+          },
+        });
+
+        if (!account) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 유저입니다.',
+          });
+        }
+        const { privateKey } = account;
         // nft 발생
-        const receipt = await this.klaytnService.mint(story.id, story.name);
+        const receipt = await this.klaytnService.mint(privateKey, story.id);
         console.log('recetp', receipt);
         if (!receipt) {
           return {

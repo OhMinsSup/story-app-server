@@ -20,7 +20,7 @@ import { SignupRequestDto } from './dtos/signup.request.dto';
 import { SigninRequestDto } from './dtos/signin.request.dto';
 
 // select
-import { userAccountSelect, userProfileSelect } from 'src/common/select.option';
+import { userAccountSelect } from 'src/common/select.option';
 import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
 import { Story, StoryTags, Tag } from '@prisma/client';
 
@@ -41,7 +41,7 @@ export class UsersService {
       where: {
         id: userId,
       },
-      select: userProfileSelect,
+      select: userAccountSelect,
     });
     return user;
   }
@@ -200,6 +200,8 @@ export class UsersService {
         },
       });
 
+      console.log('exists', exists);
+
       if (!exists) {
         return {
           ok: false,
@@ -221,29 +223,30 @@ export class UsersService {
       }
 
       // create Sign message Data
-      const message = `userId:${
-        exists.id
-      }\n timestamp:${Date.now()} LoginRequest`;
+      // const message = `userId:${
+      //   exists.id
+      // }\n timestamp:${Date.now()} LoginRequest`;
 
       // 서명 데이터 생성
-      const sign = await this.klaytnService.sign(
-        message,
-        exists.account.privateKey,
-      );
+      // const sign = await this.klaytnService.sign(
+      //   message,
+      //   exists.account.privateKey,
+      // );
 
       // 서명 데이터 저장
-      await this.prisma.signature.create({
-        data: {
-          signature: sign.signature,
-          messageHash: sign.messageHash,
-          messageData: message,
-        },
-      });
+      // await this.prisma.signature.create({
+      //   data: {
+      //     signature: sign.signature,
+      //     messageHash: sign.messageHash,
+      //     messageData: message,
+      //   },
+      // });
 
       // 액세스 토큰을 생성한다.
       const accessToken = this.jwtService.sign(
         {
-          signature: sign.signature,
+          id: exists.id,
+          address: exists.account.address,
         },
         {
           subject: 'access_token',

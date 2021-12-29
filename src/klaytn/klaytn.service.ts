@@ -13,7 +13,6 @@ import type { SingleKeyring } from 'caver-js';
 interface StoryToken {
   tokenId: number;
   storyId: number;
-  tokenUrl: string;
   timestamp: number;
   ownerHistory: any[];
 }
@@ -68,6 +67,7 @@ export class KlaytnService {
   /**
    * @description 주어진 개인키에서 공개키를 도출합니다.
    * @param privateKey
+   * @deprecated
    */
   async privateKeyToPublicKey(privateKey: string) {
     return this.caver.klay.accounts.privateKeyToPublicKey(privateKey);
@@ -77,6 +77,7 @@ export class KlaytnService {
    * @description 임의의 데이터에 서명합니다. 데이터는 UTF-8 HEX 디코딩되기 전이며 다음과 같이 포함
    * @param data
    * @param privateKey
+   * @deprecated
    */
   async sign(data: string, privateKey: string) {
     return this.caver.klay.accounts.sign(data, privateKey);
@@ -86,6 +87,7 @@ export class KlaytnService {
    * @description 주어진 데이터에 서명하는 데 사용된 Klaytn 주소를 복구합니다.
    * @param signature
    * @param preFixed
+   * @deprecated
    */
   async recover(signature: any, preFixed?: boolean) {
     return this.caver.klay.accounts.recover(signature, preFixed);
@@ -95,6 +97,7 @@ export class KlaytnService {
    * @description 서명 ECDSA 서명 r, ECDSA 서명 s. ECDSA 리커버리 id v. recover
    * @param signature
    * @param messageHash
+   * @deprecated
    */
   async recoverSignature(signature: string, messageHash: string) {
     const v = '0x' + signature.substring(2).substring(128, 130);
@@ -107,7 +110,21 @@ export class KlaytnService {
       r,
       s,
     });
-    return address;
+
+    if (!this.caver.utils.isAddress(address)) {
+      return null;
+    }
+
+    const checksumAddress = this.caver.utils.toChecksumAddress(address);
+    return checksumAddress;
+  }
+
+  /**
+   * @description 주어진 주소가 올바른 주소인지 체크
+   * @param address
+   */
+  isAddress(address: string) {
+    return this.caver.utils.isAddress(address);
   }
 
   /**
@@ -127,19 +144,33 @@ export class KlaytnService {
 
   /**
    * @description 토큰 발행
-   * @param storyId
-   * @param tokenUrl
+   * @param address
+   * @param privateKey
+   * @param tokenId
    */
-  async mint(storyId: number, tokenUrl: string) {
-    return this.contract.send(
-      {
-        from: DEPLOYED_ADDRESS,
-        gas: GAS,
-      },
-      'mintStory',
-      storyId,
-      tokenUrl,
-    );
+  async mint(privateKey: string, storyId: number) {
+    // Add a keyring to caver.wallet
+    const instance: any = (this.caver.wallet as any).keyring;
+    const keyring = instance.createFromPrivateKey(privateKey);
+    this.walletAdd(keyring);
+
+    const valueTransfer = this.caver.transaction.valueTransfer.create({
+      from: keyring.address,
+      to: DEPLOYED_ADDRESS,
+      input: this.contract.methods.mintStory(storyId).encodeABI(),
+      value: this.caver.utils.toPeb('0.1', 'KLAY'),
+      gas: GAS,
+    });
+
+    // Sign the transaction via caver.wallet.sign
+    await this.caver.wallet.sign(keyring.address, valueTransfer);
+
+    const rlpEncoded = valueTransfer.getRLPEncoding();
+
+    // Send the transaction using `caver.rpc.klay.sendRawTransaction`.
+    const receipt = await this.caver.rpc.klay.sendRawTransaction(rlpEncoded);
+    console.log(receipt);
+    return receipt;
   }
 
   /**

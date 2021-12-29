@@ -7,7 +7,6 @@ contract Story is ERC721, ERC721Enumerable {
     event StoryUploaded(
         uint256 indexed tokenId,
         uint256 indexed storyId,
-        string tokenUrl,
         uint256 timestamp
     );
 
@@ -16,7 +15,6 @@ contract Story is ERC721, ERC721Enumerable {
     struct StoryData {
         uint256 tokenId; // Unique token identifier
         uint256 storyId; // Unique story identifier
-        string tokenUrl; // URL of the token
         uint256 timestamp; // Uploaded time
         address[] ownerHistory; // History of all previous owners
     }
@@ -24,7 +22,7 @@ contract Story is ERC721, ERC721Enumerable {
     /**
      * @notice _mint() is from ERC721.sol
      */
-    function mintStory(uint256 storyId, string memory tokenUrl) public {
+    function mintStory(uint256 storyId) public {
         // create a token Id
         uint256 tokenId = totalSupply() + 1;
 
@@ -36,7 +34,6 @@ contract Story is ERC721, ERC721Enumerable {
         StoryData memory story = StoryData({
             tokenId: tokenId,
             storyId: storyId,
-            tokenUrl: tokenUrl,
             timestamp: now,
             ownerHistory: ownerHistory
         });
@@ -44,7 +41,7 @@ contract Story is ERC721, ERC721Enumerable {
         _stories[tokenId] = story;
         _stories[tokenId].ownerHistory.push(msg.sender);
 
-        emit StoryUploaded(tokenId, storyId, tokenUrl, now);
+        emit StoryUploaded(tokenId, storyId, now);
     }
 
     /**
@@ -98,7 +95,6 @@ contract Story is ERC721, ERC721Enumerable {
             uint256,
             uint256,
             address[] memory,
-            string memory,
             uint256
         )
     {
@@ -107,7 +103,6 @@ contract Story is ERC721, ERC721Enumerable {
             _stories[tokenId].tokenId,
             _stories[tokenId].storyId,
             _stories[tokenId].ownerHistory,
-            _stories[tokenId].tokenUrl,
             _stories[tokenId].timestamp
         );
     }
