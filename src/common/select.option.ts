@@ -130,4 +130,13 @@ export const historiesSelect = {
       },
     },
   },
+  tokenId: true,
+  toHash: true,
+  fromHash: true,
+  blockNumber: true,
+  blockHash: true,
+  transactionHash: true,
+  senderTxHash: true,
+  type: true,
+  createdAt: true,
 };

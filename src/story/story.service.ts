@@ -521,9 +521,13 @@ export class StoriesService {
             msg: '존재하지 않는 유저입니다.',
           });
         }
-        const { privateKey } = account;
+        const { privateKey, address } = account;
         // nft 발생
-        const receipt = await this.klaytnService.mint(privateKey, story.id);
+        const receipt = await this.klaytnService.mint(
+          address,
+          privateKey,
+          story.id,
+        );
         console.log('recetp', receipt);
         if (!receipt) {
           return {
@@ -536,12 +540,14 @@ export class StoriesService {
 
         // 발생 NFT 토큰 ID
         const tokenId = (receipt as any).events.StoryUploaded.returnValues[0];
-        console.log('tokenId', tokenId);
+        const transformTokenId = parseInt(tokenId, 10);
+        const transformBlockNumber = `${receipt.blockNumber}`;
+
         await Promise.all([
           tx.nFT.create({
             data: {
               storyId: story.id,
-              tokenId,
+              tokenId: transformTokenId,
             },
           }),
           tx.history.create({
@@ -551,12 +557,12 @@ export class StoriesService {
               toId: user.id,
               fromId: user.id,
               // new
-              tokenId,
+              tokenId: transformTokenId,
               type: receipt.type,
               toHash: receipt.to,
               fromHash: receipt.from,
               blockHash: receipt.blockHash,
-              blockNumber: receipt.blockNumber,
+              blockNumber: transformBlockNumber,
               senderTxHash: receipt.senderTxHash,
               transactionHash: receipt.transactionHash,
             },

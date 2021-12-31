@@ -200,8 +200,6 @@ export class UsersService {
         },
       });
 
-      console.log('exists', exists);
-
       if (!exists) {
         return {
           ok: false,
