@@ -110,6 +110,8 @@ export class KlaytnService {
       //   storyId,
       // );
 
+      this.caver.klay.accounts.wallet.clear();
+
       return {
         ...tx,
         tokenId,

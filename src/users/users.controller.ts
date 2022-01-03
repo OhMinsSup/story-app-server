@@ -108,7 +108,7 @@ export class UsersController {
   @UseGuards(LoggedInGuard)
   logout(@Res() res: Response) {
     res.clearCookie('access_token', { httpOnly: true });
-    res.status(HttpStatus.OK).json(true);
+    return res.status(HttpStatus.OK).json(true);
   }
 
   @Put(':id/unregister')
