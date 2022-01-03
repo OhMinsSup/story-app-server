@@ -5,27 +5,27 @@ import {
   KLAYTN,
   GAS,
   DEPLOYED_ADDRESS,
+  FEE_PAYER_WALLET,
 } from 'src/common/common.constants';
 
 import type Caver from 'caver-js';
 import type { SingleKeyring } from 'caver-js';
-
-interface StoryToken {
-  tokenId: number;
-  storyId: number;
-  timestamp: number;
-  ownerHistory: any[];
-}
+import type { KlaytnModuleOptions } from './klaytn.interfaces';
 
 @Injectable()
 export class KlaytnService {
   private contract: Contract | null;
-  constructor(@Inject(KLAYTN) private readonly caver: Caver) {
+  constructor(
+    @Inject(KLAYTN) private readonly caver: Caver,
+    @Inject(FEE_PAYER_WALLET)
+    private readonly feePayerWallet: KlaytnModuleOptions,
+  ) {
     if ([DEPLOYED_ABI, DEPLOYED_ADDRESS].every(Boolean)) {
       this.contract = new this.caver.klay.Contract(
         DEPLOYED_ABI,
         DEPLOYED_ADDRESS,
       );
+      console.log(this.contract._address);
     } else {
       this.contract = null;
     }
@@ -35,9 +35,9 @@ export class KlaytnService {
    * @description Keyring은 Klaytn 계정의 주소와 개인 키를 포함하는 구조입니다.
    */
   async keyring() {
+    const wallet = this.caver.wallet as any;
     const randomHex = this.caver.utils.randomHex(32);
-    const keyring: any = (this.caver.wallet as any).keyring;
-    return keyring.generate(randomHex) as SingleKeyring;
+    return wallet.keyring.generate(randomHex) as SingleKeyring;
   }
 
   /**
@@ -49,34 +49,11 @@ export class KlaytnService {
   }
 
   /**
-   * @description 개인키 또는 계정 객체를 사용하여 계정을 지갑에 추가합니다.
-   * @todo 참고: 지갑에 동일한 주소가 있는 경우에는 오류가 반환됩니다. 지갑의 계정과 관련된 개인키를 변경하려면 caver.klay.accounts.wallet.updatePrivateKey를 사용하세요.
-   */
-  walletAdd(wallet: any) {
-    return this.caver.klay.accounts.wallet.add(wallet);
-  }
-
-  /**
    * @description 주어진 주소가 올바른 주소인지 체크
    * @param address
    */
   isAddress(address: string) {
     return this.caver.utils.isAddress(address);
-  }
-
-  /**
-   * @description 현재 배포된 모든 토큰 카운트값
-   */
-  async getTotalCount(): Promise<number | null> {
-    return this.contract?.methods.getTotalCount().call();
-  }
-
-  /**
-   * @description 특정 토큰 아이디를 통해서 토큰 정보를 가져오는 메소드
-   * @param tokenId
-   */
-  async getStory(tokenId: number): Promise<StoryToken | null> {
-    return this.contract?.methods.getStory(tokenId).call();
   }
 
   /**
@@ -86,24 +63,60 @@ export class KlaytnService {
    * @param tokenId
    */
   async mint(address: string, privateKey: string, storyId: number) {
-    const account = this.caver.klay.accounts.createWithAccountKey(
-      address,
-      privateKey,
-    );
+    try {
+      const senderKeyring = this.caver.klay.accounts.createWithAccountKey(
+        address,
+        privateKey,
+      );
+      const feePayerKeyring = this.caver.klay.accounts.createWithAccountKey(
+        this.feePayerWallet.feePayerAddress,
+        this.feePayerWallet.feePayerPrivateKey,
+      );
 
-    // Add a keyring to caver.wallet
-    this.walletAdd(account);
+      // Add a keyring login user address to caver.wallet
+      this.caver.klay.accounts.wallet.add(senderKeyring);
+      // Add a keyring login fee payer address to caver.wallet
+      this.caver.klay.accounts.wallet.add(feePayerKeyring);
 
-    const result = await this.contract.send(
-      {
-        from: account.address,
-        gas: GAS,
-      },
-      'mintStory',
-      storyId,
-    );
+      const signedTx: any = await this.caver.klay.accounts.signTransaction(
+        {
+          type: 'FEE_DELEGATED_SMART_CONTRACT_EXECUTION',
+          from: senderKeyring.address,
+          to: DEPLOYED_ADDRESS,
+          data: this.contract?.methods.mintStory(storyId).encodeABI(),
+          gas: GAS,
+        },
+        senderKeyring.privateKey,
+      );
 
-    return result;
+      const { rawTransaction } = signedTx;
+
+      const tx = await this.caver.klay.sendTransaction({
+        senderRawTransaction: rawTransaction,
+        feePayer: feePayerKeyring.address,
+      });
+
+      const tokenId = await this.contract?.methods.getTotalCount().call();
+
+      // const setResult = await this.contract?.send(
+      //   {
+      //     from: senderKeyring.address,
+      //     feeDelegation: true,
+      //     feePayer: feePayerKeyring.address,
+      //     feeRatio: 50, // Without feeRatio, `send` will use FeeDelegatedSmartContractExecution
+      //     gas: GAS,
+      //   },
+      //   'mintStory',
+      //   storyId,
+      // );
+
+      return {
+        ...tx,
+        tokenId,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -129,23 +142,5 @@ export class KlaytnService {
       .once('error', (error) => {
         console.log(error);
       });
-  }
-
-  /**
-   * @description 현재 배포된 모든 토큰을 가져옵니다.
-   */
-  async getStories() {
-    if (!this.contract) {
-      throw new Error('Contract is not deployed');
-    }
-
-    const totalCount = await this.getTotalCount();
-    if (!totalCount) return [];
-    const stories = [];
-    for (let i = totalCount; i > 0; i--) {
-      const story = this.getStory(i);
-      stories.push(story);
-    }
-    return Promise.all(stories);
   }
 }

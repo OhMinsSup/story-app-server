@@ -320,9 +320,7 @@ export class UsersService {
           key: { privateKey },
         } = keyring;
         // 개인키로 계정을 생성한다.
-        const wallet = this.klaytnService.privateKeyToAccount(privateKey);
-        // 트랜잭션을 보내려면 cav.klay.accounts.wallet.add(walletInstance)를 통해 지갑 인스턴스를 caver에 추
-        this.klaytnService.walletAdd(wallet);
+        this.klaytnService.privateKeyToAccount(privateKey);
 
         // 유저 생성
         const user = await tx.user.create({

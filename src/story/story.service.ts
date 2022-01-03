@@ -528,7 +528,7 @@ export class StoriesService {
           privateKey,
           story.id,
         );
-        console.log('recetp', receipt);
+
         if (!receipt) {
           return {
             ok: false,
@@ -539,7 +539,8 @@ export class StoriesService {
         }
 
         // 발생 NFT 토큰 ID
-        const tokenId = (receipt as any).events.StoryUploaded.returnValues[0];
+        console.log('receipt', receipt.logs[0].topics[1]);
+        const tokenId = receipt.tokenId;
         const transformTokenId = parseInt(tokenId, 10);
         const transformBlockNumber = `${receipt.blockNumber}`;
 

@@ -31,6 +31,8 @@ import { SearchModule } from './search/search.module';
         DATABASE_URL: Joi.string().required(),
         PRIVATE_KEY: Joi.string().required(),
         COOKIE_SECRET: Joi.string().required(),
+        KLAYTN_PRIVATE_KEY: Joi.string().required(),
+        KLAYTN_ADDRESS: Joi.string().required(),
       }),
     }),
     JwtModule.forRoot({
@@ -44,7 +46,10 @@ import { SearchModule } from './search/search.module';
       cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
       cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
     }),
-    KlaytnModule.forRoot(),
+    KlaytnModule.forRoot({
+      feePayerPrivateKey: process.env.KLAYTN_PRIVATE_KEY,
+      feePayerAddress: process.env.KLAYTN_ADDRESS,
+    }),
     AuthModule,
     UsersModule,
     FilesModule,
