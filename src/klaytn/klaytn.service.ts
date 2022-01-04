@@ -98,18 +98,7 @@ export class KlaytnService {
 
       const tokenId = await this.contract?.methods.getTotalCount().call();
 
-      // const setResult = await this.contract?.send(
-      //   {
-      //     from: senderKeyring.address,
-      //     feeDelegation: true,
-      //     feePayer: feePayerKeyring.address,
-      //     feeRatio: 50, // Without feeRatio, `send` will use FeeDelegatedSmartContractExecution
-      //     gas: GAS,
-      //   },
-      //   'mintStory',
-      //   storyId,
-      // );
-
+      // in-memory wallet 에서 계정 정보 삭제
       this.caver.klay.accounts.wallet.clear();
 
       return {
@@ -123,26 +112,47 @@ export class KlaytnService {
 
   /**
    * @description 소유권 이전
-   * @param address
    * @param tokenId
-   * @param to
+   * @param ownerAddress
+   * @param ownerPrivateKey
+   * @param buyerAddress
+   * @param buyerPrivateKey
    */
-  async transferOwnership(address: string, tokenId: number, to: string) {
-    // promies race transferOwnership
-    return this.contract?.methods
-      .transferOwnership(tokenId, to)
-      .send({
-        from: address,
+  async transferOwnership(
+    tokenId: number,
+    ownerAddress: string,
+    ownerPrivateKey: string,
+    buyerAddress: string,
+    buyerPrivateKey: string,
+  ) {
+    const senderKeyring = this.caver.klay.accounts.createWithAccountKey(
+      ownerAddress,
+      ownerPrivateKey,
+    );
+
+    const buyerKeyring = this.caver.klay.accounts.createWithAccountKey(
+      buyerAddress,
+      buyerPrivateKey,
+    );
+
+    // Add a keyring login snder address to caver.wallet
+    this.caver.klay.accounts.wallet.add(senderKeyring);
+    // Add a keyring login buyer address to caver.wallet
+    this.caver.klay.accounts.wallet.add(buyerKeyring);
+
+    const receipt = await this.contract?.send(
+      {
+        from: senderKeyring.address,
         gas: GAS,
-      })
-      .once('transactionHash', (txHash) => {
-        console.log(txHash);
-      })
-      .once('receipt', (receipt) => {
-        console.log(receipt);
-      })
-      .once('error', (error) => {
-        console.log(error);
-      });
+      },
+      'transferOwnership',
+      tokenId,
+      buyerKeyring.address,
+    );
+
+    // in-memory wallet 에서 계정 정보 삭제
+    this.caver.klay.accounts.wallet.clear();
+
+    return receipt;
   }
 }

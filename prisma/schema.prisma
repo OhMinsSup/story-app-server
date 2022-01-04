@@ -26,132 +26,124 @@ model User {
   likes  Like[] // 유저 좋아요 관계
 }
 
-model Signature {
-  id          Int      @id @default(autoincrement())
-  signature   String // 서명 데이터
-  messageHash String // 서명 데이터 hash값
-  messageData String? // 서명 데이터 정보
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
 model Profile {
   id             Int      @id @default(autoincrement())
   userId         Int      @unique
-  nickname       String
-  profileUrl     String?
-  avatarSvg      String?
-  defaultProfile Boolean  @default(true)
-  gender         String
-  bio            String?
+  nickname       String // 유저 닉네임
+  profileUrl     String? // 유저 프로필 이미지
+  avatarSvg      String? // 아바타 svg
+  defaultProfile Boolean  @default(true) // 기본 프로필 여부
+  gender         String // 성별
+  bio            String? // 간단한 소개
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id])
+  user           User     @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
 model Account {
   id         Int      @id @default(autoincrement())
-  userId     Int      @unique
-  address    String   @unique
-  privateKey String   @unique
+  userId     Int      @unique // 유저 아이디
+  address    String   @unique // 지갑 주소
+  privateKey String   @unique // 지갑 개인키
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
 model History {
   id              Int      @id @default(autoincrement())
-  status          String
-  toId            Int?
-  fromId          Int?
-  storyId         Int
-  tokenId         Int
-  type            String
-  toHash          String
-  fromHash        String
-  blockHash       String
-  blockNumber     String
-  senderTxHash    String
-  transactionHash String
+  status          String // 거래 상태
+  toId            Int? // 받는 사람 아이디
+  fromId          Int? // 보내는 사람 아이디
+  storyId         Int // 스토리 아이디
+  tokenId         Int // 토큰 아이디
+  type            String // 거래 종류
+  toHash          String // 받는 사람 해시
+  fromHash        String // 보내는 사람 해시
+  blockHash       String // 블록 해시
+  blockNumber     String // 블록 넘버
+  senderTxHash    String // 보내는 사람 트랜잭션 해시
+  transactionHash String // 트랜잭션 해시
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  story Story @relation(fields: [storyId], references: [id])
-  to    User? @relation(name: "to", fields: [toId], references: [id])
-  from  User? @relation(name: "from", fields: [fromId], references: [id])
+  story Story @relation(fields: [storyId], references: [id]) // 스토리 관계
+  to    User? @relation(name: "to", fields: [toId], references: [id]) // 받는 사람 관계
+  from  User? @relation(name: "from", fields: [fromId], references: [id]) // 보내는 사람 관계
 }
 
 model Story {
   id              Int      @id @default(autoincrement())
-  userId          Int
-  ownerId         Int
-  mediaId         Int
-  nftId           Int?
-  name            String
-  description     String
-  backgroundColor String?
-  externalUrl     String?
-  views           Int      @default(0)
-  private         Boolean  @default(false)
+  userId          Int //  유저 아이디
+  ownerId         Int // 소유권 아이디
+  mediaId         Int // 미디어 아이디
+  nftId           Int? // nft 아이디
+  name            String // 스토리 이름
+  description     String // 스토리 설명
+  backgroundColor String? // 배경 색상
+  externalUrl     String? // 외부 주소
+  views           Int      @default(0) // 조회수
+  private         Boolean  @default(false) // 공개 여부
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-  isDelete        Boolean  @default(false)
-  media           Media    @relation(fields: [mediaId], references: [id])
-  user            User     @relation(fields: [userId], references: [id])
-  owner           User     @relation(name: "owner", fields: [ownerId], references: [id])
+  isDelete        Boolean  @default(false) // 삭제 여부
+  media           Media    @relation(fields: [mediaId], references: [id]) // 미디어
+  user            User     @relation(fields: [userId], references: [id]) // 유저
+  owner           User     @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
 
-  storyTags StoryTags[]
-  histories History[]
-  likes     Like[]
-  nft       NFT?        @relation(fields: [nftId], references: [id])
+  nft NFT? // nft
+
+  storyTags StoryTags[] // 스토리 태그 관계
+  histories History[] // 스토리 거래 및 발행 내역
+  likes     Like[] // 스토리 좋아요 관계
 }
 
 model NFT {
   id        Int      @id @default(autoincrement())
-  tokenId   Int      @unique
-  storyId   Int
+  tokenId   Int      @unique // 토큰 아이디
+  storyId   Int      @unique // 스토리 아이디
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  story     Story[]
+  story     Story    @relation(fields: [storyId], references: [id]) // 스토리
 }
 
 model Media {
   id           Int      @id @default(autoincrement())
-  originUrl    String
-  contentUrl   String?
-  thumbnailUrl String?
-  type         String
+  originUrl    String // 원본 이미지
+  contentUrl   String? // 컨텐츠 이미지
+  thumbnailUrl String? // 썸네일 이미지
+  type         String // 이미지 타입
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  stories      Story[]
+  stories      Story[] // 스토리 관계
 }
 
 model StoryTags {
   id      Int    @id @default(autoincrement())
-  story   Story? @relation(fields: [storyId], references: [id])
-  tag     Tag?   @relation(fields: [tagId], references: [id])
-  storyId Int?
-  tagId   Int?
+  story   Story? @relation(fields: [storyId], references: [id]) // 스토리
+  tag     Tag?   @relation(fields: [tagId], references: [id]) // 태그
+  storyId Int? // 스토리 아이디
+  tagId   Int? // 태그 아이디
 }
 
 model Tag {
   id        Int         @id @default(autoincrement())
-  name      String      @unique
+  name      String      @unique // 태그 이름
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
-  storyTags StoryTags[]
+  storyTags StoryTags[] // 스토리 태그 관계
 
   @@index([name])
 }
 
 model Like {
   id        Int      @id @default(autoincrement())
-  userId    Int      @unique
-  storyId   Int      @unique
+  userId    Int      @unique // 유저 아이디
+  storyId   Int      @unique // 스토리 아이디
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user  User  @relation(fields: [userId], references: [id])
-  story Story @relation(fields: [storyId], references: [id])
+  user  User  @relation(fields: [userId], references: [id]) // 유저
+  story Story @relation(fields: [storyId], references: [id]) // 스토리
 }

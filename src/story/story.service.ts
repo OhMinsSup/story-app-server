@@ -539,36 +539,45 @@ export class StoriesService {
         }
 
         // 발생 NFT 토큰 ID
-        console.log('receipt', receipt.logs[0].topics[1]);
         const tokenId = receipt.tokenId;
         const transformTokenId = parseInt(tokenId, 10);
         const transformBlockNumber = `${receipt.blockNumber}`;
 
-        await Promise.all([
-          tx.nFT.create({
-            data: {
-              storyId: story.id,
-              tokenId: transformTokenId,
-            },
-          }),
-          tx.history.create({
-            data: {
-              status: 'ISSUE',
-              storyId: story.id,
-              toId: user.id,
-              fromId: user.id,
-              // new
-              tokenId: transformTokenId,
-              type: receipt.type,
-              toHash: receipt.to,
-              fromHash: receipt.from,
-              blockHash: receipt.blockHash,
-              blockNumber: transformBlockNumber,
-              senderTxHash: receipt.senderTxHash,
-              transactionHash: receipt.transactionHash,
-            },
-          }),
-        ]);
+        // nft 등록
+        const nft = await tx.nFT.create({
+          data: {
+            storyId: story.id,
+            tokenId: transformTokenId,
+          },
+        });
+
+        // story 업데이트 nftId
+        await tx.story.update({
+          where: {
+            id: story.id,
+          },
+          data: {
+            nftId: nft.id,
+          },
+        });
+
+        await tx.history.create({
+          data: {
+            status: 'ISSUE',
+            storyId: story.id,
+            toId: user.id,
+            fromId: user.id,
+            // new
+            tokenId: transformTokenId,
+            type: receipt.type,
+            toHash: receipt.to,
+            fromHash: receipt.from,
+            blockHash: receipt.blockHash,
+            blockNumber: transformBlockNumber,
+            senderTxHash: receipt.senderTxHash,
+            transactionHash: receipt.transactionHash,
+          },
+        });
 
         return {
           ok: true,
@@ -733,6 +742,122 @@ export class StoriesService {
         };
       });
 
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  /**
+   * @description 토큰 소유권 이전
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async transferOwnership(user: User, storyId: number) {
+    try {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const story = await tx.story.findFirst({
+          where: {
+            id: storyId,
+          },
+          include: {
+            owner: {
+              select: {
+                account: true,
+              },
+            },
+            nft: true,
+          },
+        });
+
+        if (!story) {
+          throw new NotFoundException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '존재하지 않는 스토리입니다.',
+          });
+        }
+
+        if (story.ownerId === user.id) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+            msg: '자신의 스토리는 소유권을 이전할 수 없습니다.',
+          });
+        }
+
+        // 로그인한 유저의 privateKey를 가져옴
+        const account = await tx.account.findFirst({
+          where: {
+            address: (user as any).account.address,
+          },
+        });
+        if (!account) {
+          throw new BadRequestException({
+            resultCode: EXCEPTION_CODE.NOT_EXIST,
+            msg: '소유권을 이전할 수 없습니다.',
+          });
+        }
+        console.log('account ===>', account);
+        console.log('story ===>', story);
+
+        const receipt = await this.klaytnService.transferOwnership(
+          story.nft.tokenId,
+          story.owner.account.address,
+          story.owner.account.privateKey,
+          account.address,
+          account.privateKey,
+        );
+
+        if (!receipt) {
+          return {
+            ok: false,
+            resultCode: EXCEPTION_CODE.NFT_FAIL,
+            message: '스토리 생성에 실패하였습니다.',
+            result: null,
+          };
+        }
+
+        // 발생 NFT 토큰 ID
+        const transformBlockNumber = `${receipt.blockNumber}`;
+
+        await Promise.all([
+          // 스토리 소유권 이전
+          tx.story.update({
+            where: {
+              id: storyId,
+            },
+            data: {
+              ownerId: user.id,
+            },
+          }),
+          // 스토리 히스토리 등록
+          tx.history.create({
+            data: {
+              status: 'TRANSFER',
+              storyId: story.id,
+              toId: user.id,
+              fromId: story.userId,
+              // new
+              tokenId: story.nft.tokenId,
+              type: receipt.type,
+              toHash: receipt.to,
+              fromHash: receipt.from,
+              blockHash: receipt.blockHash,
+              blockNumber: transformBlockNumber,
+              senderTxHash: receipt.senderTxHash,
+              transactionHash: receipt.transactionHash,
+            },
+          }),
+        ]);
+
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            dataId: storyId,
+          },
+        };
+      });
       return result;
     } catch (error) {
       throw error;

@@ -60,18 +60,6 @@ export class UsersService {
   }
 
   /**
-   * @description - 서명 정보를 가져오는 함수
-   * @param {string} signature
-   */
-  async findBySignature(signature: string) {
-    return this.prisma.signature.findFirst({
-      where: {
-        signature,
-      },
-    });
-  }
-
-  /**
    * @description 지갑 정보를 가져오는 함수
    * @param {string} address
    */

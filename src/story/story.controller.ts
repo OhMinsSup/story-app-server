@@ -140,4 +140,14 @@ export class StoriesController {
   unlike(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
     return this.storiesService.unlike(user, id);
   }
+
+  @Post(':id/transferOwnership')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '토큰 소유권 이전 API' })
+  transferOwnership(
+    @AuthUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.storiesService.transferOwnership(user, id);
+  }
 }
