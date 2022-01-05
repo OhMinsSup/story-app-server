@@ -17,6 +17,8 @@ import { StoriesModule } from './story/story.module';
 import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
 import { SearchModule } from './search/search.module';
+import { MessageModule } from './message/message.module';
+import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { SearchModule } from './search/search.module';
         COOKIE_SECRET: Joi.string().required(),
         KLAYTN_PRIVATE_KEY: Joi.string().required(),
         KLAYTN_ADDRESS: Joi.string().required(),
+        FCM_SERVER_KEY: Joi.string().required(),
+        GMAIL: Joi.string().required(),
       }),
     }),
     JwtModule.forRoot({
@@ -50,12 +54,17 @@ import { SearchModule } from './search/search.module';
       feePayerPrivateKey: process.env.KLAYTN_PRIVATE_KEY,
       feePayerAddress: process.env.KLAYTN_ADDRESS,
     }),
+    FirebaseModule.forRoot({
+      gmail: process.env.GMAIL,
+      fcmServerkey: process.env.FCM_SERVER_KEY,
+    }),
     AuthModule,
     UsersModule,
     FilesModule,
     StoriesModule,
     TagsModule,
     SearchModule,
+    MessageModule,
   ],
 })
 export class AppModule implements NestModule {

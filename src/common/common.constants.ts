@@ -5,6 +5,7 @@ export const CLOUDINARY = 'CLOUDINARY';
 export const KLAYTN = 'KLAYTN';
 export const FEE_PAYER_WALLET = 'FEE_PAYER_WALLET';
 export const CONTRACT = 'STORY_CONTRACT';
+export const FIREBASE_OPTIONS = 'FIREBASE_OPITIONS';
 
 export const BAOBAB_TESTNET_RPC_URL = 'https://api.baobab.klaytn.net:8651/';
 
