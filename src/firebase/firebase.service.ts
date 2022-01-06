@@ -8,4 +8,8 @@ export class FirebaseService {
     @Inject(FIREBASE_OPTIONS)
     private readonly vapidKeys: webpush.VapidKeys,
   ) {}
+
+  get vapidKey(): webpush.VapidKeys {
+    return this.vapidKeys;
+  }
 }
