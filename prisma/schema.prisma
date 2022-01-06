@@ -26,6 +26,16 @@ model User {
   likes  Like[] // 유저 좋아요 관계
 }
 
+model Notification {
+  id        Int      @id @default(autoincrement())
+  type      String // 타입
+  title     String // 제목
+  message   String // 메시지
+  isRead    Boolean  @default(false) // 읽음 여부
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Profile {
   id             Int      @id @default(autoincrement())
   userId         Int      @unique
