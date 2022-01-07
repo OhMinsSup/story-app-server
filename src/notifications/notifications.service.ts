@@ -8,7 +8,7 @@ import { PushRequestDto } from './dto/push.request.dto';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
 
 @Injectable()
-export class MessageService {
+export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly firebaseService: FirebaseService,
@@ -26,6 +26,10 @@ export class MessageService {
     };
   }
 
+  /**
+   * @description 푸시 메시지를 발송한다
+   * @param {PushRequestDto} input
+   */
   async push(input: PushRequestDto) {
     console.log(input);
     try {

@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { PushRequestDto } from './dto/push.request.dto';
-import { MessageService } from './message.service';
+import { NotificationsService } from './notifications.service';
 
-@ApiTags('Message')
-@Controller('/api/messages')
+@ApiTags('Notification')
+@Controller('/api/notifications')
 export class MessageController {
-  constructor(private messageService: MessageService) {}
+  constructor(private notificationsService: NotificationsService) {}
 
   @Get('token')
   @ApiOperation({
@@ -14,7 +14,7 @@ export class MessageController {
     description: '푸시 public key를 가져온다.',
   })
   getPushToken() {
-    return this.messageService.getPushToken();
+    return this.notificationsService.getPushToken();
   }
 
   @Post('push')
@@ -28,6 +28,6 @@ export class MessageController {
     type: PushRequestDto,
   })
   push(@Body() input: PushRequestDto) {
-    return this.messageService.push(input);
+    return this.notificationsService.push(input);
   }
 }

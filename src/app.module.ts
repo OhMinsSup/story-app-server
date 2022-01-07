@@ -17,7 +17,7 @@ import { StoriesModule } from './story/story.module';
 import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
 import { SearchModule } from './search/search.module';
-import { MessageModule } from './message/message.module';
+import { NotificationseModule } from './notifications/notifications.module';
 import { FirebaseModule } from './firebase/firebase.module';
 
 @Module({
@@ -64,7 +64,7 @@ import { FirebaseModule } from './firebase/firebase.module';
     StoriesModule,
     TagsModule,
     SearchModule,
-    MessageModule,
+    NotificationseModule,
   ],
 })
 export class AppModule implements NestModule {
