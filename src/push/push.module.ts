@@ -1,18 +1,19 @@
 import webpush from 'web-push';
 import { DynamicModule, Global, Module } from '@nestjs/common';
-import { FIREBASE_OPTIONS } from 'src/common/common.constants';
-import { FirebaseModuleOptions } from './firebase.interface';
-import { FirebaseService } from './firebase.service';
+import { PUSH_OPITIONS } from 'src/common/common.constants';
+import { PushModuleOptions } from './push.interface';
+
+import { PushService } from './push.service';
 
 @Module({})
 @Global()
-export class FirebaseModule {
-  static forRoot(options: FirebaseModuleOptions): DynamicModule {
+export class PushModule {
+  static forRoot(options: PushModuleOptions): DynamicModule {
     return {
-      module: FirebaseModule,
+      module: PushModule,
       providers: [
         {
-          provide: FIREBASE_OPTIONS,
+          provide: PUSH_OPITIONS,
           useValue: (() => {
             // VAPID keys should only be generated only once.
             const vapidKeys = webpush.generateVAPIDKeys();
@@ -25,9 +26,9 @@ export class FirebaseModule {
             return vapidKeys;
           })(),
         },
-        FirebaseService,
+        PushService,
       ],
-      exports: [FirebaseService],
+      exports: [PushService],
     };
   }
 }

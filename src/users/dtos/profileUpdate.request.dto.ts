@@ -1,8 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsBoolean, IsOptional } from 'class-validator';
-import { CommonDTO } from './common.dto';
+import {
+  IsNotEmpty,
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
+import { GenderEnum, GenderType } from './common.dto';
 
-export class ProfileUpdateRequestDto extends CommonDTO {
+export class ProfileUpdateRequestDto {
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEnum(GenderEnum)
+  @ApiProperty({
+    example: GenderEnum.MALE,
+    default: GenderEnum.MALE,
+    enum: [GenderEnum.FEMALE, GenderEnum.MALE],
+    description: '성별',
+  })
+  gender: GenderType;
+
   @IsOptional()
   @IsNotEmpty()
   @IsString()
@@ -48,4 +65,13 @@ export class ProfileUpdateRequestDto extends CommonDTO {
     description: '유저 설명',
   })
   bio: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsBoolean()
+  @ApiProperty({
+    example: true,
+    description: '알림 설정',
+  })
+  canNotification: boolean;
 }

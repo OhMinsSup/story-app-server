@@ -18,7 +18,7 @@ import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
 import { SearchModule } from './search/search.module';
 import { NotificationseModule } from './notifications/notifications.module';
-import { FirebaseModule } from './firebase/firebase.module';
+import { PushModule } from './push/push.module';
 
 @Module({
   imports: [
@@ -54,7 +54,7 @@ import { FirebaseModule } from './firebase/firebase.module';
       feePayerPrivateKey: process.env.KLAYTN_PRIVATE_KEY,
       feePayerAddress: process.env.KLAYTN_ADDRESS,
     }),
-    FirebaseModule.forRoot({
+    PushModule.forRoot({
       gmail: process.env.GMAIL,
       fcmServerkey: process.env.FCM_SERVER_KEY,
     }),

@@ -146,6 +146,11 @@ export class UsersService {
       updateData.profileUrl = '';
     }
 
+    // 알림 설정
+    if (typeof input.canNotification === 'boolean') {
+      updateData.canNotification = input.canNotification;
+    }
+
     if (!_.isEmpty(updateData)) {
       await this.prisma.profile.update({
         where: {

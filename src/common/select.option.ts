@@ -7,6 +7,7 @@ export const userProfileSelect = {
       profileUrl: true,
       avatarSvg: true,
       defaultProfile: true,
+      canNotification: true,
       gender: true,
       bio: true,
     },

@@ -1,4 +1,4 @@
-export interface FirebaseModuleOptions {
+export interface PushModuleOptions {
   gmail: string;
   fcmServerkey: string;
 }

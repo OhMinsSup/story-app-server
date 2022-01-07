@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class PushRequestDto {
   @IsString()
@@ -17,6 +17,15 @@ export class PushRequestDto {
     required: true,
   })
   message: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    example: 'https://...',
+    description: '링크',
+    required: false,
+  })
+  linkUrl: string;
 
   @IsString()
   @ApiProperty({

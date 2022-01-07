@@ -1,15 +1,16 @@
 import webpush from 'web-push';
 import { Inject, Injectable } from '@nestjs/common';
-import { FIREBASE_OPTIONS } from 'src/common/common.constants';
+
+import { PUSH_OPITIONS } from 'src/common/common.constants';
 
 @Injectable()
-export class FirebaseService {
+export class PushService {
   constructor(
-    @Inject(FIREBASE_OPTIONS)
+    @Inject(PUSH_OPITIONS)
     private readonly vapidKeys: webpush.VapidKeys,
   ) {}
 
-  get vapidKey(): webpush.VapidKeys {
+  get getVapidKeys(): webpush.VapidKeys {
     return this.vapidKeys;
   }
 }

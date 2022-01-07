@@ -5,7 +5,7 @@ import { NotificationsService } from './notifications.service';
 
 @ApiTags('Notification')
 @Controller('/api/notifications')
-export class MessageController {
+export class NotificationController {
   constructor(private notificationsService: NotificationsService) {}
 
   @Get('token')
