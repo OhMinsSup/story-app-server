@@ -7,9 +7,10 @@ import { StoriesController } from './story.controller';
 import { StoriesService } from './story.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TagsService } from 'src/tags/tags.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Module({
-  providers: [StoriesService, PrismaService, TagsService],
+  providers: [StoriesService, PrismaService, TagsService, NotificationsService],
   controllers: [StoriesController],
 })
 export class StoriesModule {}

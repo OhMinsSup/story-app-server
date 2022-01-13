@@ -11,6 +11,7 @@ import { EXCEPTION_CODE } from 'src/exception/exception.code';
 // service
 import { PrismaService } from 'src/prisma/prisma.service';
 import { KlaytnService } from 'src/klaytn/klaytn.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 // types
 import type { Story, StoryTags, Tag, User } from '.prisma/client';
@@ -25,6 +26,7 @@ export class StoriesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly klaytnService: KlaytnService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   /**
@@ -796,8 +798,6 @@ export class StoriesService {
             msg: '소유권을 이전할 수 없습니다.',
           });
         }
-        console.log('account ===>', account);
-        console.log('story ===>', story);
 
         const receipt = await this.klaytnService.transferOwnership(
           story.nft.tokenId,

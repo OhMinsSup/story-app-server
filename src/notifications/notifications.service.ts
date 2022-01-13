@@ -10,6 +10,7 @@ import { EXCEPTION_CODE } from 'src/exception/exception.code';
 @Injectable()
 export class NotificationsService {
   constructor(
+    // https://nsinc.tistory.com/218
     private readonly prisma: PrismaService,
     private readonly pushService: PushService,
   ) {}
@@ -62,6 +63,7 @@ export class NotificationsService {
         result: true,
       };
     } catch (error) {
+      console.log(error);
       throw error;
     }
   }

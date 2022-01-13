@@ -20,69 +20,24 @@
 
 # Story App Server
 
-🙏🏻 NFT Market App Generate (Nextjs)
+🙏🏻 NFT Market App Generate (NestJs)
 
 ## ⚡ Features
 
-해당 본문은 앞으로 지원하는 기능 추가 및 계획된 기능들을 보여줍니다. 체크박스를 체크하면 해당 기능은 추가된 기능임을 의미합니다. 그렇지 않으면 아직 계획 및 구현 단계인 상태입니다. 구체적인 내용은 항목 설명을 참조하십시오.
-
-- [ ] `API 서버 분리해서 생성하기`
-
-  - 서버 구성은 nest / prisma를 사용 할 계획 입니다.
-
-- [ ] `NFT Token 생성`
-  - openzeppelin을 이용해서 구현
-- [ ] `Klaytn 연동`
-
 ## 📝 TODO
-
-- [x] `회원가입 API`
-
-- [x] `로그인 API`
-
-- [x] `인증`
-
-- [x] `쿠키 및 header로 인증`
-
-- [x] `내 정보 가져오기`
-
-- [x] `파일 업로드 API`
-
-- [x] `Story 등록 API`
-
-- [x] `Story 수정 API`
-
-- [x] `Story 상세 API`
-
-- [x] `Story 리스트 API`
-
-- [x] `Story 삭제 API`
-
-- [ ] `스마트 컨트랙트 연동`
-
-- [ ] `minting시 tokenId story schema와 연동`
-
-- [ ] `minting과 관련된 액션`
-
-- [ ] `scripts - download를 통해서 컨트랙트 파일 다운로드`
-
-- [ ] `Story 생성시 Owner 값 생성`
-
-- [ ] `거래 히스토리`
-
-- [ ] `Story Like & Views`
 
 - [ ] `이미지 리사이징`
 
-- [ ] `검색 기능`
+- [ ] 각 NFT (Story) 가격 정보를 가지고 해당 가격 정보에 해당하는 토큰으로 거래한다.
 
-- [ ] `유저 상세에서 내 NFT 정보`
+- [ ] Push Notification (FCM) 고도화
+
+  - 현재는 제일 기본 형식으로 구현되어 있는데 Push 토큰을 관리하는 기능 필요 (클라이언트도 마찬가지)
+  - 어떤 상황에서 메세지를 발송할건지
+
+- [ ] 거래 내역을 저장하는 Contract 추가 개발
 
 ## 🐳 Issue
-
-1. NFT 등록을 서버에서 등록이 되는 형태로 구현 할 것인가? 아니면 클라이언트에서 할 것 인가? 아마 서버에서 할 것 같은데 임시로 클라이언트에 구현을 해야하나
-
-2. NFT를 서버에 등록한다면 어떤식으로 저장을 할 것 인가??
 
 ## 💩 Bug
 

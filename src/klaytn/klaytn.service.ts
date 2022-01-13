@@ -25,7 +25,6 @@ export class KlaytnService {
         DEPLOYED_ABI,
         DEPLOYED_ADDRESS,
       );
-      console.log(this.contract._address);
     } else {
       this.contract = null;
     }
