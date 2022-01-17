@@ -1,20 +1,43 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { PushRequestDto } from './dto/push.request.dto';
+import { User } from '@prisma/client';
+
+// guard
+import { LoggedInGuard } from 'src/auth/logged-in.guard';
+import { AuthUser } from 'src/decorators/get-user.decorator';
+
+// service
 import { NotificationsService } from './notifications.service';
+
+// dto
+import { PushRequestDto } from './dto/push.request.dto';
+import { SavePushRequestDto } from './dto/savePush.request.dto';
 
 @ApiTags('Notification')
 @Controller('/api/notifications')
 export class NotificationController {
   constructor(private notificationsService: NotificationsService) {}
 
-  @Get('token')
+  @Get()
+  get(@Req() req) {
+    // generate browser unique id
+    console.log(req);
+    return null;
+  }
+
+  @Post('token')
+  @UseGuards(LoggedInGuard)
   @ApiOperation({
-    summary: '푸시 public key를 가져온다.',
-    description: '푸시 public key를 가져온다.',
+    summary: '푸시 토큰을 저장한다.',
+    description: '푸시 토큰을 저장한다.',
   })
-  getPushToken() {
-    return this.notificationsService.getPushToken();
+  @ApiBody({
+    required: true,
+    description: '푸시 토큰 저장',
+    type: SavePushRequestDto,
+  })
+  save(@AuthUser() user: User, @Body() input: SavePushRequestDto) {
+    return this.notificationsService.save(user, input);
   }
 
   @Post('push')
