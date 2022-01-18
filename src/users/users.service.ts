@@ -213,6 +213,26 @@ export class UsersService {
         };
       }
 
+      if (input.deviceHash && input.deviceId) {
+        const device = await this.prisma.device.findFirst({
+          where: {
+            id: input.deviceId,
+            deviceHash: input.deviceHash,
+          },
+        });
+        // 디바이스가 존재하면 유저 정보와 연결
+        if (device) {
+          await this.prisma.device.update({
+            where: {
+              id: input.deviceId,
+            },
+            data: {
+              userId: exists.id,
+            },
+          });
+        }
+      }
+
       // create Sign message Data
       // const message = `userId:${
       //   exists.id

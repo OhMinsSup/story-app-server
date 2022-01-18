@@ -9,12 +9,14 @@ datasource db {
 }
 
 model Device {
-  id       Int     @id @default(autoincrement())
-  os       String
-  deviceId String
-  token    String?
-  user     User?   @relation(fields: [userId], references: [id])
-  userId   Int?
+  id         Int     @id @default(autoincrement())
+  os         String
+  clientType String
+  deviceType String
+  deviceHash String
+  token      String?
+  user       User?   @relation(fields: [userId], references: [id])
+  userId     Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

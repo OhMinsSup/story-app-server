@@ -26,12 +26,4 @@ export class PushRequestDto {
     required: false,
   })
   linkUrl: string;
-
-  @IsString()
-  @ApiProperty({
-    example: 'subscription 정보',
-    description: 'subscription 정보',
-    required: true,
-  })
-  subscription: string;
 }
