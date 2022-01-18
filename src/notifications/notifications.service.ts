@@ -1,10 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import * as firebaseAdmin from 'firebase-admin';
-import {
-  BaseMessage,
-  Message,
-  MulticastMessage,
-} from 'firebase-admin/lib/messaging/messaging-api';
 import DeviceDetector from 'device-detector-js';
 import * as bcrypt from 'bcrypt';
 
@@ -27,69 +21,48 @@ export class NotificationsService {
     private readonly pushService: PushService,
   ) {}
 
-  send(message: Message) {
-    firebaseAdmin
-      .messaging()
-      .send(message)
-      .then((res) => {
-        console.log('보내기 성공 메시지: ', res);
-      })
-      .catch((err) => {
-        console.log('보내기 실패 메세지: ', err);
-      });
-  }
-
-  async sendMulticast(multiMessage: MulticastMessage) {
-    return await firebaseAdmin.messaging().sendMulticast(multiMessage);
-  }
-
   async sendPush(input: PushRequestDto) {
-    const where = {
-      AND: [
-        {
-          userId: {
-            not: null,
-          },
-        },
-        {
-          token: {
-            not: null,
-          },
-        },
-      ],
-    };
-
-    const devices = await this.prisma.device.findMany({
-      where,
-    });
-    console.log('devices: ', devices);
-    const tokens: string[] = [];
-    while (devices.length > 0) {
-      devices.forEach((target) => {
-        tokens.push(target.token);
-      });
-    }
-
-    const multipleMessage: BaseMessage['notification'] = {
-      title: input.title,
-      body: input.message,
-    };
-
     try {
-      this.sendMulticast({
-        notification: multipleMessage,
-        tokens,
-      });
-    } catch (error) {
-      console.log('error: ', error);
-    }
+      const where = {
+        AND: [
+          {
+            userId: {
+              not: null,
+            },
+          },
+          {
+            token: {
+              not: null,
+            },
+          },
+        ],
+      };
 
-    return {
-      ok: true,
-      resultCode: EXCEPTION_CODE.OK,
-      message: null,
-      result: {},
-    };
+      const devices = await this.prisma.device.findMany({
+        where,
+      });
+      const tokens: string[] = devices.map((device) => device.token);
+
+      console.log('tokens: ', tokens);
+
+      if (tokens.length) {
+        await this.pushService.sendNotification(tokens, {
+          notification: {
+            title: input.title,
+            body: input.message,
+          },
+        });
+      }
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {},
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**

@@ -2,6 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
+import path from 'path';
 import * as Joi from '@hapi/joi';
 
 // middleware
@@ -55,7 +56,10 @@ import { PushModule } from './push/push.module';
       feePayerAddress: process.env.KLAYTN_ADDRESS,
     }),
     PushModule.forRoot({
-      gmail: process.env.GMAIL,
+      firebaseSpecsPath: path.join(
+        __dirname,
+        '../google_developer-6ace0a488399.json',
+      ),
       fcmServerkey: process.env.FCM_SERVER_KEY,
     }),
     AuthModule,
