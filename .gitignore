@@ -45,3 +45,5 @@ prisma/migrations
 build/
 deployedABI
 deployedAddress
+
+google_developer-6ace0a488399.json
