@@ -38,6 +38,7 @@ import { PushModule } from './push/push.module';
         KLAYTN_ADDRESS: Joi.string().required(),
         FCM_SERVER_KEY: Joi.string().required(),
         GMAIL: Joi.string().required(),
+        GOOGLE_CREDENTIALS: Joi.string().required(),
       }),
     }),
     JwtModule.forRoot({
@@ -56,10 +57,7 @@ import { PushModule } from './push/push.module';
       feePayerAddress: process.env.KLAYTN_ADDRESS,
     }),
     PushModule.forRoot({
-      firebaseSpecsPath: path.join(
-        __dirname,
-        '../google_developer-6ace0a488399.json',
-      ),
+      firebaseSpecsPath: path.join(__dirname, process.env.GOOGLE_CREDENTIALS),
       fcmServerkey: process.env.FCM_SERVER_KEY,
     }),
     AuthModule,

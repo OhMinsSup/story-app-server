@@ -43,22 +43,32 @@ export class NotificationsService {
       });
       const tokens: string[] = devices.map((device) => device.token);
 
-      console.log('tokens: ', tokens);
-
       if (tokens.length) {
-        await this.pushService.sendNotification(tokens, {
+        const message = await this.pushService.sendNotification(tokens, {
           notification: {
             title: input.title,
             body: input.message,
           },
         });
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: {
+            failureCount: message.failureCount,
+            successCount: message.successCount,
+          },
+        };
       }
 
       return {
         ok: true,
         resultCode: EXCEPTION_CODE.OK,
         message: null,
-        result: {},
+        result: {
+          failureCount: 0,
+          successCount: 0,
+        },
       };
     } catch (error) {
       throw error;
@@ -72,16 +82,30 @@ export class NotificationsService {
    */
   async save(input: SavePushRequestDto, userAgent: string) {
     try {
-      const browserId = await bcrypt.hash(userAgent, 12);
+      const exists = await this.prisma.device.findFirst({
+        where: {
+          token: input.pushToken,
+        },
+      });
+
+      if (exists) {
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: exists,
+        };
+      }
+
+      const deviceHash = await bcrypt.hash(userAgent, 12);
       const deviceDetector = new DeviceDetector();
       const deviceInfo = deviceDetector.parse(userAgent);
-
       const device = await this.prisma.device.create({
         data: {
           os: deviceInfo.os.name,
           clientType: deviceInfo.client.type,
           deviceType: deviceInfo.device.type,
-          deviceHash: browserId,
+          deviceHash,
           token: input.pushToken,
         },
       });
