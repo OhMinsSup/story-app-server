@@ -9,7 +9,7 @@ import { PushService } from 'src/push/push.service';
 // dto
 import { PushRequestDto } from './dto/push.request.dto';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
-import { SavePushRequestDto } from './dto/savePush.request.dto';
+import { TokenPushRequestDto } from './dto/tokenPush.request.dto';
 
 // http://daplus.net/javascript-%EC%9B%B9-%EC%82%AC%EC%9D%B4%ED%8A%B8%EB%A5%BC-%EB%B0%A9%EB%AC%B8%ED%95%98%EB%8A%94-%EC%BB%B4%ED%93%A8%ED%84%B0%EB%A5%BC-%EC%96%B4%EB%96%BB%EA%B2%8C-%EA%B3%A0%EC%9C%A0%ED%95%98%EA%B2%8C/
 // https://nsinc.tistory.com/218
@@ -21,7 +21,27 @@ export class NotificationsService {
     private readonly pushService: PushService,
   ) {}
 
-  async sendPush(input: PushRequestDto) {
+  private async makeDeviceInfo(userAgent: string) {
+    const deviceHash = await bcrypt.hash(userAgent, 12);
+    const deviceDetector = new DeviceDetector();
+    const deviceInfo = deviceDetector.parse(userAgent);
+    return {
+      os: deviceInfo.os.name,
+      clientType: deviceInfo.client.type,
+      deviceType: deviceInfo.device.type,
+      deviceHash,
+    };
+  }
+
+  findByPushToken(pushToken: string) {
+    return this.prisma.device.findFirst({
+      where: {
+        token: pushToken,
+      },
+    });
+  }
+
+  async send(input: PushRequestDto) {
     try {
       const where = {
         AND: [
@@ -77,17 +97,12 @@ export class NotificationsService {
 
   /**
    * @description 푸시 토큰을 저장한다
-   * @param {SavePushRequestDto} input
+   * @param {TokenPushRequestDto} input
    * @param {string} userAgent
    */
-  async save(input: SavePushRequestDto, userAgent: string) {
+  async token(input: TokenPushRequestDto, userAgent: string) {
     try {
-      const exists = await this.prisma.device.findFirst({
-        where: {
-          token: input.pushToken,
-        },
-      });
-
+      const exists = await this.findByPushToken(input.pushToken);
       if (exists) {
         return {
           ok: true,
@@ -97,14 +112,13 @@ export class NotificationsService {
         };
       }
 
-      const deviceHash = await bcrypt.hash(userAgent, 12);
-      const deviceDetector = new DeviceDetector();
-      const deviceInfo = deviceDetector.parse(userAgent);
+      const { os, clientType, deviceHash, deviceType } =
+        await this.makeDeviceInfo(userAgent);
       const device = await this.prisma.device.create({
         data: {
-          os: deviceInfo.os.name,
-          clientType: deviceInfo.client.type,
-          deviceType: deviceInfo.device.type,
+          os,
+          clientType,
+          deviceType,
           deviceHash,
           token: input.pushToken,
         },

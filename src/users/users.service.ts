@@ -213,11 +213,10 @@ export class UsersService {
         };
       }
 
-      if (input.deviceHash && input.deviceId) {
+      if (input.deviceId) {
         const device = await this.prisma.device.findFirst({
           where: {
             id: input.deviceId,
-            deviceHash: input.deviceHash,
           },
         });
         // 디바이스가 존재하면 유저 정보와 연결

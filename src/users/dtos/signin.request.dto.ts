@@ -20,16 +20,6 @@ export class SigninRequestDto {
 
   @IsOptional()
   @IsNotEmpty()
-  @IsString()
-  @ApiProperty({
-    description: '디바이스 아이디',
-    required: false,
-    example: 'rt5#$@#TEU^$4%DFYU^',
-  })
-  deviceHash?: string;
-
-  @IsOptional()
-  @IsNotEmpty()
   @IsNumber()
   @ApiProperty({
     description: '디바이스 아이디',
