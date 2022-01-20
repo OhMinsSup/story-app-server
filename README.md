@@ -30,10 +30,11 @@
 
 - [ ] 각 NFT (Story) 가격 정보를 가지고 해당 가격 정보에 해당하는 토큰으로 거래한다.
 
-- [ ] Push Notification (FCM) 고도화
+- [x] Push Notification (FCM)
 
-  - 현재는 제일 기본 형식으로 구현되어 있는데 Push 토큰을 관리하는 기능 필요 (클라이언트도 마찬가지)
-  - 어떤 상황에서 메세지를 발송할건지
+- [ ] Push Notification (FCM) 고도화 (메세지 (redis 대기열 사용))
+
+- [ ] 메일 서비스 추가 개발 (AWS SES)
 
 - [ ] 거래 내역을 저장하는 Contract 추가 개발
 

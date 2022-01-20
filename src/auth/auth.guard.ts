@@ -44,6 +44,7 @@ export class AuthGuard implements CanActivate {
           if (this.klaytnService.isAddress(address)) {
             const user = await this.usersService.findByUserId(id);
             if (user) {
+              console.log('user =======>', user);
               request.user = user;
             } else {
               // 403 forbidden

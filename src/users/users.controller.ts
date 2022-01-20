@@ -105,7 +105,6 @@ export class UsersController {
 
   @Post('logout')
   @ApiOperation({ summary: '로그아웃' })
-  @UseGuards(LoggedInGuard)
   logout(@Res() res: Response) {
     res.clearCookie('access_token', { httpOnly: true });
     return res.status(HttpStatus.OK).json(true);

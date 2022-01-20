@@ -43,23 +43,21 @@ export class NotificationsService {
 
   async send(input: PushRequestDto) {
     try {
-      const where = {
-        AND: [
-          {
-            userId: {
-              not: null,
-            },
-          },
-          {
-            token: {
-              not: null,
-            },
-          },
-        ],
-      };
-
       const devices = await this.prisma.device.findMany({
-        where,
+        where: {
+          AND: [
+            {
+              userId: {
+                not: null,
+              },
+            },
+            {
+              token: {
+                not: null,
+              },
+            },
+          ],
+        },
       });
       const tokens: string[] = devices.map((device) => device.token);
 
@@ -68,6 +66,7 @@ export class NotificationsService {
           notification: {
             title: input.title,
             body: input.message,
+            icon: './images/android-chrome-192x192.png',
           },
         });
         return {
