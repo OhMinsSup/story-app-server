@@ -41,6 +41,53 @@ export class NotificationsService {
     });
   }
 
+  async pushMessage(input: PushRequestDto) {
+    try {
+      const devices = await this.prisma.device.findMany({
+        where: {
+          AND: [
+            {
+              userId: {
+                not: null,
+              },
+            },
+            {
+              token: {
+                not: null,
+              },
+            },
+          ],
+        },
+      });
+      const tokens: string[] = devices.map((device) => device.token);
+      if (tokens.length) {
+        await this.pushService.pushBulkMessage(
+          tokens,
+          input.title,
+          input.message,
+        );
+        return {
+          ok: true,
+          resultCode: EXCEPTION_CODE.OK,
+          message: null,
+          result: null,
+        };
+      }
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          failureCount: 0,
+          successCount: 0,
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async send(input: PushRequestDto) {
     try {
       const devices = await this.prisma.device.findMany({

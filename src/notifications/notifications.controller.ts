@@ -29,17 +29,11 @@ export class NotificationController {
     return this.notificationsService.token(input, req.headers['user-agent']);
   }
 
-  @Post('send')
-  @ApiOperation({
-    summary: '푸시 메시지 발송',
-    description: '푸시 메시지를 발송합니다.',
-  })
-  @ApiBody({
-    required: true,
-    description: '푸시 메시지 발송',
-    type: PushRequestDto,
-  })
-  send(@Body() input: PushRequestDto) {
+  test_send_v1(input: PushRequestDto) {
     return this.notificationsService.send(input);
+  }
+
+  test_send_v2(input: PushRequestDto) {
+    return this.notificationsService.pushMessage(input);
   }
 }
