@@ -58,6 +58,9 @@ export class NotificationsService {
             },
           ],
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
       const tokens: string[] = devices.map((device) => device.token);
       if (tokens.length) {
@@ -104,6 +107,9 @@ export class NotificationsService {
               },
             },
           ],
+        },
+        orderBy: {
+          createdAt: 'desc',
         },
       });
       const tokens: string[] = devices.map((device) => device.token);
@@ -158,8 +164,8 @@ export class NotificationsService {
         };
       }
 
-      const { os, clientType, deviceHash, deviceType } =
-        await this.makeDeviceInfo(userAgent);
+      const result = await this.makeDeviceInfo(userAgent);
+      const { os, clientType, deviceHash, deviceType } = result;
       const device = await this.prisma.device.create({
         data: {
           os,

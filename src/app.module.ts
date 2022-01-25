@@ -20,6 +20,7 @@ import { KlaytnModule } from './klaytn/klaytn.module';
 import { SearchModule } from './search/search.module';
 import { NotificationseModule } from './notifications/notifications.module';
 import { PushModule } from './push/push.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { PushModule } from './push/push.module';
     TagsModule,
     SearchModule,
     NotificationseModule,
+    TaskModule,
   ],
 })
 export class AppModule implements NestModule {
