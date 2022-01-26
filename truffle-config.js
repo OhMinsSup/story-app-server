@@ -12,9 +12,7 @@ const GASLIMIT = '20000000';
 /**
  * URL: 사용할 원격 노드의 URL
  * PRIVATE_KEY: 거래대금을 지급하는 계좌의 Private Key (자신의 Private Key로 변경) */
-const URL = `https://api.baobab.klaytn.net:8651`;
-// truffle.js에 충분한 KLAY가 있는 `Private key`를 붙여넣습니다.
-const PRIVATE_KEY = process.env.KLAYTN_PRIVATE_KEY;
+const URL = 'https://api.baobab.klaytn.net:8651';
 
 module.exports = {
   networks: {
@@ -25,7 +23,8 @@ module.exports = {
     },
 
     klaytn: {
-      provider: new HDWalletProvider(PRIVATE_KEY, URL),
+      // truffle.js에 충분한 KLAY가 있는 `Private key`를 붙여넣습니다.
+      provider: new HDWalletProvider(process.env.KLAYTN_PRIVATE_KEY, URL),
       network_id: NETWORK_ID,
       gas: GASLIMIT,
       gasPrice: null,

@@ -32,7 +32,7 @@
 
 - [x] Push Notification (FCM)
 
-- [ ] Push Notification (FCM) 고도화 (메세지 (redis 대기열 사용))
+- [x] Push Notification (FCM) 고도화 (메세지 (redis 대기열 사용))
 
 - [ ] 메일 서비스 추가 개발 (AWS SES)
 

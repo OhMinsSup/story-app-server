@@ -10,6 +10,8 @@ contract Story is ERC721, ERC721Enumerable {
         uint256 timestamp
     );
 
+    mapping(uint256 => uint256) public _tokenPrice;
+
     mapping(uint256 => StoryData) public _stories;
 
     struct StoryData {
@@ -17,6 +19,38 @@ contract Story is ERC721, ERC721Enumerable {
         uint256 storyId; // Unique story identifier
         uint256 timestamp; // Uploaded time
         address[] ownerHistory; // History of all previous owners
+    }
+
+    function setForSale(uint256 _tokenId, uint256 _price) public {
+        address tokenOwner = ownerOf(_tokenId);
+        require(tokenOwner == msg.sender, 'caller is not token owner');
+        require(_price > 0, 'price is zero or lower');
+        require(
+            isApprovedForAll(tokenOwner, address(this)),
+            'token owner did not approve contract'
+        );
+        _tokenPrice[_tokenId] = _price;
+    }
+
+    function purchaseToken(uint256 _tokenId) public payable {
+        uint256 price = _tokenPrice[_tokenId];
+        address tokenSeller = ownerOf(_tokenId);
+        require(msg.value >= price, 'caller sent klay lower than price');
+        require(msg.sender != tokenSeller, 'caller is token seller');
+        address payable payableTokenSeller = address(uint160(tokenSeller));
+        payableTokenSeller.transfer(msg.value);
+        safeTransferFrom(tokenSeller, msg.sender, _tokenId);
+        _tokenPrice[_tokenId] = 0;
+    }
+
+    function removeTokenOnSale(uint256[] memory _tokenIds) public {
+        require(_tokenIds.length > 0, 'tokenIds is empty');
+        for (uint256 i = 0; i < _tokenIds.length; i++) {
+            uint256 tokenId = _tokenIds[i];
+            address tokenSeller = ownerOf(tokenId);
+            require(msg.sender == tokenSeller, 'caller is not token seller');
+            _tokenPrice[tokenId] = 0;
+        }
     }
 
     /**
