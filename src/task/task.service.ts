@@ -17,11 +17,6 @@ export class TaskService {
       where: {
         AND: [
           {
-            userId: {
-              not: null,
-            },
-          },
-          {
             token: {
               not: null,
             },
@@ -40,9 +35,13 @@ export class TaskService {
     });
 
     if (deletedDevices.length) {
+      // push 토큰이 유효하지 않은 기기를 삭제한다.(push token 제거)
       await Promise.all(
         deletedDevices.map((device) =>
-          this.prisma.device.delete({ where: { id: device.id } }),
+          this.prisma.device.update({
+            data: { token: '' },
+            where: { id: device.id },
+          }),
         ),
       );
     }

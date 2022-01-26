@@ -11,9 +11,6 @@ import { PushRequestDto } from './dto/push.request.dto';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
 import { TokenPushRequestDto } from './dto/tokenPush.request.dto';
 
-// http://daplus.net/javascript-%EC%9B%B9-%EC%82%AC%EC%9D%B4%ED%8A%B8%EB%A5%BC-%EB%B0%A9%EB%AC%B8%ED%95%98%EB%8A%94-%EC%BB%B4%ED%93%A8%ED%84%B0%EB%A5%BC-%EC%96%B4%EB%96%BB%EA%B2%8C-%EA%B3%A0%EC%9C%A0%ED%95%98%EA%B2%8C/
-// https://nsinc.tistory.com/218
-
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -33,24 +30,11 @@ export class NotificationsService {
     };
   }
 
-  findByPushToken(pushToken: string) {
-    return this.prisma.device.findFirst({
-      where: {
-        token: pushToken,
-      },
-    });
-  }
-
   async pushMessage(input: PushRequestDto) {
     try {
       const devices = await this.prisma.device.findMany({
         where: {
           AND: [
-            {
-              userId: {
-                not: null,
-              },
-            },
             {
               token: {
                 not: null,
@@ -96,11 +80,6 @@ export class NotificationsService {
       const devices = await this.prisma.device.findMany({
         where: {
           AND: [
-            {
-              userId: {
-                not: null,
-              },
-            },
             {
               token: {
                 not: null,
@@ -154,8 +133,22 @@ export class NotificationsService {
    */
   async token(input: TokenPushRequestDto, userAgent: string) {
     try {
-      const exists = await this.findByPushToken(input.pushToken);
+      const exists = await this.prisma.device.findFirst({
+        where: {
+          token: input.pushToken,
+        },
+      });
+
       if (exists) {
+        // 토큰의 row값은 존재하지만 token이 빈값이면 토큰 만료
+        if (!exists.token) {
+          return {
+            ok: true,
+            resultCode: EXCEPTION_CODE.PUSH_TOKEN_EXPIRED,
+            message: '푸시 토큰이 만료되었습니다.',
+            result: exists,
+          };
+        }
         return {
           ok: true,
           resultCode: EXCEPTION_CODE.OK,

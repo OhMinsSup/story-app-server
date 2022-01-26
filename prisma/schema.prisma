@@ -15,8 +15,6 @@ model Device {
   deviceType String
   deviceHash String
   token      String?
-  user       User?   @relation(fields: [userId], references: [id])
-  userId     Int?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -32,7 +30,6 @@ model User {
   profile   Profile? // 유저 프로필 관계
   account   Account? // 유저 지갑 관계
   stories   Story[] // 유저 story 관계 (생성한 유저)
-  devices   Device[] // 유저 디바이스 관계
 
 
   froms         History[]      @relation("from") // 유저 거래 및 발행 내역
