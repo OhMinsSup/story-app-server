@@ -24,7 +24,7 @@ import type { Response } from 'express';
 
 // decorators
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
-import { AuthUser } from 'src/decorators/get-user.decorator';
+import { AuthUser } from 'src/auth/get-user.decorator';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
 import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
 import { SearchParams } from 'src/story/dtos/story.interface';

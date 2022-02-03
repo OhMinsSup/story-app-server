@@ -110,6 +110,7 @@ model Story {
   description     String // 스토리 설명
   backgroundColor String? // 배경 색상
   externalUrl     String? // 외부 주소
+  tokenId         Int      @unique // 토큰 아이디
   views           Int      @default(0) // 조회수
   private         Boolean  @default(false) // 공개 여부
   createdAt       DateTime @default(now())
@@ -119,31 +120,21 @@ model Story {
   user            User     @relation(fields: [userId], references: [id]) // 유저
   owner           User     @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
 
-  nft NFT? // nft
 
   storyTags StoryTags[] // 스토리 태그 관계
   histories History[] // 스토리 거래 및 발행 내역
   likes     Like[] // 스토리 좋아요 관계
 }
 
-model NFT {
-  id        Int      @id @default(autoincrement())
-  tokenId   Int      @unique // 토큰 아이디
-  storyId   Int      @unique // 스토리 아이디
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  story     Story    @relation(fields: [storyId], references: [id]) // 스토리
-}
-
 model Media {
-  id           Int      @id @default(autoincrement())
-  originUrl    String // 원본 이미지
-  contentUrl   String? // 컨텐츠 이미지
-  thumbnailUrl String? // 썸네일 이미지
-  type         String // 이미지 타입
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  stories      Story[] // 스토리 관계
+  id         Int      @id @default(autoincrement())
+  publidId   String // cloudinary 공개 아아디
+  version    String // cloudinary 버전 정보
+  contentUrl String // 컨텐츠 이미지
+  type       String // 이미지 타입
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  stories    Story[] // 스토리 관계
 }
 
 model StoryTags {

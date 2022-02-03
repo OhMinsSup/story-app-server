@@ -5,11 +5,9 @@ import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 
 // dto
-import { PushRequestDto } from './dto/push.request.dto';
 import { TokenPushRequestDto } from './dto/tokenPush.request.dto';
 import type { Request } from 'express';
 
-// https://github.com/bluekim98/notification-server/blob/main/src/notification/service/notification.service.ts
 @ApiTags('Notification')
 @Controller('/api/notifications')
 export class NotificationController {
@@ -27,13 +25,5 @@ export class NotificationController {
   })
   token(@Req() req: Request, @Body() input: TokenPushRequestDto) {
     return this.notificationsService.token(input, req.headers['user-agent']);
-  }
-
-  test_send_v1(input: PushRequestDto) {
-    return this.notificationsService.send(input);
-  }
-
-  test_send_v2(input: PushRequestDto) {
-    return this.notificationsService.pushMessage(input);
   }
 }

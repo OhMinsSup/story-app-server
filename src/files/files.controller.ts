@@ -11,7 +11,7 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // guard
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
-import { AuthUser } from 'src/decorators/get-user.decorator';
+import { AuthUser } from 'src/auth/get-user.decorator';
 
 // dto
 import { UploadRequestDto } from './dtos/upload.request.dto';
@@ -44,6 +44,6 @@ export class FilesController {
     @Body() body: UploadRequestDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.filesService.uploadFile(body, file, user);
+    return this.filesService.upload(body, file, user);
   }
 }

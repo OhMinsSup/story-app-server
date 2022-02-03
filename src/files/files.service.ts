@@ -20,46 +20,44 @@ export class FilesService {
 
   /**
    * - This method is used to file upload api
-   * @param {UploadRequestDto} body
+   * @param {UploadRequestDto} input
    * @param {Express.Multer.File} file
    * @param {User} user
    */
-  async uploadFile(
-    body: UploadRequestDto,
-    file: Express.Multer.File,
-    user: User,
-  ) {
-    try {
-      const resourse = await this.cloudinary.uploadFile(
-        file,
-        user.id,
-        body.storyType,
-      );
+  async upload(input: UploadRequestDto, file: Express.Multer.File, user: User) {
+    const { storyType } = input;
 
-      const { public_id, secure_url } = resourse;
+    const upperStoryType =
+      storyType.toUpperCase() as UploadRequestDto['storyType'];
 
-      const media = await this.prisma.media.create({
-        data: {
-          originUrl: public_id,
-          contentUrl: secure_url,
-          type: body.storyType,
-        },
-      });
+    const resourse = await this.cloudinary.upload(
+      file,
+      user.id,
+      upperStoryType,
+    );
 
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          id: media.id,
-          name: file.originalname,
-          fileType: file.mimetype,
-          storyType: body.storyType,
-          path: media.contentUrl,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
+    const { public_id, secure_url, version } = resourse;
+
+    const media = await this.prisma.media.create({
+      data: {
+        publidId: public_id,
+        version: version.toString(),
+        contentUrl: secure_url,
+        type: upperStoryType,
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        id: media.id,
+        name: file.originalname,
+        fileType: file.mimetype,
+        storyType: upperStoryType,
+        path: media.contentUrl,
+      },
+    };
   }
 }
