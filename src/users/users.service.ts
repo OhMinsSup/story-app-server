@@ -1,10 +1,5 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as _ from 'lodash';
-import { JsonWebTokenError } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 
 // common
@@ -33,6 +28,29 @@ export class UsersService {
   ) {}
 
   /**
+   * @description - serialize a story
+   * @param {unknown} data
+   */
+  serializeLikes = (data: unknown) => {
+    const story = (data as any).story;
+    type SerializedTags = (StoryTags & {
+      tag: Tag;
+    })[];
+
+    const result = _.pick(story, ['storyTags']) as {
+      storyTags: SerializedTags;
+    };
+    const tags = result.storyTags?.map(({ tag }) => ({
+      id: tag.id,
+      name: tag.name,
+    }));
+    return {
+      ..._.omit(story as Story, ['storyTags']),
+      tags,
+    };
+  };
+
+  /**
    * @description - 유저 아이디로 유저 찾기
    * @param {number} userId
    */
@@ -44,34 +62,6 @@ export class UsersService {
       select: userAccountSelect,
     });
     return user;
-  }
-
-  /**
-   * @description - 유저 이메일로 유저 찾기
-   * @param {string} email
-   */
-  async findByEmail(email: string) {
-    const exists = await this.prisma.user.findFirst({
-      where: {
-        email,
-      },
-    });
-    return exists;
-  }
-
-  /**
-   * @description 지갑 정보를 가져오는 함수
-   * @param {string} address
-   */
-  async findByWalletAddress(address: string) {
-    return this.prisma.user.findFirst({
-      where: {
-        account: {
-          address,
-        },
-      },
-      select: userAccountSelect,
-    });
   }
 
   /**
@@ -177,74 +167,70 @@ export class UsersService {
    * @param {SigninRequestDto} input
    */
   async signin(input: SigninRequestDto) {
-    try {
-      const exists = await this.prisma.user.findFirst({
-        where: {
-          email: input.email,
-        },
-        include: {
-          profile: true,
-          account: {
-            select: {
-              address: true,
-              privateKey: true,
-            },
+    const exists = await this.prisma.user.findFirst({
+      where: {
+        email: input.email,
+      },
+      include: {
+        profile: true,
+        account: {
+          select: {
+            address: true,
+            privateKey: true,
           },
         },
-      });
+      },
+    });
 
-      if (!exists) {
-        return {
-          ok: false,
-          resultCode: EXCEPTION_CODE.NOT_EXIST,
-          message: '존재하지 않는 사용자 입니다.',
-          result: null,
-        };
-      }
+    if (!exists) {
+      return {
+        ok: false,
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        message: '존재하지 않는 사용자 입니다.',
+        result: null,
+      };
+    }
 
-      // 비밀번호 체크
-      const result = await bcrypt.compare(input.password, exists.password);
-      if (!result) {
-        return {
-          ok: false,
-          resultCode: EXCEPTION_CODE.INCORRECT_PASSWORD,
-          message: '비밀번호가 일치하지 않습니다.',
-          result: null,
-        };
-      }
+    // 비밀번호 체크
+    const result = await bcrypt.compare(input.password, exists.password);
+    if (!result) {
+      return {
+        ok: false,
+        resultCode: EXCEPTION_CODE.INCORRECT_PASSWORD,
+        message: '비밀번호가 일치하지 않습니다.',
+        result: null,
+      };
+    }
 
-      // 액세스 토큰을 생성한다.
-      const accessToken = this.jwtService.sign(
-        {
-          id: exists.id,
+    // 액세스 토큰을 생성한다.
+    const accessToken = this.jwtService.sign(
+      {
+        id: exists.id,
+        address: exists.account.address,
+      },
+      {
+        subject: 'access_token',
+        expiresIn: '30d',
+      },
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id, createdAt, updatedAt, ...info } = exists.profile;
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        accessToken,
+        id: exists.id,
+        email: exists.email,
+        profile: info,
+        account: {
           address: exists.account.address,
         },
-        {
-          subject: 'access_token',
-          expiresIn: '30d',
-        },
-      );
-
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { id, createdAt, updatedAt, ...info } = exists.profile;
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          accessToken,
-          id: exists.id,
-          email: exists.email,
-          profile: info,
-          account: {
-            address: exists.account.address,
-          },
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
+      },
+    };
   }
 
   /**
@@ -252,8 +238,12 @@ export class UsersService {
    * @param {SignupRequestDto} input
    */
   async signup(input: SignupRequestDto) {
-    try {
-      const exists = await this.findByEmail(input.email);
+    const result = await this.prisma.$transaction(async (tx) => {
+      const exists = await tx.user.findFirst({
+        where: {
+          email: input.email,
+        },
+      });
 
       if (exists) {
         return {
@@ -267,98 +257,59 @@ export class UsersService {
         };
       }
 
-      const result = await this.prisma.$transaction(async (tx) => {
-        const profile_exists = await tx.profile.findFirst({
-          where: {
-            nickname: input.nickname,
-          },
-        });
-
-        if (profile_exists) {
-          return {
-            ok: false,
-            resultCode: EXCEPTION_CODE.INVALID,
-            message: '이미 사용중인 닉네임 입니다. 다시 입력해 주세요.',
-            result: 'nickaname',
-          };
-        }
-
-        const hased = await bcrypt.hash(input.password, 12);
-
-        // 지갑을 생성한다.
-        // const wallet = await this.klaytnService.createWallet();
-        const keyring = await this.klaytnService.keyring();
-        const {
-          address,
-          key: { privateKey },
-        } = keyring;
-        // 개인키로 계정을 생성한다.
-        this.klaytnService.privateKeyToAccount(privateKey);
-
-        // 유저 생성
-        const user = await tx.user.create({
-          data: {
-            email: input.email,
-            password: hased,
-          },
-        });
-
-        await Promise.all([
-          // 프로필 생성
-          tx.profile.create({
-            data: {
-              userId: user.id,
-              nickname: input.nickname,
-              gender: input.gender,
-              profileUrl: null,
-              avatarSvg: input.avatarSvg,
-              defaultProfile: input.defaultProfile,
-            },
-          }),
-          // 지갑 생성
-          tx.account.create({
-            data: {
-              userId: user.id,
-              address,
-              privateKey,
-            },
-          }),
-        ]);
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: true,
-        };
-      });
-
-      return result;
-    } catch (error) {
-      if (error instanceof JsonWebTokenError) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_TOKEN,
-          msg: '유효하지 않은 토큰입니다.',
-        });
-      }
-      throw error;
-    }
-  }
-
-  /**
-   * @description 회원탈퇴
-   * @param {number} id
-   */
-  async unregister(id: number) {
-    try {
-      await this.prisma.user.update({
+      const profile_exists = await tx.profile.findFirst({
         where: {
-          id,
-        },
-        data: {
-          isDelete: true,
+          nickname: input.nickname,
         },
       });
+
+      if (profile_exists) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.INVALID,
+          message: '이미 사용중인 닉네임 입니다. 다시 입력해 주세요.',
+          result: 'nickaname',
+        };
+      }
+
+      const hased = await bcrypt.hash(input.password, 12);
+
+      const keyring = this.klaytnService.keyring();
+
+      const {
+        address,
+        key: { privateKey },
+      } = keyring;
+
+      // 유저 생성
+      const user = await tx.user.create({
+        data: {
+          email: input.email,
+          password: hased,
+        },
+      });
+
+      await Promise.all([
+        // 프로필 생성
+        tx.profile.create({
+          data: {
+            userId: user.id,
+            nickname: input.nickname,
+            gender: input.gender,
+            profileUrl: null,
+            avatarSvg: input.avatarSvg,
+            defaultProfile: input.defaultProfile,
+          },
+        }),
+        // 지갑 생성
+        tx.account.create({
+          data: {
+            userId: user.id,
+            address,
+            privateKey,
+          },
+        }),
+      ]);
 
       return {
         ok: true,
@@ -366,9 +317,31 @@ export class UsersService {
         message: null,
         result: true,
       };
-    } catch (error) {
-      throw error;
-    }
+    });
+
+    return result;
+  }
+
+  /**
+   * @description 회원탈퇴
+   * @param {number} id
+   */
+  async unregister(id: number) {
+    await this.prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        isDelete: true,
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: true,
+    };
   }
 
   /**
@@ -384,78 +357,55 @@ export class UsersService {
       pageSize = Number(pageSize);
     }
 
-    try {
-      const [total, list] = await Promise.all([
-        this.prisma.like.count({
-          where: {
-            userId,
-          },
-        }),
-        this.prisma.like.findMany({
-          skip: (pageNo - 1) * pageSize,
-          take: pageSize,
-          orderBy: {
-            createdAt: 'desc',
-          },
-          where: {
-            userId,
-          },
-          include: {
-            story: {
-              include: {
-                media: true,
-                storyTags: {
-                  include: {
-                    tag: true,
-                  },
+    const [total, list] = await Promise.all([
+      this.prisma.like.count({
+        where: {
+          userId,
+        },
+      }),
+      this.prisma.like.findMany({
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        where: {
+          userId,
+        },
+        include: {
+          story: {
+            include: {
+              media: true,
+              storyTags: {
+                include: {
+                  tag: true,
                 },
-                user: {
-                  include: {
-                    profile: true,
-                  },
+              },
+              user: {
+                include: {
+                  profile: true,
                 },
-                likes: {
-                  select: {
-                    userId: true,
-                  },
+              },
+              likes: {
+                select: {
+                  userId: true,
                 },
               },
             },
           },
-        }),
-      ]);
-
-      const serialize = (data: unknown) => {
-        const story = (data as any).story;
-        type SerializedTags = (StoryTags & {
-          tag: Tag;
-        })[];
-
-        const result = _.pick(story, ['storyTags']) as {
-          storyTags: SerializedTags;
-        };
-        const tags = result.storyTags?.map(({ tag }) => ({
-          id: tag.id,
-          name: tag.name,
-        }));
-        return {
-          ..._.omit(story as Story, ['storyTags']),
-          tags,
-        };
-      };
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          list: list.map(serialize),
-          total,
-          pageNo,
         },
-      };
-    } catch (error) {
-      throw error;
-    }
+      }),
+    ]);
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: list.map(this.serializeLikes),
+        total,
+        pageNo,
+      },
+    };
   }
 }

@@ -49,7 +49,7 @@
     "@types/jsonwebtoken": "^8.5.5",
     "bcrypt": "^5.0.1",
     "bull": "^4.2.1",
-    "caver-js": "^1.6.5",
+    "caver-js": "^1.6.7",
     "class-transformer": "^0.4.0",
     "class-validator": "^0.13.1",
     "cloudinary": "^1.27.1",

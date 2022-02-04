@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Contract } from 'caver-js';
+import { Contract, KeyringContainer } from 'caver-js';
 import {
   DEPLOYED_ABI,
   KLAYTN,
@@ -9,7 +9,6 @@ import {
 } from 'src/common/common.constants';
 
 import type Caver from 'caver-js';
-import type { SingleKeyring } from 'caver-js';
 import type { KlaytnModuleOptions } from './klaytn.interfaces';
 
 @Injectable()
@@ -31,20 +30,24 @@ export class KlaytnService {
   }
 
   /**
-   * @description Keyring은 Klaytn 계정의 주소와 개인 키를 포함하는 구조입니다.
-   */
-  async keyring() {
-    const wallet = this.caver.wallet as any;
-    const randomHex = this.caver.utils.randomHex(32);
-    return wallet.keyring.generate(randomHex) as SingleKeyring;
+   * @description caver.wallet는 인메모리 지갑에서 Keyring 인스턴스를 관리하는 패키지입니다.
+   * caver.wallet는 모든 SingleKeyring, MultipleKeyring, RoleBasedKeyring을 받으며,
+   * 주소를 기준으로 관리합니다. */
+  get wallet() {
+    return this.caver.wallet as KeyringContainer;
   }
 
   /**
-   * @description 개인키에서 계정 객체를 생성합니다.
-   * @param privateKey
-   */
-  privateKeyToAccount(privateKey: string) {
-    return this.caver.klay.accounts.privateKeyToAccount(privateKey);
+   * @description caver.account는 계정 업데이트시 사용 되며 Account에 관련된 기능을 제공하는 패키지입니다. */
+  get account() {
+    return this.caver.account;
+  }
+
+  /**
+   * @description Keyring은 Klaytn 계정의 주소와 개인 키를 포함하는 구조입니다. */
+  keyring() {
+    const randomHex = this.caver.utils.randomHex(32);
+    return this.wallet.keyring.generate(randomHex);
   }
 
   /**

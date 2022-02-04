@@ -31,14 +31,14 @@ export class StoriesService {
 
   /**
    * @description - serialize a story
-   * @param story
+   * @param {unknown} data
    */
-  serialize(story: unknown) {
+  serialize = (data: unknown) => {
     type SerializedTags = (StoryTags & {
       tag: Tag;
     })[];
 
-    const result = _.pick(story, ['storyTags']) as {
+    const result = _.pick(data, ['storyTags']) as {
       storyTags: SerializedTags;
     };
     const tags = result.storyTags?.map(({ tag }) => ({
@@ -46,10 +46,10 @@ export class StoriesService {
       name: tag.name,
     }));
     return {
-      ..._.omit(story as Story, ['storyTags']),
+      ..._.omit(data as Story, ['storyTags']),
       tags,
     };
-  }
+  };
 
   /**
    * @description - 상세에서 해당 작품을 생성한 거래내역 정보
@@ -128,71 +128,10 @@ export class StoriesService {
    * @param id
    */
   async delete(user: User, id: number) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        const story = await tx.story.findFirst({
-          where: { id, userId: user.id },
-        });
-        if (!story) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 스토리입니다.',
-          });
-        }
-
-        if (story.userId !== user.id) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.NO_PERMISSION,
-            msg: '삭제 권한이 없습니다.',
-          });
-        }
-
-        // delete story tags
-        await tx.storyTags.deleteMany({
-          where: {
-            storyId: id,
-          },
-        });
-
-        // delete story
-        await tx.story.update({
-          where: { id },
-          data: {
-            isDelete: true,
-          },
-        });
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: id,
-          },
-        };
+    const result = await this.prisma.$transaction(async (tx) => {
+      const story = await tx.story.findFirst({
+        where: { id, userId: user.id },
       });
-      return result;
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  /**
-   * @description - detail a story
-   * @param id
-   */
-  async detail(id: number) {
-    try {
-      const story = await this.prisma.story.findFirst({
-        where: {
-          id,
-        },
-        select: {
-          ...storiesSelect,
-          isDelete: true,
-        },
-      });
-
       if (!story) {
         throw new NotFoundException({
           resultCode: EXCEPTION_CODE.NOT_EXIST,
@@ -200,24 +139,77 @@ export class StoriesService {
         });
       }
 
-      if (story.isDelete) {
-        return {
-          ok: false,
-          resultCode: EXCEPTION_CODE.DELETED,
-          message: '삭제된 스토리입니다.',
-          result: null,
-        };
+      if (story.userId !== user.id) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NO_PERMISSION,
+          msg: '삭제 권한이 없습니다.',
+        });
       }
+
+      // delete story tags
+      await tx.storyTags.deleteMany({
+        where: {
+          storyId: id,
+        },
+      });
+
+      // delete story
+      await tx.story.update({
+        where: { id },
+        data: {
+          isDelete: true,
+        },
+      });
 
       return {
         ok: true,
         resultCode: EXCEPTION_CODE.OK,
         message: null,
-        result: this.serialize(story),
+        result: {
+          dataId: id,
+        },
       };
-    } catch (error) {
-      throw error;
+    });
+    return result;
+  }
+
+  /**
+   * @description - detail a story
+   * @param id
+   */
+  async detail(id: number) {
+    const story = await this.prisma.story.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        ...storiesSelect,
+        isDelete: true,
+      },
+    });
+
+    if (!story) {
+      throw new NotFoundException({
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        msg: '존재하지 않는 스토리입니다.',
+      });
     }
+
+    if (story.isDelete) {
+      return {
+        ok: false,
+        resultCode: EXCEPTION_CODE.DELETED,
+        message: '삭제된 스토리입니다.',
+        result: null,
+      };
+    }
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: this.serialize(story),
+    };
   }
 
   /**
@@ -258,35 +250,31 @@ export class StoriesService {
       });
     }
 
-    try {
-      const [total, list] = await Promise.all([
-        this.prisma.story.count({
-          where,
-        }),
-        this.prisma.story.findMany({
-          skip: (pageNo - 1) * pageSize,
-          take: pageSize,
-          orderBy: {
-            createdAt: 'desc',
-          },
-          select: storiesSelect,
-          where,
-        }),
-      ]);
-
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          list: list.map(this.serialize),
-          total,
-          pageNo,
+    const [total, list] = await Promise.all([
+      this.prisma.story.count({
+        where,
+      }),
+      this.prisma.story.findMany({
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
         },
-      };
-    } catch (error) {
-      throw error;
-    }
+        select: storiesSelect,
+        where,
+      }),
+    ]);
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: list.map(this.serialize),
+        total,
+        pageNo,
+      },
+    };
   }
 
   /**
@@ -296,141 +284,32 @@ export class StoriesService {
    * @param input
    */
   async update(user: User, id: number, input: StoryCreateRequestDto) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        // 수정하는 스토리 정보가 존재하는지 체크
-        const story = await tx.story.findFirst({
-          where: {
-            AND: [
-              {
-                id,
-              },
-              {
-                userId: user.id,
-              },
-            ],
-          },
-          include: {
-            storyTags: true,
-          },
-        });
-        if (!story) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 스토리입니다.',
-          });
-        }
-
-        // 수정하려는 스토리 정보가 이미 존재하는지 체크
-        if (story.mediaId !== input.mediaId) {
-          const media = await tx.media.findFirst({
-            where: {
-              id: input.mediaId,
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 수정하는 스토리 정보가 존재하는지 체크
+      const story = await tx.story.findFirst({
+        where: {
+          AND: [
+            {
+              id,
             },
-          });
-          if (!media) {
-            throw new NotFoundException({
-              resultCode: EXCEPTION_CODE.NOT_EXIST,
-              msg: '존재하지 않는 파일입니다.',
-            });
-          }
-        }
-
-        let updatedTags: Tag[] = [];
-        if (!_.isEmpty(input.tags)) {
-          const tags = await Promise.all(
-            input.tags.map(async (tag) => {
-              const tagResult = await tx.tag.findFirst({
-                where: {
-                  name: tag.trim(),
-                },
-              });
-              if (!tagResult) {
-                const newTag = await tx.tag.create({
-                  data: {
-                    name: tag.trim(),
-                  },
-                });
-                return newTag;
-              }
-              return tagResult;
-            }),
-          );
-          updatedTags = tags.filter((tag) => tag);
-        }
-
-        if (!_.isEmpty(updatedTags)) {
-          // deep compare tags and storyTags to find deleted tags and create
-          //  new tags if not exist in storyTags array of story model
-          //  (storyTags is array of tag model)
-          const deletedTags = _.differenceWith(
-            story.storyTags,
-            updatedTags,
-            (tag1, tag2) => tag1.id === tag2.id,
-          );
-          const newTags = _.differenceWith(
-            updatedTags,
-            story.storyTags,
-            (tag1, tag2) => tag1.id === tag2.id,
-          );
-          await Promise.all([
-            ...deletedTags.map((tag) =>
-              tx.storyTags.delete({
-                where: {
-                  id: tag.id,
-                },
-              }),
-            ),
-            ...newTags.map((tag) =>
-              tx.storyTags.create({
-                data: {
-                  storyId: story.id,
-                  tagId: tag.id,
-                },
-              }),
-            ),
-          ]);
-        }
-
-        const updatedData = _.pickBy(
-          _.merge(
-            _.omit(story, ['createdAt', 'updatedAt', 'userId', 'storyTags']),
-            _.omit(input, ['storyId', 'tags', 'dataId']),
-          ),
-          _.identity,
-        );
-
-        await tx.story.update({
-          where: {
-            id: story.id,
-          },
-          data: updatedData,
-        });
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: story.id,
-          },
-        };
+            {
+              userId: user.id,
+            },
+          ],
+        },
+        include: {
+          storyTags: true,
+        },
       });
-      return result;
-    } catch (error) {
-      console.log('error', error);
-      throw error;
-    }
-  }
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
 
-  /**
-   * @description - create a new story
-   * @param user
-   * @param input
-   */
-  async create(user: User, input: StoryCreateRequestDto) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
+      // 수정하려는 스토리 정보가 이미 존재하는지 체크
+      if (story.mediaId !== input.mediaId) {
         const media = await tx.media.findFirst({
           where: {
             id: input.mediaId,
@@ -442,66 +321,54 @@ export class StoriesService {
             msg: '존재하지 않는 파일입니다.',
           });
         }
-        const nameDuplicate = await tx.story.findFirst({
-          where: {
-            name: input.name,
-          },
-        });
-        if (!_.isEmpty(nameDuplicate)) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.DUPLICATE,
-            msg: '이미 존재하는 스토리 입니다.',
-          });
-        }
+      }
 
-        let createdTags: Tag[] = [];
-        // 태크 체크
-        if (!_.isEmpty(input.tags)) {
-          const tags = await Promise.all(
-            input.tags.map(async (tag) => {
-              const tagData = await tx.tag.findFirst({
-                where: {
+      let updatedTags: Tag[] = [];
+      if (!_.isEmpty(input.tags)) {
+        const tags = await Promise.all(
+          input.tags.map(async (tag) => {
+            const tagResult = await tx.tag.findFirst({
+              where: {
+                name: tag.trim(),
+              },
+            });
+            if (!tagResult) {
+              const newTag = await tx.tag.create({
+                data: {
                   name: tag.trim(),
                 },
               });
-              if (!tagData) {
-                return tx.tag.create({
-                  data: {
-                    name: tag.trim(),
-                  },
-                });
-              }
-              return tagData;
-            }),
-          );
-          createdTags = tags;
-        }
+              return newTag;
+            }
+            return tagResult;
+          }),
+        );
+        updatedTags = tags.filter((tag) => tag);
+      }
 
-        // 스토리 생성
-        const story = await tx.story.create({
-          data: {
-            userId: user.id,
-            ownerId: user.id,
-            mediaId: media.id,
-            name: input.name,
-            description: input.description,
-            private: !!input.isPrivate,
-            ...(input.backgroundColor
-              ? {
-                  backgroundColor: input.backgroundColor,
-                }
-              : {
-                  backgroundColor: '#ffffff',
-                }),
-            ...(input.externalUrl && {
-              externalUrl: input.externalUrl,
+      if (!_.isEmpty(updatedTags)) {
+        // deep compare tags and storyTags to find deleted tags and create
+        //  new tags if not exist in storyTags array of story model
+        //  (storyTags is array of tag model)
+        const deletedTags = _.differenceWith(
+          story.storyTags,
+          updatedTags,
+          (tag1, tag2) => tag1.id === tag2.id,
+        );
+        const newTags = _.differenceWith(
+          updatedTags,
+          story.storyTags,
+          (tag1, tag2) => tag1.id === tag2.id,
+        );
+        await Promise.all([
+          ...deletedTags.map((tag) =>
+            tx.storyTags.delete({
+              where: {
+                id: tag.id,
+              },
             }),
-          },
-        });
-
-        // 태그 생성
-        await Promise.all(
-          createdTags.map((tag) =>
+          ),
+          ...newTags.map((tag) =>
             tx.storyTags.create({
               data: {
                 storyId: story.id,
@@ -509,82 +376,194 @@ export class StoriesService {
               },
             }),
           ),
-        );
+        ]);
+      }
 
-        const account = await tx.account.findFirst({
-          where: {
-            userId: user.id,
-          },
-        });
+      const updatedData = _.pickBy(
+        _.merge(
+          _.omit(story, ['createdAt', 'updatedAt', 'userId', 'storyTags']),
+          _.omit(input, ['storyId', 'tags', 'dataId']),
+        ),
+        _.identity,
+      );
 
-        if (!account) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 유저입니다.',
-          });
-        }
-        const { privateKey, address } = account;
-        // nft 발생
-        const receipt = await this.klaytnService.mint(
-          address,
-          privateKey,
-          story.id,
-        );
-
-        if (!receipt) {
-          return {
-            ok: false,
-            resultCode: EXCEPTION_CODE.NFT_FAIL,
-            message: '스토리 생성에 실패하였습니다.',
-            result: null,
-          };
-        }
-
-        // 발생 NFT 토큰 ID
-        const tokenId = receipt.tokenId;
-        const transformTokenId = parseInt(tokenId, 10);
-        const transformBlockNumber = `${receipt.blockNumber}`;
-
-        // story 업데이트 nftId
-        await tx.story.update({
-          where: {
-            id: story.id,
-          },
-          data: {
-            tokenId: transformTokenId,
-          },
-        });
-
-        await tx.transaction.create({
-          data: {
-            status: 'ISSUE',
-            storyId: story.id,
-            toId: user.id,
-            fromId: user.id,
-            type: receipt.type,
-            toHash: receipt.to,
-            fromHash: receipt.from,
-            blockHash: receipt.blockHash,
-            blockNumber: transformBlockNumber,
-            senderTxHash: receipt.senderTxHash,
-            transactionHash: receipt.transactionHash,
-          },
-        });
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: story.id,
-          },
-        };
+      await tx.story.update({
+        where: {
+          id: story.id,
+        },
+        data: updatedData,
       });
 
-      return result;
-    } catch (error) {
-      throw error;
-    }
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: story.id,
+        },
+      };
+    });
+    return result;
+  }
+
+  /**
+   * @description - create a new story
+   * @param user
+   * @param input
+   */
+  async create(user: User, input: StoryCreateRequestDto) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const media = await tx.media.findFirst({
+        where: {
+          id: input.mediaId,
+        },
+      });
+      if (!media) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 파일입니다.',
+        });
+      }
+      const nameDuplicate = await tx.story.findFirst({
+        where: {
+          name: input.name,
+        },
+      });
+      if (!_.isEmpty(nameDuplicate)) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.DUPLICATE,
+          msg: '이미 존재하는 스토리 입니다.',
+        });
+      }
+
+      let createdTags: Tag[] = [];
+      // 태크 체크
+      if (!_.isEmpty(input.tags)) {
+        const tags = await Promise.all(
+          input.tags.map(async (tag) => {
+            const tagData = await tx.tag.findFirst({
+              where: {
+                name: tag.trim(),
+              },
+            });
+            if (!tagData) {
+              return tx.tag.create({
+                data: {
+                  name: tag.trim(),
+                },
+              });
+            }
+            return tagData;
+          }),
+        );
+        createdTags = tags;
+      }
+
+      // 스토리 생성
+      const story = await tx.story.create({
+        data: {
+          userId: user.id,
+          ownerId: user.id,
+          mediaId: media.id,
+          name: input.name,
+          description: input.description,
+          private: !!input.isPrivate,
+          ...(input.backgroundColor
+            ? {
+                backgroundColor: input.backgroundColor,
+              }
+            : {
+                backgroundColor: '#ffffff',
+              }),
+          ...(input.externalUrl && {
+            externalUrl: input.externalUrl,
+          }),
+        },
+      });
+
+      // 태그 생성
+      await Promise.all(
+        createdTags.map((tag) =>
+          tx.storyTags.create({
+            data: {
+              storyId: story.id,
+              tagId: tag.id,
+            },
+          }),
+        ),
+      );
+
+      const account = await tx.account.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+
+      if (!account) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 유저입니다.',
+        });
+      }
+      const { privateKey, address } = account;
+      // nft 발생
+      const receipt = await this.klaytnService.mint(
+        address,
+        privateKey,
+        story.id,
+      );
+
+      if (!receipt) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          message: '스토리 생성에 실패하였습니다.',
+          result: null,
+        };
+      }
+
+      // 발생 NFT 토큰 ID
+      const tokenId = receipt.tokenId;
+      const transformTokenId = parseInt(tokenId, 10);
+      const transformBlockNumber = `${receipt.blockNumber}`;
+
+      // story 업데이트 nftId
+      await tx.story.update({
+        where: {
+          id: story.id,
+        },
+        data: {
+          tokenId: transformTokenId,
+        },
+      });
+
+      await tx.transaction.create({
+        data: {
+          status: 'ISSUE',
+          storyId: story.id,
+          toId: user.id,
+          fromId: user.id,
+          type: receipt.type,
+          toHash: receipt.to,
+          fromHash: receipt.from,
+          blockHash: receipt.blockHash,
+          blockNumber: transformBlockNumber,
+          senderTxHash: receipt.senderTxHash,
+          transactionHash: receipt.transactionHash,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: story.id,
+        },
+      };
+    });
+
+    return result;
   }
 
   /**
@@ -593,75 +572,71 @@ export class StoriesService {
    * @param storyId {number}
    */
   async like(user: User, storyId: number) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        // 수정하는 스토리 정보가 존재하는지 체크
-        const story = await tx.story.findFirst({
-          where: {
-            id: storyId,
-          },
-        });
-
-        if (!story) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 스토리입니다.',
-          });
-        }
-
-        // 수정하려는 스토리 정보가 이미 존재하는지 체크
-        if (story.userId === user.id) {
-          return {
-            ok: false,
-            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
-            message: '자신의 스토리는 좋아요를 할 수 없습니다.',
-            result: null,
-          };
-        }
-
-        // 좋아요 정보가 이미 존재하는지 체크
-        const like = await tx.like.findFirst({
-          where: {
-            AND: [
-              {
-                storyId,
-              },
-              {
-                userId: user.id,
-              },
-            ],
-          },
-        });
-
-        if (!_.isEmpty(like)) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.DUPLICATE,
-            msg: '이미 좋아요를 누른 스토리입니다.',
-          });
-        }
-
-        // 좋아요 정보 생성
-        await tx.like.create({
-          data: {
-            userId: user.id,
-            storyId: story.id,
-          },
-        });
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: storyId,
-          },
-        };
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 수정하는 스토리 정보가 존재하는지 체크
+      const story = await tx.story.findFirst({
+        where: {
+          id: storyId,
+        },
       });
 
-      return result;
-    } catch (error) {
-      throw error;
-    }
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      // 수정하려는 스토리 정보가 이미 존재하는지 체크
+      if (story.userId === user.id) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+          message: '자신의 스토리는 좋아요를 할 수 없습니다.',
+          result: null,
+        };
+      }
+
+      // 좋아요 정보가 이미 존재하는지 체크
+      const like = await tx.like.findFirst({
+        where: {
+          AND: [
+            {
+              storyId,
+            },
+            {
+              userId: user.id,
+            },
+          ],
+        },
+      });
+
+      if (!_.isEmpty(like)) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.DUPLICATE,
+          msg: '이미 좋아요를 누른 스토리입니다.',
+        });
+      }
+
+      // 좋아요 정보 생성
+      await tx.like.create({
+        data: {
+          userId: user.id,
+          storyId: story.id,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+
+    return result;
   }
 
   /**
@@ -670,74 +645,70 @@ export class StoriesService {
    * @param storyId {number}
    */
   async unlike(user: User, storyId: number) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        // 수정하는 스토리 정보가 존재하는지 체크
-        const story = await tx.story.findFirst({
-          where: {
-            id: storyId,
-          },
-        });
-
-        if (!story) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 스토리입니다.',
-          });
-        }
-
-        // 수정하려는 스토리 정보가 이미 존재하는지 체크
-        if (story.userId === user.id) {
-          return {
-            ok: false,
-            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
-            message: '자신의 스토리는 좋아요를 취소할 수 없습니다.',
-            result: null,
-          };
-        }
-
-        // 좋아요 정보가 이미 존재하는지 체크
-        const like = await tx.like.findFirst({
-          where: {
-            AND: [
-              {
-                storyId,
-              },
-              {
-                userId: user.id,
-              },
-            ],
-          },
-        });
-
-        if (_.isEmpty(like)) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '좋아요를 누른 스토리가 없습니다.',
-          });
-        }
-
-        // 좋아요 정보 삭제
-        await tx.like.delete({
-          where: {
-            id: like.id,
-          },
-        });
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: storyId,
-          },
-        };
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 수정하는 스토리 정보가 존재하는지 체크
+      const story = await tx.story.findFirst({
+        where: {
+          id: storyId,
+        },
       });
 
-      return result;
-    } catch (error) {
-      throw error;
-    }
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      // 수정하려는 스토리 정보가 이미 존재하는지 체크
+      if (story.userId === user.id) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+          message: '자신의 스토리는 좋아요를 취소할 수 없습니다.',
+          result: null,
+        };
+      }
+
+      // 좋아요 정보가 이미 존재하는지 체크
+      const like = await tx.like.findFirst({
+        where: {
+          AND: [
+            {
+              storyId,
+            },
+            {
+              userId: user.id,
+            },
+          ],
+        },
+      });
+
+      if (_.isEmpty(like)) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '좋아요를 누른 스토리가 없습니다.',
+        });
+      }
+
+      // 좋아요 정보 삭제
+      await tx.like.delete({
+        where: {
+          id: like.id,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+
+    return result;
   }
 
   /**
@@ -746,109 +717,105 @@ export class StoriesService {
    * @param storyId {number}
    */
   async transferOwnership(user: User, storyId: number) {
-    try {
-      const result = await this.prisma.$transaction(async (tx) => {
-        const story = await tx.story.findFirst({
+    const result = await this.prisma.$transaction(async (tx) => {
+      const story = await tx.story.findFirst({
+        where: {
+          id: storyId,
+        },
+        include: {
+          owner: {
+            select: {
+              account: true,
+            },
+          },
+        },
+      });
+
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      if (story.ownerId === user.id) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+          msg: '자신의 스토리는 소유권을 이전할 수 없습니다.',
+        });
+      }
+
+      // 로그인한 유저의 privateKey를 가져옴
+      const account = await tx.account.findFirst({
+        where: {
+          address: (user as any).account.address,
+        },
+      });
+      if (!account) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '소유권을 이전할 수 없습니다.',
+        });
+      }
+
+      const receipt = await this.klaytnService.transferOwnership(
+        story.tokenId,
+        story.owner.account.address,
+        story.owner.account.privateKey,
+        account.address,
+        account.privateKey,
+      );
+
+      if (!receipt) {
+        return {
+          ok: false,
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          message: '스토리 생성에 실패하였습니다.',
+          result: null,
+        };
+      }
+
+      // 발생 NFT 토큰 ID
+      const transformBlockNumber = `${receipt.blockNumber}`;
+
+      await Promise.all([
+        // 스토리 소유권 이전
+        tx.story.update({
           where: {
             id: storyId,
           },
-          include: {
-            owner: {
-              select: {
-                account: true,
-              },
-            },
+          data: {
+            ownerId: user.id,
           },
-        });
-
-        if (!story) {
-          throw new NotFoundException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '존재하지 않는 스토리입니다.',
-          });
-        }
-
-        if (story.ownerId === user.id) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
-            msg: '자신의 스토리는 소유권을 이전할 수 없습니다.',
-          });
-        }
-
-        // 로그인한 유저의 privateKey를 가져옴
-        const account = await tx.account.findFirst({
-          where: {
-            address: (user as any).account.address,
+        }),
+        // 스토리 히스토리 등록
+        tx.transaction.create({
+          data: {
+            status: 'TRANSFER',
+            storyId: story.id,
+            toId: user.id,
+            fromId: story.userId,
+            // new
+            type: receipt.type,
+            toHash: receipt.to,
+            fromHash: receipt.from,
+            blockHash: receipt.blockHash,
+            blockNumber: transformBlockNumber,
+            senderTxHash: receipt.senderTxHash,
+            transactionHash: receipt.transactionHash,
           },
-        });
-        if (!account) {
-          throw new BadRequestException({
-            resultCode: EXCEPTION_CODE.NOT_EXIST,
-            msg: '소유권을 이전할 수 없습니다.',
-          });
-        }
+        }),
+      ]);
 
-        const receipt = await this.klaytnService.transferOwnership(
-          story.tokenId,
-          story.owner.account.address,
-          story.owner.account.privateKey,
-          account.address,
-          account.privateKey,
-        );
-
-        if (!receipt) {
-          return {
-            ok: false,
-            resultCode: EXCEPTION_CODE.NFT_FAIL,
-            message: '스토리 생성에 실패하였습니다.',
-            result: null,
-          };
-        }
-
-        // 발생 NFT 토큰 ID
-        const transformBlockNumber = `${receipt.blockNumber}`;
-
-        await Promise.all([
-          // 스토리 소유권 이전
-          tx.story.update({
-            where: {
-              id: storyId,
-            },
-            data: {
-              ownerId: user.id,
-            },
-          }),
-          // 스토리 히스토리 등록
-          tx.transaction.create({
-            data: {
-              status: 'TRANSFER',
-              storyId: story.id,
-              toId: user.id,
-              fromId: story.userId,
-              // new
-              type: receipt.type,
-              toHash: receipt.to,
-              fromHash: receipt.from,
-              blockHash: receipt.blockHash,
-              blockNumber: transformBlockNumber,
-              senderTxHash: receipt.senderTxHash,
-              transactionHash: receipt.transactionHash,
-            },
-          }),
-        ]);
-
-        return {
-          ok: true,
-          resultCode: EXCEPTION_CODE.OK,
-          message: null,
-          result: {
-            dataId: storyId,
-          },
-        };
-      });
-      return result;
-    } catch (error) {
-      throw error;
-    }
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+    return result;
   }
 }
