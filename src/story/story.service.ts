@@ -57,7 +57,7 @@ export class StoriesService {
    * @param param
    */
   async histories(id: number) {
-    const histories = await this.prisma.history.findMany({
+    const histories = await this.prisma.transaction.findMany({
       where: {
         storyId: id,
       },
@@ -545,32 +545,22 @@ export class StoriesService {
         const transformTokenId = parseInt(tokenId, 10);
         const transformBlockNumber = `${receipt.blockNumber}`;
 
-        // nft 등록
-        const nft = await tx.nFT.create({
-          data: {
-            storyId: story.id,
-            tokenId: transformTokenId,
-          },
-        });
-
         // story 업데이트 nftId
         await tx.story.update({
           where: {
             id: story.id,
           },
           data: {
-            nftId: nft.id,
+            tokenId: transformTokenId,
           },
         });
 
-        await tx.history.create({
+        await tx.transaction.create({
           data: {
             status: 'ISSUE',
             storyId: story.id,
             toId: user.id,
             fromId: user.id,
-            // new
-            tokenId: transformTokenId,
             type: receipt.type,
             toHash: receipt.to,
             fromHash: receipt.from,
@@ -768,7 +758,6 @@ export class StoriesService {
                 account: true,
               },
             },
-            nft: true,
           },
         });
 
@@ -800,7 +789,7 @@ export class StoriesService {
         }
 
         const receipt = await this.klaytnService.transferOwnership(
-          story.nft.tokenId,
+          story.tokenId,
           story.owner.account.address,
           story.owner.account.privateKey,
           account.address,
@@ -830,14 +819,13 @@ export class StoriesService {
             },
           }),
           // 스토리 히스토리 등록
-          tx.history.create({
+          tx.transaction.create({
             data: {
               status: 'TRANSFER',
               storyId: story.id,
               toId: user.id,
               fromId: story.userId,
               // new
-              tokenId: story.nft.tokenId,
               type: receipt.type,
               toHash: receipt.to,
               fromHash: receipt.from,

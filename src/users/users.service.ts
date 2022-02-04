@@ -213,26 +213,6 @@ export class UsersService {
         };
       }
 
-      // create Sign message Data
-      // const message = `userId:${
-      //   exists.id
-      // }\n timestamp:${Date.now()} LoginRequest`;
-
-      // 서명 데이터 생성
-      // const sign = await this.klaytnService.sign(
-      //   message,
-      //   exists.account.privateKey,
-      // );
-
-      // 서명 데이터 저장
-      // await this.prisma.signature.create({
-      //   data: {
-      //     signature: sign.signature,
-      //     messageHash: sign.messageHash,
-      //     messageData: message,
-      //   },
-      // });
-
       // 액세스 토큰을 생성한다.
       const accessToken = this.jwtService.sign(
         {
