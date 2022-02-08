@@ -37,7 +37,8 @@ export const storiesSelect = {
     select: {
       id: true,
       contentUrl: true,
-      originUrl: true,
+      publidId: true,
+      version: true,
       type: true,
     },
   },
@@ -131,7 +132,6 @@ export const historiesSelect = {
       },
     },
   },
-  tokenId: true,
   toHash: true,
   fromHash: true,
   blockNumber: true,
