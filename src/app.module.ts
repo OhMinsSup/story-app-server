@@ -21,6 +21,7 @@ import { SearchModule } from './search/search.module';
 import { NotificationseModule } from './notifications/notifications.module';
 import { PushModule } from './push/push.module';
 import { TaskModule } from './task/task.module';
+import { NftModule } from './nft/nft.module';
 
 @Module({
   imports: [
@@ -69,6 +70,7 @@ import { TaskModule } from './task/task.module';
     SearchModule,
     NotificationseModule,
     TaskModule,
+    NftModule,
   ],
 })
 export class AppModule implements NestModule {
