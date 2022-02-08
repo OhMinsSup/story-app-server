@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import * as _ from 'lodash';
@@ -507,19 +508,17 @@ export class StoriesService {
       }
       const { privateKey, address } = account;
       // nft 발생
-      const receipt = await this.klaytnService.mint(
-        address,
+      const receipt = await this.klaytnService.minting({
         privateKey,
-        story.id,
-      );
+        address,
+        id: story.id,
+      });
 
       if (!receipt) {
-        return {
-          ok: false,
+        throw new InternalServerErrorException({
           resultCode: EXCEPTION_CODE.NFT_FAIL,
-          message: '스토리 생성에 실패하였습니다.',
-          result: null,
-        };
+          msg: '스토리 생성에 실패했습니다.',
+        });
       }
 
       // 발생 NFT 토큰 ID
@@ -758,21 +757,19 @@ export class StoriesService {
         });
       }
 
-      const receipt = await this.klaytnService.transferOwnership(
-        story.tokenId,
-        story.owner.account.address,
-        story.owner.account.privateKey,
-        account.address,
-        account.privateKey,
-      );
+      const receipt = await this.klaytnService.transferOwnership({
+        tokenId: story.tokenId,
+        ownerAddress: story.owner.account.address,
+        ownerPrivateKey: story.owner.account.privateKey,
+        buyerAddress: account.address,
+        buyerPrivateKey: account.privateKey,
+      });
 
       if (!receipt) {
-        return {
-          ok: false,
+        throw new InternalServerErrorException({
           resultCode: EXCEPTION_CODE.NFT_FAIL,
-          message: '스토리 생성에 실패하였습니다.',
-          result: null,
-        };
+          msg: '스토리 생성에 실패했습니다.',
+        });
       }
 
       // 발생 NFT 토큰 ID
