@@ -7,11 +7,10 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Query,
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // service
 import { UsersService } from './users.service';
@@ -27,7 +26,6 @@ import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { AuthUser } from 'src/auth/get-user.decorator';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
 import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
-import { SearchParams } from 'src/story/dtos/story.interface';
 
 @ApiTags('Users')
 @Controller('api/users')
@@ -115,26 +113,5 @@ export class UsersController {
   @UseGuards(LoggedInGuard)
   unregister(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.unregister(id);
-  }
-
-  @Get(':id/likes/stories')
-  @ApiQuery({
-    name: 'pageNo',
-    type: Number,
-    required: false,
-    description: '페이지 번호',
-  })
-  @ApiQuery({
-    name: 'pageSize',
-    type: Number,
-    required: false,
-    description: '페이지 사이즈',
-  })
-  @ApiOperation({ summary: '스토리 좋아요 리스트 조회 API' })
-  likes(
-    @Param('id', ParseIntPipe) id: number,
-    @Query() query: Partial<Pick<SearchParams, 'pageNo' | 'pageSize'>>,
-  ) {
-    return this.usersService.likes(id, query.pageNo, query.pageSize);
   }
 }

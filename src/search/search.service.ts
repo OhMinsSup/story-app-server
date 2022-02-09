@@ -106,32 +106,28 @@ export class SearchService {
       });
     }
 
-    try {
-      const [total, list] = await Promise.all([
-        this.prisma.story.count({
-          where,
-        }),
-        this.prisma.story.findMany({
-          skip: (pageNo - 1) * pageSize,
-          take: pageSize,
-          orderBy: order,
-          select: storiesSelect,
-          where,
-        }),
-      ]);
+    const [total, list] = await Promise.all([
+      this.prisma.story.count({
+        where,
+      }),
+      this.prisma.story.findMany({
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
+        orderBy: order,
+        select: storiesSelect,
+        where,
+      }),
+    ]);
 
-      return {
-        ok: true,
-        resultCode: EXCEPTION_CODE.OK,
-        message: null,
-        result: {
-          list: list.map(this.storiesService.serialize),
-          total,
-          pageNo,
-        },
-      };
-    } catch (error) {
-      throw error;
-    }
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: list.map(this.storiesService.serialize),
+        total,
+        pageNo,
+      },
+    };
   }
 }

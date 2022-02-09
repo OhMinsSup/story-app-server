@@ -110,14 +110,6 @@ export class StoriesController {
     return this.storiesService.update(user, id, input);
   }
 
-  @Get(':id/histories')
-  @ApiOperation({
-    summary: '거래내역 조회 API',
-  })
-  histories(@Param('id', ParseIntPipe) id: number) {
-    return this.storiesService.histories(id);
-  }
-
   @Get(':id/anothers/:userId')
   @ApiOperation({ summary: '작품을 작성한 사람의 다른 작품 리스트 조회' })
   anothers(
@@ -139,5 +131,26 @@ export class StoriesController {
   @ApiOperation({ summary: '스토리 좋아요 취소 API' })
   unlike(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
     return this.storiesService.unlike(user, id);
+  }
+
+  @Get(':id/likes')
+  @ApiQuery({
+    name: 'pageNo',
+    type: Number,
+    required: false,
+    description: '페이지 번호',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    type: Number,
+    required: false,
+    description: '페이지 사이즈',
+  })
+  @ApiOperation({ summary: '스토리 좋아요 리스트 조회 API' })
+  likes(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: Partial<Pick<SearchParams, 'pageNo' | 'pageSize'>>,
+  ) {
+    return this.storiesService.storyLikes(id, query.pageNo, query.pageSize);
   }
 }

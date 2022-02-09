@@ -1,8 +1,10 @@
 import {
   Controller,
+  Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -18,11 +20,11 @@ import { AuthUser } from 'src/auth/get-user.decorator';
 import type { User } from '.prisma/client';
 
 @ApiTags('Nfts')
-@Controller('/api/nfts')
+@Controller('/api/stories')
 export class NftController {
   constructor(private nftService: NftService) {}
 
-  @Post(':id/transferOwnership')
+  @Put(':id/nfts/transferOwnership')
   @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '토큰 소유권 이전 API' })
   transferOwnership(
@@ -30,5 +32,27 @@ export class NftController {
     @Param('id', ParseIntPipe) id: number,
   ) {
     return this.nftService.transferOwnership(user, id);
+  }
+
+  @Post(':id/nfts/buyer')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '토큰 구매자 설정 API' })
+  buyer(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.nftService.buyer(user, id);
+  }
+
+  @Post(':id/nfts/seller')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '토큰 판매자 설정 API' })
+  seller(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.nftService.seller(user, id);
+  }
+
+  @Get(':id/nfts/histories')
+  @ApiOperation({
+    summary: '거래내역 조회 API',
+  })
+  histories(@Param('id', ParseIntPipe) id: number) {
+    return this.nftService.histories(id);
   }
 }

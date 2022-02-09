@@ -9,6 +9,8 @@ import { KlaytnService } from 'src/klaytn/klaytn.service';
 import { NotificationsService } from 'src/notifications/notifications.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+import { historiesSelect } from 'src/common/select.option';
+
 import type { User } from '.prisma/client';
 
 @Injectable()
@@ -18,6 +20,24 @@ export class NftService {
     private readonly klaytnService: KlaytnService,
     private readonly notificationsService: NotificationsService,
   ) {}
+
+  /**
+   * @description 토큰 구매자 설정
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async buyer(user: User, storyId: number) {
+    return {};
+  }
+
+  /**
+   * @description 토큰 판매자 설정
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async seller(user: User, storyId: number) {
+    return {};
+  }
 
   /**
    * @description 토큰 소유권 이전
@@ -124,5 +144,34 @@ export class NftService {
     });
 
     return result;
+  }
+
+  /**
+   * @description - 상세에서 해당 작품을 생성한 거래내역 정보
+   * @param storyUserId
+   * @param param
+   */
+  async histories(id: number) {
+    const histories = await this.prisma.transaction.findMany({
+      where: {
+        storyId: id,
+      },
+      select: {
+        ...historiesSelect,
+      },
+      take: 30,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: histories,
+      },
+    };
   }
 }

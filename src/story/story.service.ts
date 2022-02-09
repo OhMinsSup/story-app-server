@@ -20,7 +20,7 @@ import type { SearchParams } from './dtos/story.interface';
 
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
-import { historiesSelect, storiesSelect } from 'src/common/select.option';
+import { storiesSelect } from 'src/common/select.option';
 
 @Injectable()
 export class StoriesService {
@@ -51,35 +51,6 @@ export class StoriesService {
       tags,
     };
   };
-
-  /**
-   * @description - 상세에서 해당 작품을 생성한 거래내역 정보
-   * @param storyUserId
-   * @param param
-   */
-  async histories(id: number) {
-    const histories = await this.prisma.transaction.findMany({
-      where: {
-        storyId: id,
-      },
-      select: {
-        ...historiesSelect,
-      },
-      take: 30,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return {
-      ok: true,
-      resultCode: EXCEPTION_CODE.OK,
-      message: null,
-      result: {
-        list: histories,
-      },
-    };
-  }
 
   /**
    * @description - 상세에서 해당 작품을 생성한 크리에이터의 또 다른 story를 가져온다ㄴs
@@ -708,5 +679,70 @@ export class StoriesService {
     });
 
     return result;
+  }
+
+  /**
+   * @description 스토리 좋아요 리스트 조회 API
+   * @param userId {number}
+   */
+  async storyLikes(userId: number, pageNo = 1, pageSize = 25) {
+    if (_.isString(pageNo)) {
+      pageNo = Number(pageNo);
+    }
+
+    if (_.isString(pageSize)) {
+      pageSize = Number(pageSize);
+    }
+
+    const [total, list] = await Promise.all([
+      this.prisma.like.count({
+        where: {
+          userId,
+        },
+      }),
+      this.prisma.like.findMany({
+        skip: (pageNo - 1) * pageSize,
+        take: pageSize,
+        orderBy: {
+          createdAt: 'desc',
+        },
+        where: {
+          userId,
+        },
+        include: {
+          story: {
+            include: {
+              media: true,
+              storyTags: {
+                include: {
+                  tag: true,
+                },
+              },
+              user: {
+                include: {
+                  profile: true,
+                },
+              },
+              likes: {
+                select: {
+                  userId: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: list.map(this.serialize),
+        total,
+        pageNo,
+      },
+    };
   }
 }
