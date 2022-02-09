@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
@@ -7,7 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // services
 import { NftService } from './nft.service';
@@ -18,6 +19,7 @@ import { AuthUser } from 'src/auth/get-user.decorator';
 
 // types
 import type { User } from '.prisma/client';
+import { SellerRequestDto } from './dto/seller.request.dto';
 
 @ApiTags('Nfts')
 @Controller('/api/stories')
@@ -44,8 +46,17 @@ export class NftController {
   @Post(':id/nfts/seller')
   @UseGuards(LoggedInGuard)
   @ApiOperation({ summary: '토큰 판매자 설정 API' })
-  seller(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
-    return this.nftService.seller(user, id);
+  @ApiBody({
+    required: true,
+    description: '가격 제시 데이터',
+    type: SellerRequestDto,
+  })
+  seller(
+    @AuthUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() input: SellerRequestDto,
+  ) {
+    return this.nftService.seller(user, id, input);
   }
 
   @Get(':id/nfts/histories')

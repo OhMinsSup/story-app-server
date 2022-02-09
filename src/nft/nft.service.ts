@@ -12,6 +12,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { historiesSelect } from 'src/common/select.option';
 
 import type { User } from '.prisma/client';
+import { SellerRequestDto } from './dto/seller.request.dto';
 
 @Injectable()
 export class NftService {
@@ -27,16 +28,213 @@ export class NftService {
    * @param storyId {number}
    */
   async buyer(user: User, storyId: number) {
-    return {};
+    const result = await this.prisma.$transaction(async (tx) => {
+      const story = await tx.story.findFirst({
+        where: { id: storyId },
+        select: {
+          userId: true,
+          tokenId: true,
+          unit: true,
+          price: true,
+          owner: {
+            select: {
+              account: {
+                select: {
+                  privateKey: true,
+                  address: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      if (typeof story.price === 'undefined' || story.price === null) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '가격이 올바르지 않습니다.',
+        });
+      }
+
+      if (!story.unit) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '유형이 올바르지 않습니다.',
+        });
+      }
+
+      const klayUnit = this.klaytnService.klayUnit();
+      if (!klayUnit[story.unit]) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '유형이 올바르지 않습니다.',
+        });
+      }
+
+      const receipt = await this.klaytnService.buy(
+        {
+          tokenId: story.tokenId,
+          price: story.price,
+          owner: {
+            address: story.owner.account.address,
+            privateKey: story.owner.account.privateKey,
+          },
+        },
+        story.unit,
+      );
+
+      if (!receipt) {
+        throw new InternalServerErrorException({
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          msg: 'NFT 생성에 실패했습니다.',
+        });
+      }
+
+      // 발생 NFT 토큰 ID
+      const transformBlockNumber = `${receipt.blockNumber}`;
+
+      await tx.transaction.create({
+        data: {
+          status: 'BUYER',
+          storyId: storyId,
+          toId: user.id,
+          fromId: story.userId,
+          // new
+          type: receipt.type,
+          toHash: receipt.to,
+          fromHash: receipt.from,
+          blockHash: receipt.blockHash,
+          blockNumber: transformBlockNumber,
+          senderTxHash: receipt.senderTxHash,
+          transactionHash: receipt.transactionHash,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+
+    return result;
   }
 
   /**
    * @description 토큰 판매자 설정
    * @param user {User}
    * @param storyId {number}
+   * @param input {SellerRequestDto}
    */
-  async seller(user: User, storyId: number) {
-    return {};
+  async seller(user: User, storyId: number, input: SellerRequestDto) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const story = await tx.story.findFirst({
+        where: { id: storyId },
+        select: {
+          tokenId: true,
+          userId: true,
+          price: true,
+          owner: {
+            select: {
+              account: {
+                select: {
+                  privateKey: true,
+                  address: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      const klayUnit = this.klaytnService.klayUnit();
+      if (!klayUnit[input.unit]) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '유형이 올바르지 않습니다.',
+        });
+      }
+
+      const receipt = await this.klaytnService.seller(
+        {
+          tokenId: story.tokenId,
+          price: input.price,
+          owner: {
+            address: story.owner.account.address,
+            privateKey: story.owner.account.privateKey,
+          },
+        },
+        input.unit,
+      );
+
+      if (!receipt) {
+        throw new InternalServerErrorException({
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          msg: 'NFT 생성에 실패했습니다.',
+        });
+      }
+
+      // 발생 NFT 토큰 ID
+      const transformBlockNumber = `${receipt.blockNumber}`;
+
+      await Promise.all([
+        // 스토리 소유권 이전
+        tx.story.update({
+          where: {
+            id: storyId,
+          },
+          data: {
+            price: input.price,
+            unit: input.unit,
+          },
+        }),
+        // 스토리 히스토리 등록
+        tx.transaction.create({
+          data: {
+            status: 'SELLER',
+            storyId: storyId,
+            toId: user.id,
+            fromId: story.userId,
+            // new
+            type: receipt.type,
+            toHash: receipt.to,
+            fromHash: receipt.from,
+            blockHash: receipt.blockHash,
+            blockNumber: transformBlockNumber,
+            senderTxHash: receipt.senderTxHash,
+            transactionHash: receipt.transactionHash,
+          },
+        }),
+      ]);
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+
+    return result;
   }
 
   /**

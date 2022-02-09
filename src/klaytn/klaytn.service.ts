@@ -11,6 +11,11 @@ import {
 import type Caver from 'caver-js';
 import type { KlaytnModuleOptions } from './klaytn.interfaces';
 
+interface Account {
+  address: string;
+  privateKey: string;
+}
+
 interface MintingParams {
   address: string;
   privateKey: string;
@@ -23,6 +28,12 @@ interface TransferParams {
   ownerPrivateKey: string;
   buyerAddress: string;
   buyerPrivateKey: string;
+}
+
+interface BuyNSellerParams {
+  tokenId: number;
+  price: string | number;
+  owner: Account;
 }
 
 @Injectable()
@@ -90,6 +101,119 @@ export class KlaytnService {
    */
   isAddress(address: string) {
     return this.caver.utils.isAddress(address);
+  }
+
+  /**
+   * @description 모든 KLAY 단위를 보여줍니다. */
+  klayUnit() {
+    return this.caver.utils.klayUnit;
+  }
+
+  /**
+   * @description tokenId에 해당하는 가격이 있는지 확인
+   * @param tokenId
+   */
+  async tokenPrice(tokenId: number) {
+    const tokenPrice = await this.contract.call('_tokenPrice', tokenId);
+    return tokenPrice;
+  }
+
+  /**
+   * @description 판매를 한다
+   * @param {BuyNSellerParams} params
+   */
+  async seller(params: BuyNSellerParams, utils: string) {
+    const ownerKeyring = this.singleKeyring(
+      params.owner.address,
+      params.owner.privateKey,
+    );
+
+    const feePayerSingle = this.singleKeyring(
+      this.feePayerWallet.feePayerAddress,
+      this.feePayerWallet.feePayerPrivateKey,
+    );
+
+    const price = this.caver.utils.convertToPeb(
+      this.caver.utils.toBN(params.price),
+      utils,
+    );
+
+    const signed: any = await this.contract.sign(
+      {
+        from: ownerKeyring.address,
+        feeDelegation: true,
+        gas: GAS,
+      } as Record<string, any>,
+      'setForSale',
+      params.tokenId,
+      this.caver.utils.convertToPeb(price, utils),
+    );
+
+    await this.wallet.signAsFeePayer(feePayerSingle.address, signed);
+
+    const receipt = await this.rpc.klay.sendRawTransaction(signed);
+
+    const result = {
+      tokenId: params.tokenId,
+      ...receipt,
+    };
+
+    this.logger.debug({
+      message: 'seller',
+      payload: result,
+    });
+
+    return receipt;
+  }
+
+  /**
+   * @description 구매를 한다
+   * @param {BuyNSellerParams} params
+   */
+  async buy(params: BuyNSellerParams, utils: string) {
+    const ownerKeyring = this.singleKeyring(
+      params.owner.address,
+      params.owner.privateKey,
+    );
+
+    const feePayerSingle = this.singleKeyring(
+      this.feePayerWallet.feePayerAddress,
+      this.feePayerWallet.feePayerPrivateKey,
+    );
+
+    const tokenPrice = await this.tokenPrice(params.tokenId);
+
+    const price = this.caver.utils.convertToPeb(
+      this.caver.utils.toBN(tokenPrice),
+      utils,
+    );
+
+    const signed: any = await this.contract.sign(
+      {
+        from: ownerKeyring.address,
+        feeDelegation: true,
+        gas: GAS,
+        value: price,
+      } as Record<string, any>,
+      'purchaseToken',
+      params.tokenId,
+    );
+
+    await this.wallet.signAsFeePayer(feePayerSingle.address, signed);
+
+    const receipt = await this.rpc.klay.sendRawTransaction(signed);
+
+    const result = {
+      tokenId: params.tokenId,
+      ...receipt,
+    };
+
+    this.logger.debug({
+      message: 'buy',
+      payload: result,
+    });
+
+    return receipt;
   }
 
   /**
@@ -179,105 +303,5 @@ export class KlaytnService {
     });
 
     return receipt;
-  }
-
-  async buyToken(
-    tokenId: number,
-    amount: string | number,
-    ownerAddress: string,
-    ownerPrivateKey: string,
-  ) {
-    const senderKeyring = this.caver.klay.accounts.createWithAccountKey(
-      ownerAddress,
-      ownerPrivateKey,
-    );
-
-    const feePayerKeyring = this.caver.klay.accounts.createWithAccountKey(
-      this.feePayerWallet.feePayerAddress,
-      this.feePayerWallet.feePayerPrivateKey,
-    );
-
-    // Add a keyring login snder address to caver.wallet
-    this.caver.klay.accounts.wallet.add(senderKeyring);
-    // Add a keyring login fee payer address to caver.wallet
-    this.caver.klay.accounts.wallet.add(feePayerKeyring);
-
-    const price = await this.contract?.methods._tokenPrice(tokenId).call();
-
-    // using the promise
-    const signedTx: any = await this.caver.klay.accounts.signTransaction(
-      {
-        type: 'FEE_DELEGATED_SMART_CONTRACT_EXECUTION',
-        from: senderKeyring.address,
-        to: DEPLOYED_ADDRESS,
-        data: this.contract?.methods.purchaseToken(tokenId).encodeABI(),
-        gas: '500000',
-        value: price,
-      },
-      senderKeyring.privateKey,
-    );
-
-    const { rawTransaction } = signedTx;
-
-    const tx = await this.caver.klay.sendTransaction({
-      senderRawTransaction: rawTransaction,
-      feePayer: feePayerKeyring.address,
-    });
-
-    // in-memory wallet 에서 계정 정보 삭제
-    this.caver.klay.accounts.wallet.clear();
-
-    return {
-      ...tx,
-    };
-  }
-
-  async sellToken(
-    tokenId: number,
-    amount: string | number,
-    ownerAddress: string,
-    ownerPrivateKey: string,
-  ) {
-    const senderKeyring = this.caver.klay.accounts.createWithAccountKey(
-      ownerAddress,
-      ownerPrivateKey,
-    );
-
-    const feePayerKeyring = this.caver.klay.accounts.createWithAccountKey(
-      this.feePayerWallet.feePayerAddress,
-      this.feePayerWallet.feePayerPrivateKey,
-    );
-
-    // Add a keyring login snder address to caver.wallet
-    this.caver.klay.accounts.wallet.add(senderKeyring);
-    // Add a keyring login fee payer address to caver.wallet
-    this.caver.klay.accounts.wallet.add(feePayerKeyring);
-
-    const signedTx: any = await this.caver.klay.accounts.signTransaction(
-      {
-        type: 'FEE_DELEGATED_SMART_CONTRACT_EXECUTION',
-        from: senderKeyring.address,
-        to: DEPLOYED_ADDRESS,
-        data: this.contract?.methods
-          .setForSale(tokenId, this.caver.utils.toPeb(amount, 'KLAY'))
-          .encodeABI(),
-        gas: '500000',
-      },
-      senderKeyring.privateKey,
-    );
-
-    const { rawTransaction } = signedTx;
-
-    const tx = await this.caver.klay.sendTransaction({
-      senderRawTransaction: rawTransaction,
-      feePayer: feePayerKeyring.address,
-    });
-
-    // in-memory wallet 에서 계정 정보 삭제
-    this.caver.klay.accounts.wallet.clear();
-
-    return {
-      ...tx,
-    };
   }
 }

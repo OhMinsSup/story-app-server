@@ -107,7 +107,8 @@ model Story {
   userId          Int //  유저 아이디
   ownerId         Int // 소유권 아이디
   mediaId         Int // 미디어 아이디
-  nftId           Int? // nft 아이디
+  price           String? // 가격
+  unit            String? // KLAY 단위
   name            String // 스토리 이름
   description     String // 스토리 설명
   backgroundColor String? // 배경 색상
