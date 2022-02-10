@@ -119,6 +119,15 @@ export class KlaytnService {
   }
 
   /**
+   * @description tokenId에 해당하는 NFT 정보를 가져온다
+   * @param tokenId
+   */
+  async getStory(tokenId: number) {
+    const story = await this.contract.call('getStory', tokenId);
+    return story;
+  }
+
+  /**
    * @description 판매를 한다
    * @param {BuyNSellerParams} params
    */
@@ -133,34 +142,43 @@ export class KlaytnService {
       this.feePayerWallet.feePayerPrivateKey,
     );
 
-    const price = this.caver.utils.convertToPeb(
-      this.caver.utils.toBN(params.price),
-      utils,
-    );
-
-    const signed: any = await this.contract.sign(
+    /**
+     * @link https://forum.klaytn.com/t/setapprovalforall/3552/4
+     * @description 호출한 NFT 토큰 Owner는 자신이 보유한 모든 NFT토큰에 대해 Operator가 전송 권한을 갖게 할 수 있습니다.
+     * _approved 변수에 true를 입력하면 모든 토큰에 대한 전송 권한을 갖게,
+     * false를 입력하면 모든 토큰에 대한 전송 권한을 취소하게 됩니다.
+     */
+    await this.contract.send(
       {
         from: ownerKeyring.address,
-        feeDelegation: true,
         gas: GAS,
-      } as Record<string, any>,
-      'setForSale',
-      params.tokenId,
-      this.caver.utils.convertToPeb(price, utils),
+        feeDelegation: true,
+        feePayer: feePayerSingle.address,
+      },
+      'setApprovalForAll',
+      DEPLOYED_ADDRESS,
+      true,
     );
 
-    await this.wallet.signAsFeePayer(feePayerSingle.address, signed);
+    const price = this.caver.utils
+      .toBN(this.caver.utils.convertToPeb(params.price, utils).toString())
+      .toNumber();
 
-    const receipt = await this.rpc.klay.sendRawTransaction(signed);
-
-    const result = {
-      tokenId: params.tokenId,
-      ...receipt,
-    };
+    const receipt = await this.contract.send(
+      {
+        from: ownerKeyring.address,
+        gas: GAS,
+        feeDelegation: true,
+        feePayer: feePayerSingle.address,
+      },
+      'setForSale',
+      params.tokenId,
+      price,
+    );
 
     this.logger.debug({
       message: 'seller',
-      payload: result,
+      payload: receipt,
     });
 
     return receipt;
