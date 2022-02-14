@@ -59,6 +59,13 @@ export class NftController {
     return this.nftService.seller(user, id, input);
   }
 
+  @Put(':id/nfts/cancel')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '토큰 판매 취소 API' })
+  cancel(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.nftService.cancel(user, id);
+  }
+
   @Get(':id/nfts/histories')
   @ApiOperation({
     summary: '거래내역 조회 API',

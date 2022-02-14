@@ -36,6 +36,11 @@ interface BuyNSellerParams {
   owner: Account;
 }
 
+interface CancelParams {
+  tokenId: number;
+  owner: Account;
+}
+
 @Injectable()
 export class KlaytnService {
   private contract: Contract | null;
@@ -128,6 +133,40 @@ export class KlaytnService {
   }
 
   /**
+   * @description 판매 취소를 한다
+   * @param {BuyNSellerParams} params
+   */
+  async cancel(params: CancelParams) {
+    const ownerKeyring = this.singleKeyring(
+      params.owner.address,
+      params.owner.privateKey,
+    );
+
+    const feePayerSingle = this.singleKeyring(
+      this.feePayerWallet.feePayerAddress,
+      this.feePayerWallet.feePayerPrivateKey,
+    );
+
+    const receipt = await this.contract.send(
+      {
+        from: ownerKeyring.address,
+        gas: GAS,
+        feeDelegation: true,
+        feePayer: feePayerSingle.address,
+      },
+      'removeTokenOnSale',
+      [params.tokenId],
+    );
+
+    this.logger.debug({
+      message: 'cancel',
+      payload: receipt,
+    });
+
+    return receipt;
+  }
+
+  /**
    * @description 판매를 한다
    * @param {BuyNSellerParams} params
    */
@@ -201,34 +240,23 @@ export class KlaytnService {
 
     const tokenPrice = await this.tokenPrice(params.tokenId);
 
-    const price = this.caver.utils.convertToPeb(
-      this.caver.utils.toBN(tokenPrice),
-      utils,
-    );
+    const price = this.caver.utils.convertToPeb(tokenPrice, utils);
 
-    const signed: any = await this.contract.sign(
+    const receipt = await this.contract.send(
       {
         from: ownerKeyring.address,
-        feeDelegation: true,
         gas: GAS,
+        feeDelegation: true,
+        feePayer: feePayerSingle.address,
         value: price,
       } as Record<string, any>,
       'purchaseToken',
       params.tokenId,
     );
 
-    await this.wallet.signAsFeePayer(feePayerSingle.address, signed);
-
-    const receipt = await this.rpc.klay.sendRawTransaction(signed);
-
-    const result = {
-      tokenId: params.tokenId,
-      ...receipt,
-    };
-
     this.logger.debug({
       message: 'buy',
-      payload: result,
+      payload: receipt,
     });
 
     return receipt;

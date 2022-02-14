@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { EXCEPTION_CODE } from 'src/exception/exception.code';
@@ -21,6 +20,110 @@ export class NftService {
     private readonly klaytnService: KlaytnService,
     private readonly notificationsService: NotificationsService,
   ) {}
+
+  /**
+   * @description 토큰 판매 취소
+   * @param user {User}
+   * @param storyId {number}
+   */
+  async cancel(user: User, storyId: number) {
+    const result = await this.prisma.$transaction(async (tx) => {
+      const story = await tx.story.findFirst({
+        where: { id: storyId },
+        select: {
+          userId: true,
+          tokenId: true,
+          unit: true,
+          price: true,
+          owner: {
+            select: {
+              account: {
+                select: {
+                  privateKey: true,
+                  address: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!story) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 스토리입니다.',
+        });
+      }
+
+      if (typeof story.price === 'undefined' || story.price === null) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '가격이 제시가 안된 NFT 입니다.',
+        });
+      }
+
+      if (!story.unit) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '유형이 올바르지 않습니다.',
+        });
+      }
+
+      const klayUnit = this.klaytnService.klayUnit();
+      if (!klayUnit[story.unit]) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.INVALID_PARAM,
+          msg: '유형이 올바르지 않습니다.',
+        });
+      }
+
+      const receipt = await this.klaytnService.cancel({
+        tokenId: story.tokenId,
+        owner: {
+          address: story.owner.account.address,
+          privateKey: story.owner.account.privateKey,
+        },
+      });
+
+      if (!receipt) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          msg: 'NFT 판매 취소가 실패했습니다.',
+        });
+      }
+
+      // 발생 NFT 토큰 ID
+      const transformBlockNumber = `${receipt.blockNumber}`;
+
+      await tx.transaction.create({
+        data: {
+          status: 'CANCEL',
+          storyId: storyId,
+          toId: user.id,
+          fromId: story.userId,
+          // new
+          type: receipt.type,
+          toHash: receipt.to,
+          fromHash: receipt.from,
+          blockHash: receipt.blockHash,
+          blockNumber: transformBlockNumber,
+          senderTxHash: receipt.senderTxHash,
+          transactionHash: receipt.transactionHash,
+        },
+      });
+
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: storyId,
+        },
+      };
+    });
+
+    return result;
+  }
 
   /**
    * @description 토큰 구매자 설정
@@ -91,9 +194,9 @@ export class NftService {
       );
 
       if (!receipt) {
-        throw new InternalServerErrorException({
+        throw new BadRequestException({
           resultCode: EXCEPTION_CODE.NFT_FAIL,
-          msg: 'NFT 생성에 실패했습니다.',
+          msg: 'NFT 구매가 실패했습니다.',
         });
       }
 
@@ -185,9 +288,9 @@ export class NftService {
       );
 
       if (!receipt) {
-        throw new InternalServerErrorException({
+        throw new BadRequestException({
           resultCode: EXCEPTION_CODE.NFT_FAIL,
-          msg: 'NFT 생성에 실패했습니다.',
+          msg: 'NFT 판매가 실패했습니다.',
         });
       }
 
@@ -293,7 +396,7 @@ export class NftService {
       });
 
       if (!receipt) {
-        throw new InternalServerErrorException({
+        throw new BadRequestException({
           resultCode: EXCEPTION_CODE.NFT_FAIL,
           msg: '스토리 생성에 실패했습니다.',
         });
