@@ -33,8 +33,6 @@ export class NftService {
         select: {
           userId: true,
           tokenId: true,
-          unit: true,
-          price: true,
           owner: {
             select: {
               account: {
@@ -55,27 +53,27 @@ export class NftService {
         });
       }
 
-      if (typeof story.price === 'undefined' || story.price === null) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '가격이 제시가 안된 NFT 입니다.',
-        });
-      }
+      // if (typeof story.price === 'undefined' || story.price === null) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '가격이 제시가 안된 NFT 입니다.',
+      //   });
+      // }
 
-      if (!story.unit) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '유형이 올바르지 않습니다.',
-        });
-      }
+      // if (!story.unit) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '유형이 올바르지 않습니다.',
+      //   });
+      // }
 
-      const klayUnit = this.klaytnService.klayUnit();
-      if (!klayUnit[story.unit]) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '유형이 올바르지 않습니다.',
-        });
-      }
+      // const klayUnit = this.klaytnService.klayUnit();
+      // if (!klayUnit[story.unit]) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '유형이 올바르지 않습니다.',
+      //   });
+      // }
 
       const receipt = await this.klaytnService.cancel({
         tokenId: story.tokenId,
@@ -99,15 +97,8 @@ export class NftService {
         data: {
           status: 'CANCEL',
           storyId: storyId,
-          toId: user.id,
-          fromId: story.userId,
-          // new
-          type: receipt.type,
-          toHash: receipt.to,
-          fromHash: receipt.from,
           blockHash: receipt.blockHash,
           blockNumber: transformBlockNumber,
-          senderTxHash: receipt.senderTxHash,
           transactionHash: receipt.transactionHash,
         },
       });
@@ -137,8 +128,6 @@ export class NftService {
         select: {
           userId: true,
           tokenId: true,
-          unit: true,
-          price: true,
           owner: {
             select: {
               account: {
@@ -159,38 +148,40 @@ export class NftService {
         });
       }
 
-      if (typeof story.price === 'undefined' || story.price === null) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '가격이 올바르지 않습니다.',
-        });
-      }
+      // if (typeof story.price === 'undefined' || story.price === null) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '가격이 올바르지 않습니다.',
+      //   });
+      // }
 
-      if (!story.unit) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '유형이 올바르지 않습니다.',
-        });
-      }
+      // if (!story.unit) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '유형이 올바르지 않습니다.',
+      //   });
+      // }
 
-      const klayUnit = this.klaytnService.klayUnit();
-      if (!klayUnit[story.unit]) {
-        throw new BadRequestException({
-          resultCode: EXCEPTION_CODE.INVALID_PARAM,
-          msg: '유형이 올바르지 않습니다.',
-        });
-      }
+      // const klayUnit = this.klaytnService.klayUnit();
+      // if (!klayUnit[story.unit]) {
+      //   throw new BadRequestException({
+      //     resultCode: EXCEPTION_CODE.INVALID_PARAM,
+      //     msg: '유형이 올바르지 않습니다.',
+      //   });
+      // }
 
       const receipt = await this.klaytnService.buy(
         {
           tokenId: story.tokenId,
-          price: story.price,
+          // price: story.price,
+          price: 1000,
           owner: {
             address: story.owner.account.address,
             privateKey: story.owner.account.privateKey,
           },
         },
-        story.unit,
+        // story.unit,
+        'ped',
       );
 
       if (!receipt) {
@@ -207,15 +198,8 @@ export class NftService {
         data: {
           status: 'BUYER',
           storyId: storyId,
-          toId: user.id,
-          fromId: story.userId,
-          // new
-          type: receipt.type,
-          toHash: receipt.to,
-          fromHash: receipt.from,
           blockHash: receipt.blockHash,
           blockNumber: transformBlockNumber,
-          senderTxHash: receipt.senderTxHash,
           transactionHash: receipt.transactionHash,
         },
       });
@@ -246,7 +230,6 @@ export class NftService {
         select: {
           tokenId: true,
           userId: true,
-          price: true,
           owner: {
             select: {
               account: {
@@ -304,8 +287,8 @@ export class NftService {
             id: storyId,
           },
           data: {
-            price: input.price,
-            unit: input.unit,
+            // price: input.price,
+            // unit: input.unit,
           },
         }),
         // 스토리 히스토리 등록
@@ -313,15 +296,8 @@ export class NftService {
           data: {
             status: 'SELLER',
             storyId: storyId,
-            toId: user.id,
-            fromId: story.userId,
-            // new
-            type: receipt.type,
-            toHash: receipt.to,
-            fromHash: receipt.from,
             blockHash: receipt.blockHash,
             blockNumber: transformBlockNumber,
-            senderTxHash: receipt.senderTxHash,
             transactionHash: receipt.transactionHash,
           },
         }),
@@ -420,15 +396,8 @@ export class NftService {
           data: {
             status: 'TRANSFER',
             storyId: story.id,
-            toId: user.id,
-            fromId: story.userId,
-            // new
-            type: receipt.type,
-            toHash: receipt.to,
-            fromHash: receipt.from,
             blockHash: receipt.blockHash,
             blockNumber: transformBlockNumber,
-            senderTxHash: receipt.senderTxHash,
             transactionHash: receipt.transactionHash,
           },
         }),

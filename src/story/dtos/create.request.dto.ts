@@ -74,4 +74,47 @@ export class StoryCreateRequestDto {
     required: false,
   })
   externalUrl?: string | null;
+
+  @IsString()
+  @ApiProperty({
+    example: '1000',
+    description: '가격',
+    nullable: false,
+    required: true,
+  })
+  price: string;
+
+  @IsString()
+  @ApiProperty({
+    enum: [
+      'peb',
+      'kpeb',
+      'Mpeb',
+      'Gpeb',
+      'Ston',
+      'uKLAY',
+      'mKLAY',
+      'KLAY',
+      'kKLAY',
+      'MKLAY',
+      'GKLAY',
+    ],
+    example: `
+    - peb: '1'
+    - kpeb: '1000'
+    - Mpeb: '1000000'
+    - Gpeb: '1000000000'
+    - Ston: '1000000000'
+    - uKLAY: '1000000000000'
+    - mKLAY: '1000000000000000'
+    - KLAY: '1000000000000000000'
+    - kKLAY: '1000000000000000000000'
+    - MKLAY: '1000000000000000000000000'
+    - GKLAY: '1000000000000000000000000000'
+    `,
+    description: 'KLAY 단위',
+    nullable: false,
+    required: true,
+  })
+  unit: string;
 }

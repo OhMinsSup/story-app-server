@@ -20,11 +20,11 @@ model User {
   stories   Story[] // 유저 story 관계 (생성한 유저)
 
 
-  froms         Transaction[]  @relation("from") // 유저 거래 및 발행 내역
-  tos           Transaction[]  @relation("to") // 유저 거래 및 발행 내역
   owners        Story[]        @relation("owner") // 내 스토리 관계 (생성 및 거래)
   likes         Like[] // 유저 좋아요 관계
   notifications Notification[] // 유저 알림 관계
+  sellers       Offer[]        @relation("seller") // 유저 오퍼 관계
+  buyers        Offer[]        @relation("buyer") // 유저 오퍼 관계
 }
 
 model Notification {
@@ -78,37 +78,46 @@ model Account {
   user User @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
+model Offer {
+  id Int @id @default(autoincrement())
+
+  sellerId Int // 판매자 아이디
+  buyerId  Int // 구매자 아이디
+  storyId  Int // 스토리 아이디
+  price    String // 가격
+  unit     String // KLAY 단위
+
+
+  seller User  @relation(name: "seller", fields: [sellerId], references: [id]) // 판매자
+  buyer  User  @relation(name: "buyer", fields: [buyerId], references: [id]) // 구매자
+  story  Story @relation(name: "story", fields: [storyId], references: [id]) // 스토리
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Transaction {
   id              Int    @id @default(autoincrement())
   status          String // 거래 상태
-  type            String // 거래 종류
-  toHash          String // 받는 사람 해시
-  fromHash        String // 보내는 사람 해시
   blockHash       String // 블록 해시
   blockNumber     String // 블록 넘버
-  senderTxHash    String // 보내는 사람 트랜잭션 해시
   transactionHash String // 트랜잭션 해시
 
   storyId Int // 스토리 아이디
-  toId    Int // 받는 사람 아이디
-  fromId  Int // 보내는 사람 아이디
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
 
   story Story @relation(fields: [storyId], references: [id])
-  to    User  @relation(name: "to", fields: [toId], references: [id]) // 받는 사람 관계
-  from  User  @relation(name: "from", fields: [fromId], references: [id]) // 보내는 사람 관계
 }
 
 model Story {
   id              Int      @id @default(autoincrement())
+  salesStatus     String   @default("waiting") // 판매 상태  (waiting : 판매대기, sale : 판매중, complete : 판매완료, end: 판매 종료)
   userId          Int //  유저 아이디
   ownerId         Int // 소유권 아이디
   mediaId         Int // 미디어 아이디
-  price           String? // 가격
-  unit            String? // KLAY 단위
   name            String // 스토리 이름
   description     String // 스토리 설명
   backgroundColor String? // 배경 색상
@@ -126,6 +135,7 @@ model Story {
   storyTags   StoryTags[] // 스토리 태그 관계
   likes       Like[] // 스토리 좋아요 관계
   transaction Transaction[] // 스토리 거래 내역
+  offer       Offer[]       @relation("story")
 }
 
 model Media {

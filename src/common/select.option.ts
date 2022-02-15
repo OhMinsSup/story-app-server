@@ -31,6 +31,7 @@ export const storiesSelect = {
   description: true,
   backgroundColor: true,
   externalUrl: true,
+  salesStatus: true,
   createdAt: true,
   updatedAt: true,
   media: {
@@ -92,52 +93,8 @@ export const storiesSelect = {
 export const historiesSelect = {
   id: true,
   status: true,
-  to: {
-    select: {
-      id: true,
-      email: true,
-      account: {
-        select: {
-          address: true,
-        },
-      },
-      profile: {
-        select: {
-          nickname: true,
-          profileUrl: true,
-          avatarSvg: true,
-          defaultProfile: true,
-          gender: true,
-        },
-      },
-    },
-  },
-  from: {
-    select: {
-      id: true,
-      email: true,
-      account: {
-        select: {
-          address: true,
-        },
-      },
-      profile: {
-        select: {
-          nickname: true,
-          profileUrl: true,
-          avatarSvg: true,
-          defaultProfile: true,
-          gender: true,
-        },
-      },
-    },
-  },
-  toHash: true,
-  fromHash: true,
   blockNumber: true,
   blockHash: true,
   transactionHash: true,
-  senderTxHash: true,
-  type: true,
   createdAt: true,
 };

@@ -478,6 +478,7 @@ export class StoriesService {
         });
       }
       const { privateKey, address } = account;
+
       // nft 발생
       const receipt = await this.klaytnService.minting({
         privateKey,
@@ -511,15 +512,19 @@ export class StoriesService {
         data: {
           status: 'ISSUE',
           storyId: story.id,
-          toId: user.id,
-          fromId: user.id,
-          type: receipt.type,
-          toHash: receipt.to,
-          fromHash: receipt.from,
           blockHash: receipt.blockHash,
           blockNumber: transformBlockNumber,
-          senderTxHash: receipt.senderTxHash,
           transactionHash: receipt.transactionHash,
+        },
+      });
+
+      await tx.offer.create({
+        data: {
+          storyId: story.id,
+          sellerId: user.id,
+          buyerId: user.id,
+          price: input.price,
+          unit: input.unit,
         },
       });
 
