@@ -73,4 +73,12 @@ export class NftController {
   histories(@Param('id', ParseIntPipe) id: number) {
     return this.nftService.histories(id);
   }
+
+  @Get(':id/nfts/offers')
+  @ApiOperation({
+    summary: '판매자 거래 제시 API',
+  })
+  offers(@Param('id', ParseIntPipe) id: number) {
+    return this.nftService.offers(id);
+  }
 }

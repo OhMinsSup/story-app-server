@@ -417,9 +417,52 @@ export class NftService {
   }
 
   /**
+   * @description - 상세에서 가격제시에 대한 정보를 반환한다.
+   * @param storyId {number}
+   */
+  async offers(storyId: number) {
+    const select = {
+      select: {
+        profile: {
+          select: {
+            nickname: true,
+            profileUrl: true,
+            avatarSvg: true,
+            defaultProfile: true,
+          },
+        },
+      },
+    };
+    const offers = await this.prisma.offer.findMany({
+      where: {
+        storyId,
+      },
+      select: {
+        id: true,
+        buyer: select,
+        seller: select,
+        price: true,
+        unit: true,
+      },
+      take: 30,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: {
+        list: offers,
+      },
+    };
+  }
+
+  /**
    * @description - 상세에서 해당 작품을 생성한 거래내역 정보
-   * @param storyUserId
-   * @param param
+   * @param storyId {number}
    */
   async histories(id: number) {
     const histories = await this.prisma.transaction.findMany({
