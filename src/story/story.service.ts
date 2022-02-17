@@ -750,4 +750,57 @@ export class StoriesService {
       },
     };
   }
+
+  /**
+   * @description 판매 상태 변경 API
+   * @param userId {number}
+   */
+  async statusChange(user: User, storyId: number) {
+    const story = await this.prisma.story.findFirst({
+      where: {
+        id: storyId,
+      },
+    });
+
+    if (!story) {
+      throw new NotFoundException({
+        resultCode: EXCEPTION_CODE.NOT_EXIST,
+        msg: '존재하지 않는 스토리입니다.',
+      });
+    }
+
+    if (story.ownerId !== user.id) {
+      return {
+        ok: false,
+        resultCode: EXCEPTION_CODE.NO_PERMISSION_ACTION,
+        message: '스토리 소유자만 스토리 판매 상태를 변경할 수 있습니다.',
+        result: null,
+      };
+    }
+
+    if (story.salesStatus !== 'waiting') {
+      return {
+        ok: false,
+        resultCode: EXCEPTION_CODE.INVALID,
+        message: '판매대기 상태에서만 변경이 가능합니다',
+        result: null,
+      };
+    }
+
+    await this.prisma.story.update({
+      where: {
+        id: storyId,
+      },
+      data: {
+        salesStatus: 'sale',
+      },
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: null,
+    };
+  }
 }

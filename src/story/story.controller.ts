@@ -153,4 +153,11 @@ export class StoriesController {
   ) {
     return this.storiesService.storyLikes(id, query.pageNo, query.pageSize);
   }
+
+  @Put(':id/status')
+  @UseGuards(LoggedInGuard)
+  @ApiOperation({ summary: '스토리 판매 상태 변경 API' })
+  statusChange(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
+    return this.storiesService.statusChange(user, id);
+  }
 }
