@@ -21,6 +21,7 @@ import type { SearchParams } from './dtos/story.interface';
 // dtos
 import { StoryCreateRequestDto } from './dtos/create.request.dto';
 import { storiesSelect } from 'src/common/select.option';
+import { StatusRequestDto } from './dtos/status.request.dto';
 
 @Injectable()
 export class StoriesService {
@@ -755,7 +756,7 @@ export class StoriesService {
    * @description 판매 상태 변경 API
    * @param userId {number}
    */
-  async statusChange(user: User, storyId: number) {
+  async statusChange(user: User, storyId: number, input: StatusRequestDto) {
     const story = await this.prisma.story.findFirst({
       where: {
         id: storyId,
@@ -792,7 +793,7 @@ export class StoriesService {
         id: storyId,
       },
       data: {
-        salesStatus: 'sale',
+        salesStatus: input.status,
       },
     });
 

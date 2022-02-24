@@ -25,6 +25,7 @@ import { StoryCreateRequestDto } from './dtos/create.request.dto';
 // types
 import type { User } from '.prisma/client';
 import type { SearchParams } from './dtos/story.interface';
+import { StatusRequestDto } from './dtos/status.request.dto';
 
 @ApiTags('Stories')
 @Controller('/api/stories')
@@ -156,8 +157,17 @@ export class StoriesController {
 
   @Put(':id/status')
   @UseGuards(LoggedInGuard)
+  @ApiBody({
+    required: true,
+    description: '스토리 판매 상태 변경 데이터',
+    type: StatusRequestDto,
+  })
   @ApiOperation({ summary: '스토리 판매 상태 변경 API' })
-  statusChange(@AuthUser() user: User, @Param('id', ParseIntPipe) id: number) {
-    return this.storiesService.statusChange(user, id);
+  statusChange(
+    @AuthUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() input: StatusRequestDto,
+  ) {
+    return this.storiesService.statusChange(user, id, input);
   }
 }
