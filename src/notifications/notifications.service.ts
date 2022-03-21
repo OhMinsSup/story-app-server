@@ -17,26 +17,12 @@ export class NotificationsService {
     private readonly pushService: PushService,
   ) {}
 
-  private async makeDeviceInfo(userAgent: string) {
-    // userAgent 가지고 Hash 정보를 생성
-    const deviceHash = await bcrypt.hash(userAgent, 12);
-    const deviceDetector = new DeviceDetector();
-    // userAgent 가지고 OS 정보를 생성
-    const deviceInfo = deviceDetector.parse(userAgent);
-    return {
-      os: deviceInfo.os.name,
-      clientType: deviceInfo.client.type,
-      deviceType: deviceInfo.device.type,
-      deviceHash,
-    };
-  }
-
   /**
    * @description 푸시 토큰을 저장한다
    * @param {TokenPushRequestDto} input
    * @param {string} userAgent
    */
-  async token(input: TokenPushRequestDto, userAgent: string) {
+  async device(input: TokenPushRequestDto, userAgent: string) {
     const exists = await this.prisma.device.findFirst({
       where: {
         token: input.pushToken,
@@ -44,8 +30,22 @@ export class NotificationsService {
     });
 
     if (exists) {
+      const now = new Date();
+      const createdAt = new Date(exists.createdAt);
+      const expiredPushToken =
+        now.getTime() - createdAt.getTime() > 15 * 24 * 60 * 60 * 1000;
       // 토큰의 row값은 존재하지만 token이 빈값이면 토큰 만료
-      if (!exists.token) {
+      if (expiredPushToken) {
+        // 토큰이 만료된 경우 해당 디바이스의 토큰을 제거한다.
+        await this.prisma.device.update({
+          where: {
+            id: exists.id,
+          },
+          data: {
+            token: '',
+          },
+        });
+
         return {
           ok: true,
           resultCode: EXCEPTION_CODE.PUSH_TOKEN_EXPIRED,
@@ -62,14 +62,13 @@ export class NotificationsService {
       };
     }
 
-    const result = await this.makeDeviceInfo(userAgent);
-    const { os, clientType, deviceHash, deviceType } = result;
+    const deviceDetector = new DeviceDetector();
+    // userAgent 가지고 OS 정보를 생성
+    const deviceInfo = deviceDetector.parse(userAgent);
+
     const device = await this.prisma.device.create({
       data: {
-        os,
-        clientType,
-        deviceType,
-        deviceHash,
+        os: deviceInfo.os.name,
         token: input.pushToken,
       },
     });

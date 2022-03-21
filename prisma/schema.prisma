@@ -18,6 +18,7 @@ model User {
   profile   Profile? // 유저 프로필 관계
   account   Account? // 유저 지갑 관계
   stories   Story[] // 유저 story 관계 (생성한 유저)
+  devices   Device[] // 유저 디바이스 관계
 
 
   owners        Story[]        @relation("owner") // 내 스토리 관계 (생성 및 거래)
@@ -41,15 +42,14 @@ model Notification {
 }
 
 model Device {
-  id         Int     @id @default(autoincrement())
-  os         String // os 타입
-  clientType String // client 타입
-  deviceType String // device 타입
-  deviceHash String // device 해시
-  token      String? // push token
+  id    Int     @id @default(autoincrement())
+  os    String // os 타입
+  token String? // push token
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
 }
 
 model Profile {

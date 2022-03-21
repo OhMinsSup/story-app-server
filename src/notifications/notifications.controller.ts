@@ -13,7 +13,7 @@ import type { Request } from 'express';
 export class NotificationController {
   constructor(private notificationsService: NotificationsService) {}
 
-  @Post('token')
+  @Post('device')
   @ApiOperation({
     summary: '푸시 토큰을 저장한다.',
     description: '푸시 토큰을 저장한다.',
@@ -23,7 +23,7 @@ export class NotificationController {
     description: '푸시 토큰 저장',
     type: TokenPushRequestDto,
   })
-  token(@Req() req: Request, @Body() input: TokenPushRequestDto) {
-    return this.notificationsService.token(input, req.headers['user-agent']);
+  device(@Req() req: Request, @Body() input: TokenPushRequestDto) {
+    return this.notificationsService.device(input, req.headers['user-agent']);
   }
 }

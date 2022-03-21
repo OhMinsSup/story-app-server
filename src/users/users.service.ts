@@ -141,6 +141,8 @@ export class UsersService {
   /**
    * @description - 로그인
    * @param {SigninRequestDto} input
+   * @date 2022-03-21
+   * @author veloss
    */
   async signin(input: SigninRequestDto) {
     const exists = await this.prisma.user.findFirst({
@@ -176,6 +178,28 @@ export class UsersService {
         message: '비밀번호가 일치하지 않습니다.',
         result: null,
       };
+    }
+
+    // 디바이스 정보가 존재하는 경우
+    if (input.deviceId) {
+      const validatedDevice = await this.prisma.device.findFirst({
+        where: {
+          id: input.deviceId,
+        },
+      });
+
+      if (validatedDevice) {
+        // 디바이스가 유효한 경우
+        // 해당 디바이스와 유저를 연결
+        await this.prisma.device.update({
+          where: {
+            id: input.deviceId,
+          },
+          data: {
+            userId: exists.id,
+          },
+        });
+      }
     }
 
     // 액세스 토큰을 생성한다.
