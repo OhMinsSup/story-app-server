@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 import { CommonDTO } from './common.dto';
 
 export class SignupRequestDto extends CommonDTO {
@@ -43,4 +49,15 @@ export class SignupRequestDto extends CommonDTO {
     example: 'test1q2w3e',
   })
   password: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  @ApiProperty({
+    description: '프로필 주소',
+    required: false,
+    example:
+      'https://res.cloudinary.com/planeshare/image/upload/v1648040719/story-media/1/PROFILE/KakaoTalk_Photo_2021-08-11-01-13-45.jpg',
+  })
+  profileUrl?: string;
 }

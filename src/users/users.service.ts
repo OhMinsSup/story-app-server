@@ -236,6 +236,8 @@ export class UsersService {
   /**
    * @description - 회원가입
    * @param {SignupRequestDto} input
+   * @date 2022-03-21
+   * @author veloss
    */
   async signup(input: SignupRequestDto) {
     const result = await this.prisma.$transaction(async (tx) => {
@@ -289,6 +291,24 @@ export class UsersService {
         },
       });
 
+      // avatarSvg는 무조건 넣는다.
+      const profile = {};
+      // 기본 이미지
+      if (input.defaultProfile) {
+        Object.assign(profile, {
+          defaultProfile: true,
+          avatarSvg: input.avatarSvg,
+          profileUrl: undefined,
+        });
+      } else {
+        // 업로드 이미지
+        Object.assign(profile, {
+          defaultProfile: false,
+          avatarSvg: input.avatarSvg,
+          profileUrl: input.profileUrl,
+        });
+      }
+
       await Promise.all([
         // 프로필 생성
         tx.profile.create({
@@ -296,9 +316,7 @@ export class UsersService {
             userId: user.id,
             nickname: input.nickname,
             gender: input.gender,
-            profileUrl: null,
-            avatarSvg: input.avatarSvg,
-            defaultProfile: input.defaultProfile,
+            ...profile,
           },
         }),
         // 지갑 생성
