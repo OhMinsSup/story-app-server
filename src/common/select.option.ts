@@ -25,6 +25,18 @@ export const userAccountSelect = {
   },
 };
 
+export const userSelect = {
+  id: true,
+  email: true,
+  password: true,
+  profile: userProfileSelect.profile,
+  account: {
+    select: {
+      address: true,
+    },
+  },
+};
+
 export const storiesSelect = {
   id: true,
   name: true,

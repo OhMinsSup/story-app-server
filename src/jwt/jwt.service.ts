@@ -11,6 +11,7 @@ export class JwtService {
   constructor(
     @Inject(CONFIG_OPTIONS) private readonly options: JwtModuleOptions,
   ) {}
+
   sign(payload: any, options?: SignOptions): string {
     const jwtOptions: SignOptions = {
       issuer: 'story-app.io',
@@ -25,7 +26,21 @@ export class JwtService {
 
     return jwt.sign(payload, this.options.privateKey, jwtOptions);
   }
+
   verify<T = string | jwt.JwtPayload>(token: string) {
     return jwt.verify(token, this.options.privateKey) as T;
+  }
+
+  generateAccessToken(id: number, address: string) {
+    return this.sign(
+      {
+        id,
+        address,
+      },
+      {
+        subject: 'access_token',
+        expiresIn: '30d',
+      },
+    );
   }
 }

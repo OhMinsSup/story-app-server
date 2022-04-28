@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 export class SigninRequestDto {
   @IsString()
@@ -17,14 +17,4 @@ export class SigninRequestDto {
     example: '12345678',
   })
   password: string;
-
-  @IsOptional()
-  @IsNotEmpty()
-  @IsNumber()
-  @ApiProperty({
-    description: '디바이스 아이디',
-    required: false,
-    example: 1,
-  })
-  deviceId?: number;
 }
