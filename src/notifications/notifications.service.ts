@@ -1,10 +1,8 @@
 // import { Injectable } from '@nestjs/common';
 // import DeviceDetector from 'device-detector-js';
-// import * as bcrypt from 'bcrypt';
 
 // // service
 // import { PrismaService } from 'src/prisma/prisma.service';
-// import { PushService } from 'src/push/push.service';
 
 // // dto
 // import { EXCEPTION_CODE } from 'src/exception/exception.code';
@@ -12,10 +10,7 @@
 
 // @Injectable()
 // export class NotificationsService {
-//   constructor(
-//     private readonly prisma: PrismaService,
-//     private readonly pushService: PushService,
-//   ) {}
+//   constructor(private readonly prisma: PrismaService) {}
 
 //   /**
 //    * @description 푸시 토큰을 저장한다

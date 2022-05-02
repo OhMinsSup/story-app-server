@@ -22,44 +22,41 @@ model User {
 }
 
 model Profile {
-  id              Int       @id @default(autoincrement())
-  userId          Int       @unique
+  id              Int      @id @default(autoincrement())
+  userId          Int      @unique
   nickname        String // 유저 닉네임
   profileUrl      String? // 유저 프로필 이미지
   avatarSvg       String? // 아바타 svg
-  defaultProfile  Boolean   @default(true) // 기본 프로필 여부
+  defaultProfile  Boolean  @default(true) // 기본 프로필 여부
   gender          String // 성별
   bio             String? // 간단한 소개
-  canNotification Boolean   @default(false) // 알림 설정 값
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
+  canNotification Boolean  @default(false) // 알림 설정 값
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
 model Account {
-  id         Int       @id @default(autoincrement())
-  userId     Int       @unique // 유저 아이디
-  address    String    @unique // 지갑 주소
-  privateKey String    @unique // 지갑 개인키
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  deletedAt  DateTime?
-  user       User      @relation(fields: [userId], references: [id]) // 유저 관계
+  id         Int      @id @default(autoincrement())
+  userId     Int      @unique // 유저 아이디
+  address    String   @unique // 지갑 주소
+  privateKey String   @unique // 지갑 개인키
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
 model Device {
   id    Int     @id @default(autoincrement())
-  os    String // os 타입
   token String? // push token
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  User   User? @relation(fields: [userId], references: [id])
-  userId Int?
+  User   User @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 // model User {
