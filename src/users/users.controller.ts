@@ -1,3 +1,4 @@
+import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -10,22 +11,25 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 // service
 import { UsersService } from './users.service';
 
-// types
-import { SignupRequestDto } from './dtos/signup.request.dto';
-import { SigninRequestDto } from './dtos/signin.request.dto';
-import { User } from '.prisma/client';
-import type { Response } from 'express';
-
 // decorators
 import { LoggedInGuard } from 'src/auth/logged-in.guard';
 import { AuthUser } from 'src/auth/get-user.decorator';
-import { EXCEPTION_CODE } from 'src/exception/exception.code';
+
+// dto
+import { SignupRequestDto } from './dtos/signup.request.dto';
+import { SigninRequestDto } from './dtos/signin.request.dto';
 import { ProfileUpdateRequestDto } from './dtos/profileUpdate.request.dto';
+
+// constants
+import { EXCEPTION_CODE } from 'src/exception/exception.code';
+
+// types
+import type { User } from '.prisma/client';
+import type { Response } from 'express';
 
 @ApiTags('Users')
 @Controller('api/users')

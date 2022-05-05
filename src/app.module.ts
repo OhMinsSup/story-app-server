@@ -22,6 +22,7 @@ import { KlaytnModule } from './klaytn/klaytn.module';
 // import { PushModule } from './push/push.module';
 // import { TaskModule } from './task/task.module';
 // import { NftModule } from './nft/nft.module';
+import { DeviceModule } from './device/device.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { KlaytnModule } from './klaytn/klaytn.module';
     // }),
     AuthModule,
     UsersModule,
+    DeviceModule,
     // FilesModule,
     // StoriesModule,
     // TagsModule,
