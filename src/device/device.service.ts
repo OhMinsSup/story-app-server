@@ -26,7 +26,7 @@ export class DeviceService {
     const whereDeviceIs = Prisma.validator<Prisma.DeviceWhereInput>()({
       AND: [
         {
-          id: user.id,
+          userId: user.id,
         },
         {
           token: input.pushToken,
