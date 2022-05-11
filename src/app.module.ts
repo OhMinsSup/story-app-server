@@ -14,7 +14,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 // import { CloudinaryModule } from './cloudinary/cloudinary.module';
 // import { FilesModule } from './files/files.module';
-// import { StoriesModule } from './story/story.module';
+import { StoriesModule } from './story/story.module';
 // import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
 // import { SearchModule } from './search/search.module';
@@ -67,7 +67,7 @@ import { DeviceModule } from './device/device.module';
     UsersModule,
     DeviceModule,
     // FilesModule,
-    // StoriesModule,
+    StoriesModule,
     // TagsModule,
     // SearchModule,
     // NotificationseModule,

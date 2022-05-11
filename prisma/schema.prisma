@@ -12,13 +12,13 @@ model User {
   id        Int       @id @default(autoincrement())
   email     String    @unique // 유저 이메일
   password  String // 비밀번호
-  isDelete  Boolean   @default(false) // 삭제 여부
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   profile   Profile? // 유저 프로필 관계
   account   Account? // 유저 지갑 관계
   devices   Device[] // 유저 디바이스 관계
+  // stories   Story[] // 유저 story 관계 (생성한 유저)
 }
 
 model Profile {
@@ -55,8 +55,43 @@ model Device {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  User   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id])
   userId Int
+}
+
+model Story {
+  id              Int      @id @default(autoincrement())
+  title           String // 스토리 제목
+  description     String // 스토리 설명
+  backgroundColor String? // 배경 색상
+  externalSite    String? // 외부 주소 ("opensea, krafterSpace" 등)
+  isPublic        Boolean  @default(false) // 공개 여부
+  price           String? // 가격 (Klaytn 단위)
+  beginDate       DateTime // 시작 날짜
+  endDate         DateTime // 종료 날짜
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // userId  Int //  유저 아이디
+  // ownerId Int // 소유권 아이디
+  // mediaId Int // 미디어 아이디
+  // tokenId Int? // 토큰 아이디
+  // media   Media @relation(fields: [mediaId], references: [id]) // 미디어
+  // user    User  @relation(fields: [userId], references: [id]) // 유저
+  // owner           User     @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
+}
+
+model Media {
+  id         Int      @id @default(autoincrement())
+  publidId   String // cloudinary 공개 아아디
+  version    String // cloudinary 버전 정보
+  contentUrl String // 컨텐츠 이미지
+  type       String // 이미지 타입
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  // stories    Story[] // 스토리 관계
 }
 
 // model User {
