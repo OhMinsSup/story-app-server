@@ -18,7 +18,10 @@ model User {
   profile   Profile? // 유저 프로필 관계
   account   Account? // 유저 지갑 관계
   devices   Device[] // 유저 디바이스 관계
-  // stories   Story[] // 유저 story 관계 (생성한 유저)
+  stories   Story[] // 유저 story 관계 (생성한 유저)
+  owners    Story[]   @relation("owner") // 내 스토리 관계 (생성 및 거래)
+
+  Media Media[]
 }
 
 model Profile {
@@ -74,13 +77,14 @@ model Story {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  // userId  Int //  유저 아이디
-  // ownerId Int // 소유권 아이디
-  // mediaId Int // 미디어 아이디
-  // tokenId Int? // 토큰 아이디
-  // media   Media @relation(fields: [mediaId], references: [id]) // 미디어
-  // user    User  @relation(fields: [userId], references: [id]) // 유저
-  // owner           User     @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
+  media   Media @relation(fields: [mediaId], references: [id]) // 미디어
+  mediaId Int // 미디어 아이디
+
+  user   User @relation(fields: [userId], references: [id]) // 유저
+  userId Int //  유저 아이디
+
+  owner   User @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
+  ownerId Int // 소유권 아이디
 }
 
 model Media {
@@ -91,7 +95,9 @@ model Media {
   type       String // 이미지 타입
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  // stories    Story[] // 스토리 관계
+  stories    Story[] // 스토리 관계
+  userId     Int? // 유저 관계
+  user       User?    @relation(fields: [userId], references: [id]) // 유저 관계
 }
 
 // model User {

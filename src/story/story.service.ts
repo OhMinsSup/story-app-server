@@ -387,148 +387,146 @@ export class StoriesService {
    * @param input
    */
   async create(user: User, input: StoryCreateRequestDto) {
-    // const result = await this.prisma.$transaction(async (tx) => {
-    //   const media = await tx.media.findFirst({
-    //     where: {
-    //       id: input.mediaId,
-    //     },
-    //   });
-    //   if (!media) {
-    //     throw new NotFoundException({
-    //       resultCode: EXCEPTION_CODE.NOT_EXIST,
-    //       msg: '존재하지 않는 파일입니다.',
-    //     });
-    //   }
-    //   const nameDuplicate = await tx.story.findFirst({
-    //     where: {
-    //       name: input.name,
-    //     },
-    //   });
-    //   if (!_.isEmpty(nameDuplicate)) {
-    //     throw new BadRequestException({
-    //       resultCode: EXCEPTION_CODE.DUPLICATE,
-    //       msg: '이미 존재하는 스토리 입니다.',
-    //     });
-    //   }
-    //   let createdTags: Tag[] = [];
-    //   // 태크 체크
-    //   if (!_.isEmpty(input.tags)) {
-    //     const tags = await Promise.all(
-    //       input.tags.map(async (tag) => {
-    //         const tagData = await tx.tag.findFirst({
-    //           where: {
-    //             name: tag.trim(),
-    //           },
-    //         });
-    //         if (!tagData) {
-    //           return tx.tag.create({
-    //             data: {
-    //               name: tag.trim(),
-    //             },
-    //           });
-    //         }
-    //         return tagData;
-    //       }),
-    //     );
-    //     createdTags = tags;
-    //   }
-    //   // 스토리 생성
-    //   const story = await tx.story.create({
-    //     data: {
-    //       userId: user.id,
-    //       ownerId: user.id,
-    //       mediaId: media.id,
-    //       name: input.name,
-    //       description: input.description,
-    //       private: !!input.isPrivate,
-    //       ...(input.backgroundColor
-    //         ? {
-    //             backgroundColor: input.backgroundColor,
-    //           }
-    //         : {
-    //             backgroundColor: '#ffffff',
-    //           }),
-    //       ...(input.externalUrl && {
-    //         externalUrl: input.externalUrl,
-    //       }),
-    //     },
-    //   });
-    //   // 태그 생성
-    //   await Promise.all(
-    //     createdTags.map((tag) =>
-    //       tx.storyTags.create({
-    //         data: {
-    //           storyId: story.id,
-    //           tagId: tag.id,
-    //         },
-    //       }),
-    //     ),
-    //   );
-    //   const account = await tx.account.findFirst({
-    //     where: {
-    //       userId: user.id,
-    //     },
-    //   });
-    //   if (!account) {
-    //     throw new NotFoundException({
-    //       resultCode: EXCEPTION_CODE.NOT_EXIST,
-    //       msg: '존재하지 않는 유저입니다.',
-    //     });
-    //   }
-    //   const { privateKey, address } = account;
-    //   // nft 발생
-    //   const receipt = await this.klaytnService.minting({
-    //     privateKey,
-    //     address,
-    //     id: story.id,
-    //   });
-    //   if (!receipt) {
-    //     throw new InternalServerErrorException({
-    //       resultCode: EXCEPTION_CODE.NFT_FAIL,
-    //       msg: '스토리 생성에 실패했습니다.',
-    //     });
-    //   }
-    //   // 발생 NFT 토큰 ID
-    //   const tokenId = receipt.tokenId;
-    //   const transformTokenId = parseInt(tokenId, 10);
-    //   const transformBlockNumber = `${receipt.blockNumber}`;
-    //   // story 업데이트 nftId
-    //   await tx.story.update({
-    //     where: {
-    //       id: story.id,
-    //     },
-    //     data: {
-    //       tokenId: transformTokenId,
-    //     },
-    //   });
-    //   await tx.transaction.create({
-    //     data: {
-    //       status: 'ISSUE',
-    //       storyId: story.id,
-    //       blockHash: receipt.blockHash,
-    //       blockNumber: transformBlockNumber,
-    //       transactionHash: receipt.transactionHash,
-    //     },
-    //   });
-    //   await tx.offer.create({
-    //     data: {
-    //       storyId: story.id,
-    //       sellerId: user.id,
-    //       buyerId: user.id,
-    //       price: input.price,
-    //       unit: input.unit,
-    //     },
-    //   });
-    //   return {
-    //     ok: true,
-    //     resultCode: EXCEPTION_CODE.OK,
-    //     message: null,
-    //     result: {
-    //       dataId: story.id,
-    //     },
-    //   };
-    // });
-    // return result;
+    const result = await this.prisma.$transaction(async (tx) => {
+      const media = await tx.media.findFirst({
+        where: {
+          id: input.mediaId,
+        },
+      });
+      if (!media) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 파일입니다.',
+        });
+      }
+      const nameDuplicate = await tx.story.findFirst({
+        where: {
+          title: input.title,
+        },
+      });
+
+      if (!_.isEmpty(nameDuplicate)) {
+        throw new BadRequestException({
+          resultCode: EXCEPTION_CODE.DUPLICATE,
+          msg: '이미 존재하는 스토리 입니다.',
+        });
+      }
+
+      const userId = user.id;
+      // let createdTags: Tag[] = [];
+      // // 태크 체크
+      // if (!_.isEmpty(input.tags)) {
+      //   const tags = await Promise.all(
+      //     input.tags.map(async (tag) => {
+      //       const tagData = await tx.tag.findFirst({
+      //         where: {
+      //           name: tag.trim(),
+      //         },
+      //       });
+      //       if (!tagData) {
+      //         return tx.tag.create({
+      //           data: {
+      //             name: tag.trim(),
+      //           },
+      //         });
+      //       }
+      //       return tagData;
+      //     }),
+      //   );
+      //   createdTags = tags;
+      // }
+      // 스토리 생성
+      const story = await tx.story.create({
+        data: {
+          userId,
+          ownerId: userId,
+          mediaId: media.id,
+          title: input.title,
+          description: input.description,
+          isPublic: !!input.isPublic,
+          backgroundColor: input.backgroundColor,
+          externalSite: input.externalSite,
+          beginDate: new Date(input.beginDate),
+          endDate: new Date(input.endDate),
+        },
+      });
+      // 태그 생성
+      // await Promise.all(
+      //   createdTags.map((tag) =>
+      //     tx.storyTags.create({
+      //       data: {
+      //         storyId: story.id,
+      //         tagId: tag.id,
+      //       },
+      //     }),
+      //   ),
+      // );
+      const account = await tx.account.findFirst({
+        where: {
+          userId: user.id,
+        },
+      });
+      if (!account) {
+        throw new NotFoundException({
+          resultCode: EXCEPTION_CODE.NOT_EXIST,
+          msg: '존재하지 않는 유저입니다.',
+        });
+      }
+
+      const { privateKey, address } = account;
+      // // nft 발생
+      // const receipt = await this.klaytnService.minting({
+      //   privateKey,
+      //   address,
+      //   id: story.id,
+      // });
+      // if (!receipt) {
+      //   throw new InternalServerErrorException({
+      //     resultCode: EXCEPTION_CODE.NFT_FAIL,
+      //     msg: '스토리 생성에 실패했습니다.',
+      //   });
+      // }
+      // // 발생 NFT 토큰 ID
+      // const tokenId = receipt.tokenId;
+      // const transformTokenId = parseInt(tokenId, 10);
+      // const transformBlockNumber = `${receipt.blockNumber}`;
+      // // story 업데이트 nftId
+      // await tx.story.update({
+      //   where: {
+      //     id: story.id,
+      //   },
+      //   data: {
+      //     tokenId: transformTokenId,
+      //   },
+      // });
+      // await tx.transaction.create({
+      //   data: {
+      //     status: 'ISSUE',
+      //     storyId: story.id,
+      //     blockHash: receipt.blockHash,
+      //     blockNumber: transformBlockNumber,
+      //     transactionHash: receipt.transactionHash,
+      //   },
+      // });
+      // await tx.offer.create({
+      //   data: {
+      //     storyId: story.id,
+      //     sellerId: user.id,
+      //     buyerId: user.id,
+      //     price: input.price,
+      //     unit: input.unit,
+      //   },
+      // });
+      return {
+        ok: true,
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        result: {
+          dataId: story.id,
+        },
+      };
+    });
+    return result;
   }
 
   //   /**

@@ -12,8 +12,8 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { JwtModule } from './jwt/jwt.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-// import { CloudinaryModule } from './cloudinary/cloudinary.module';
-// import { FilesModule } from './files/files.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { FilesModule } from './files/files.module';
 import { StoriesModule } from './story/story.module';
 // import { TagsModule } from './tags/tags.module';
 import { KlaytnModule } from './klaytn/klaytn.module';
@@ -50,11 +50,11 @@ import { DeviceModule } from './device/device.module';
     MulterModule.register({
       storage: memoryStorage(), // use memory storage for having the buffer
     }),
-    // CloudinaryModule.forRoot({
-    //   cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-    //   cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
-    //   cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
-    // }),
+    CloudinaryModule.forRoot({
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+      cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    }),
     KlaytnModule.forRoot({
       feePayerPrivateKey: process.env.KLAYTN_PRIVATE_KEY,
       feePayerAddress: process.env.KLAYTN_ADDRESS,
@@ -66,7 +66,7 @@ import { DeviceModule } from './device/device.module';
     AuthModule,
     UsersModule,
     DeviceModule,
-    // FilesModule,
+    FilesModule,
     StoriesModule,
     // TagsModule,
     // SearchModule,

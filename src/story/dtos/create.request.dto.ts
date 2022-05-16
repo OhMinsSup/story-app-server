@@ -16,26 +16,7 @@ export class StoryCreateRequestDto {
     description: 'NFT 타이틀(이름)',
     required: true,
   })
-  name: string;
-
-  @IsArray()
-  @ApiProperty({
-    example: ['태그1', '태그2'],
-    description: 'NFT 태그',
-    required: false,
-    default: [],
-  })
-  tags: string[];
-
-  @IsBoolean()
-  @ApiProperty({
-    example: true,
-    description: 'NFT 노출 여부',
-    nullable: true,
-    required: false,
-    default: false,
-  })
-  isPrivate: boolean;
+  title: string;
 
   @IsString()
   @ApiProperty({
@@ -44,14 +25,6 @@ export class StoryCreateRequestDto {
     required: true,
   })
   description: string;
-
-  @IsNumber()
-  @ApiProperty({
-    example: 1,
-    description: 'NFT 미디어 id',
-    required: true,
-  })
-  mediaId: number;
 
   @IsString()
   @IsHexColor()
@@ -68,12 +41,22 @@ export class StoryCreateRequestDto {
   @IsUrl()
   @ValidateIf((object, value) => value !== null)
   @ApiProperty({
-    example: 'https://www.example.com/',
-    description: '추가 URL',
+    example: 'opensea,krafter',
+    description: '연관된 사이트',
     nullable: true,
     required: false,
   })
-  externalUrl?: string | null;
+  externalSite?: string | null;
+
+  @IsBoolean()
+  @ApiProperty({
+    example: true,
+    description: 'NFT 노출 여부',
+    nullable: true,
+    required: false,
+    default: false,
+  })
+  isPublic: boolean;
 
   @IsString()
   @ApiProperty({
@@ -84,37 +67,38 @@ export class StoryCreateRequestDto {
   })
   price: string;
 
-  @IsString()
+  @IsNumber()
   @ApiProperty({
-    enum: [
-      'peb',
-      'kpeb',
-      'Mpeb',
-      'Gpeb',
-      'Ston',
-      'uKLAY',
-      'mKLAY',
-      'KLAY',
-      'kKLAY',
-      'MKLAY',
-      'GKLAY',
-    ],
-    example: `
-    - peb: '1'
-    - kpeb: '1000'
-    - Mpeb: '1000000'
-    - Gpeb: '1000000000'
-    - Ston: '1000000000'
-    - uKLAY: '1000000000000'
-    - mKLAY: '1000000000000000'
-    - KLAY: '1000000000000000000'
-    - kKLAY: '1000000000000000000000'
-    - MKLAY: '1000000000000000000000000'
-    - GKLAY: '1000000000000000000000000000'
-    `,
-    description: 'KLAY 단위',
+    example: new Date().getTime(),
+    description: '판매시작일',
     nullable: false,
     required: true,
   })
-  unit: string;
+  beginDate: Date;
+
+  @IsNumber()
+  @ApiProperty({
+    example: new Date().getTime(),
+    description: '판매종료일',
+    nullable: false,
+    required: true,
+  })
+  endDate: Date;
+
+  // @IsArray()
+  // @ApiProperty({
+  //   example: ['태그1', '태그2'],
+  //   description: 'NFT 태그',
+  //   required: false,
+  //   default: [],
+  // })
+  // tags: string[];
+
+  @IsNumber()
+  @ApiProperty({
+    example: 1,
+    description: 'NFT 미디어 id',
+    required: true,
+  })
+  mediaId: number;
 }

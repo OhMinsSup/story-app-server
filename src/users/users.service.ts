@@ -380,15 +380,6 @@ export class UsersService {
    * @param {number} id
    */
   async unregister(id: number) {
-    await this.prisma.user.update({
-      where: {
-        id,
-      },
-      data: {
-        isDelete: true,
-      },
-    });
-
     return {
       ok: true,
       resultCode: EXCEPTION_CODE.OK,
