@@ -85,6 +85,31 @@ model Story {
 
   owner   User @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
   ownerId Int // 소유권 아이디
+
+  nft   Nft? @relation(fields: [nftId], references: [id]) // nft
+  nftId Int? // nft 아이디
+
+  tags StoryTags[] // 스토리 태그 관계
+}
+
+model Nft {
+  id      Int    @id @default(autoincrement())
+  tokenId String @unique // 토큰 아이디
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  story Story[] // 스토리 관계  
+
+  @@index([tokenId])
+}
+
+model StoryTags {
+  id      Int    @id @default(autoincrement())
+  story   Story? @relation(fields: [storyId], references: [id]) // 스토리
+  tag     Tag?   @relation(fields: [tagId], references: [id]) // 태그
+  storyId Int? // 스토리 아이디
+  tagId   Int? // 태그 아이디
 }
 
 model Media {
@@ -98,6 +123,16 @@ model Media {
   stories    Story[] // 스토리 관계
   userId     Int? // 유저 관계
   user       User?    @relation(fields: [userId], references: [id]) // 유저 관계
+}
+
+model Tag {
+  id        Int         @id @default(autoincrement())
+  name      String      @unique // 태그 이름
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  storyTags StoryTags[] // 스토리 태그 관계
+
+  @@index([name])
 }
 
 // model User {

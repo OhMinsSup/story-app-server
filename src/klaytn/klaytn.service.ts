@@ -323,7 +323,7 @@ export class KlaytnService {
       this.feePayerWallet.feePayerPrivateKey,
     );
 
-    const signed: any = await this.contract.sign(
+    const signed: Awaited<any> = await this.contract.sign(
       {
         from: senderSingle.address,
         feeDelegation: true,

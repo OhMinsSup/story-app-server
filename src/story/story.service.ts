@@ -15,10 +15,7 @@ import { KlaytnService } from 'src/klaytn/klaytn.service';
 // import { NotificationsService } from 'src/notifications/notifications.service';
 
 // types
-import type {
-  // Story, StoryTags, Tag,
-  User,
-} from '.prisma/client';
+import type { Story, StoryTags, Tag, User } from '.prisma/client';
 import type { SearchParams } from './dtos/story.interface';
 
 // dtos
@@ -413,28 +410,29 @@ export class StoriesService {
       }
 
       const userId = user.id;
-      // let createdTags: Tag[] = [];
-      // // 태크 체크
-      // if (!_.isEmpty(input.tags)) {
-      //   const tags = await Promise.all(
-      //     input.tags.map(async (tag) => {
-      //       const tagData = await tx.tag.findFirst({
-      //         where: {
-      //           name: tag.trim(),
-      //         },
-      //       });
-      //       if (!tagData) {
-      //         return tx.tag.create({
-      //           data: {
-      //             name: tag.trim(),
-      //           },
-      //         });
-      //       }
-      //       return tagData;
-      //     }),
-      //   );
-      //   createdTags = tags;
-      // }
+      let createdTags: Tag[] = [];
+      // 태크 체크
+      if (!_.isEmpty(input.tags)) {
+        const tags = await Promise.all(
+          input.tags.map(async (tag) => {
+            const tagData = await tx.tag.findFirst({
+              where: {
+                name: tag.trim(),
+              },
+            });
+            if (!tagData) {
+              return tx.tag.create({
+                data: {
+                  name: tag.trim(),
+                },
+              });
+            }
+            return tagData;
+          }),
+        );
+        createdTags = tags;
+      }
+
       // 스토리 생성
       const story = await tx.story.create({
         data: {
@@ -450,22 +448,25 @@ export class StoriesService {
           endDate: new Date(input.endDate),
         },
       });
+
       // 태그 생성
-      // await Promise.all(
-      //   createdTags.map((tag) =>
-      //     tx.storyTags.create({
-      //       data: {
-      //         storyId: story.id,
-      //         tagId: tag.id,
-      //       },
-      //     }),
-      //   ),
-      // );
+      await Promise.all(
+        createdTags.map((tag) =>
+          tx.storyTags.create({
+            data: {
+              storyId: story.id,
+              tagId: tag.id,
+            },
+          }),
+        ),
+      );
+
       const account = await tx.account.findFirst({
         where: {
           userId: user.id,
         },
       });
+
       if (!account) {
         throw new NotFoundException({
           resultCode: EXCEPTION_CODE.NOT_EXIST,
@@ -474,40 +475,38 @@ export class StoriesService {
       }
 
       const { privateKey, address } = account;
-      // // nft 발생
-      // const receipt = await this.klaytnService.minting({
-      //   privateKey,
-      //   address,
-      //   id: story.id,
-      // });
-      // if (!receipt) {
-      //   throw new InternalServerErrorException({
-      //     resultCode: EXCEPTION_CODE.NFT_FAIL,
-      //     msg: '스토리 생성에 실패했습니다.',
-      //   });
-      // }
-      // // 발생 NFT 토큰 ID
-      // const tokenId = receipt.tokenId;
-      // const transformTokenId = parseInt(tokenId, 10);
-      // const transformBlockNumber = `${receipt.blockNumber}`;
-      // // story 업데이트 nftId
-      // await tx.story.update({
-      //   where: {
-      //     id: story.id,
-      //   },
-      //   data: {
-      //     tokenId: transformTokenId,
-      //   },
-      // });
-      // await tx.transaction.create({
-      //   data: {
-      //     status: 'ISSUE',
-      //     storyId: story.id,
-      //     blockHash: receipt.blockHash,
-      //     blockNumber: transformBlockNumber,
-      //     transactionHash: receipt.transactionHash,
-      //   },
-      // });
+
+      // nft 발생
+      const receipt = await this.klaytnService.minting({
+        privateKey,
+        address,
+        id: story.id,
+      });
+
+      if (!receipt) {
+        throw new InternalServerErrorException({
+          resultCode: EXCEPTION_CODE.NFT_FAIL,
+          msg: '스토리 생성에 실패했습니다.',
+        });
+      }
+
+      // story 업데이트 nftId
+      const nft = await tx.nft.create({
+        data: {
+          // 발생 NFT 토큰 ID
+          tokenId: receipt.tokenId,
+        },
+      });
+
+      await tx.story.update({
+        where: {
+          id: story.id,
+        },
+        data: {
+          nftId: nft.id,
+        },
+      });
+
       // await tx.offer.create({
       //   data: {
       //     storyId: story.id,

@@ -85,14 +85,14 @@ export class StoryCreateRequestDto {
   })
   endDate: Date;
 
-  // @IsArray()
-  // @ApiProperty({
-  //   example: ['태그1', '태그2'],
-  //   description: 'NFT 태그',
-  //   required: false,
-  //   default: [],
-  // })
-  // tags: string[];
+  @IsArray()
+  @ApiProperty({
+    example: ['태그1', '태그2'],
+    description: 'NFT 태그',
+    required: false,
+    default: [],
+  })
+  tags: string[];
 
   @IsNumber()
   @ApiProperty({
