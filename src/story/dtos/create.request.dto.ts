@@ -74,7 +74,7 @@ export class StoryCreateRequestDto {
     nullable: false,
     required: true,
   })
-  beginDate: Date;
+  beginDate: number;
 
   @IsNumber()
   @ApiProperty({
@@ -83,7 +83,7 @@ export class StoryCreateRequestDto {
     nullable: false,
     required: true,
   })
-  endDate: Date;
+  endDate: number;
 
   @IsArray()
   @ApiProperty({

@@ -72,6 +72,7 @@ model Story {
   price           String? // 가격 (Klaytn 단위)
   beginDate       DateTime // 시작 날짜
   endDate         DateTime // 종료 날짜
+  saleStatus      String   @default("pending") // 판매 상태 ("sale", "canceled", "expired", "pending", "trade")
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

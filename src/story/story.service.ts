@@ -490,6 +490,9 @@ export class StoriesService {
         });
       }
 
+      console.log(receipt);
+      console.log(receipt.events);
+
       // story 업데이트 nftId
       const nft = await tx.nft.create({
         data: {
@@ -507,15 +510,6 @@ export class StoriesService {
         },
       });
 
-      // await tx.offer.create({
-      //   data: {
-      //     storyId: story.id,
-      //     sellerId: user.id,
-      //     buyerId: user.id,
-      //     price: input.price,
-      //     unit: input.unit,
-      //   },
-      // });
       return {
         ok: true,
         resultCode: EXCEPTION_CODE.OK,

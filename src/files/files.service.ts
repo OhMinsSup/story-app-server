@@ -18,6 +18,25 @@ export class FilesService {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
+  async list(user: User) {
+    const media = await this.prisma.media.findMany({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: 10,
+    });
+
+    return {
+      ok: true,
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      result: media,
+    };
+  }
+
   /**
    * - This method is used to file upload api
    * @param {UploadRequestDto} input

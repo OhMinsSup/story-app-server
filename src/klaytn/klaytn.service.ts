@@ -295,11 +295,6 @@ export class KlaytnService {
       ...receipt,
     };
 
-    this.logger.debug({
-      message: 'Minting',
-      payload: result,
-    });
-
     return result;
   }
 

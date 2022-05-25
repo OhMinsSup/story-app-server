@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   UploadedFile,
   UseGuards,
@@ -27,6 +28,12 @@ import type { User } from '.prisma/client';
 @Controller('api/files')
 export class FilesController {
   constructor(private filesService: FilesService) {}
+
+  @Get()
+  @ApiOperation({ summary: '내가 업로드한 파일 목록 조회' })
+  list(@AuthUser() user: User) {
+    return this.filesService.list(user);
+  }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
