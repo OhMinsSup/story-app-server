@@ -1,0 +1,519 @@
+{
+  "contractName": "Address",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"details\":\"\\uc8fc\\uc18c \\ud0c0\\uc785\\uacfc \\uad00\\ub828\\ub41c \\ud568\\uc218\\uc758 \\ubaa8\\uc74c,\",\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/Address.sol\":\"Address\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/Address.sol\":{\"keccak256\":\"0x96c056071b98e47781cde735bf54bbc34ff02979806a7a3996c76fd9b280be2b\",\"urls\":[\"bzz-raw://f1c457d8e9f71c42701d07439c22d0741a5d41762fc18b5e9ca27a7153182080\",\"dweb:/ipfs/QmSeTNXx4sVuND6iLDkoHt9eCaQjiE4kDm6awZa3jHNTTY\"]}},\"version\":1}",
+  "bytecode": "0x60556023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea265627a7a72315820c0b42ec159081f161b6e114e330a80d3ed9dceafb8ab826948cb955d3f9fb40e64736f6c63430005100032",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea265627a7a72315820c0b42ec159081f161b6e114e330a80d3ed9dceafb8ab826948cb955d3f9fb40e64736f6c63430005100032",
+  "sourceMap": "86:974:0:-;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24",
+  "deployedSourceMap": "86:974:0:-;;;;;;;;",
+  "source": "pragma solidity 0.5.16;\n\n/**\n * @dev 주소 타입과 관련된 함수의 모음,\n */\nlibrary Address {\n    /**\n     * @dev 만일 `account` 가 컨트랙트라면 참(true)를 반환합니다.\n     *\n     * 이 테스트는 불완전하며, false-negatives가 있을 수 있습니다:\n     * 컨트랙트의 생성자를 실행하는 중, 주소는 컨트랙트를 포함하지\n     * 않은 것으로 보고될 것입니다.\n     *\n     * > 이 함수가 거짓(false)을 반환하는 주소가 외부 소유 계정(EOA)\n     * 이며 컨트랙트가 아니라고 가정하는 것은 확실하지 않습니다.\n     */\n    function isContract(address account) internal view returns (bool) {\n        // 코드는 생성자 실행이 완료되고 나서 저장되므로, 생성 중인\n        // 컨트랙트에 대해 0을 반환하는 extcodesize에\n        // 의존합니다.\n        uint256 size;\n        // solhint-disable-next-line no-inline-assembly\n        assembly {\n            size := extcodesize(account)\n        }\n        return size > 0;\n    }\n}\n",
+  "sourcePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/Address.sol",
+  "ast": {
+    "absolutePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/Address.sol",
+    "exportedSymbols": {
+      "Address": [
+        18
+      ]
+    },
+    "id": 19,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".16"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": "@dev 주소 타입과 관련된 함수의 모음,",
+        "fullyImplemented": true,
+        "id": 18,
+        "linearizedBaseContracts": [
+          18
+        ],
+        "name": "Address",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 16,
+              "nodeType": "Block",
+              "src": "691:367:0",
+              "statements": [
+                {
+                  "assignments": [
+                    9
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 9,
+                      "name": "size",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 16,
+                      "src": "888:12:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 8,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "888:7:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 10,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "888:12:0"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "size": {
+                        "declaration": 9,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "989:4:0",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "account": {
+                        "declaration": 3,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1009:7:0",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 11,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ size := extcodesize(account) }",
+                  "src": "966:61:0"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 14,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 12,
+                      "name": "size",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 9,
+                      "src": "1043:4:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": ">",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "hexValue": "30",
+                      "id": 13,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1050:1:0",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "1043:8:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 7,
+                  "id": 15,
+                  "nodeType": "Return",
+                  "src": "1036:15:0"
+                }
+              ]
+            },
+            "documentation": "@dev 만일 `account` 가 컨트랙트라면 참(true)를 반환합니다.\n     * 이 테스트는 불완전하며, false-negatives가 있을 수 있습니다:\n컨트랙트의 생성자를 실행하는 중, 주소는 컨트랙트를 포함하지\n않은 것으로 보고될 것입니다.\n     * > 이 함수가 거짓(false)을 반환하는 주소가 외부 소유 계정(EOA)\n이며 컨트랙트가 아니라고 가정하는 것은 확실하지 않습니다.",
+            "id": 17,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isContract",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "645:15:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "645:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "644:17:0"
+            },
+            "returnParameters": {
+              "id": 7,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "685:4:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "685:4:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "684:6:0"
+            },
+            "scope": 18,
+            "src": "625:433:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 19,
+        "src": "86:974:0"
+      }
+    ],
+    "src": "0:1061:0"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/Address.sol",
+    "exportedSymbols": {
+      "Address": [
+        18
+      ]
+    },
+    "id": 19,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".16"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:0"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "documentation": "@dev 주소 타입과 관련된 함수의 모음,",
+        "fullyImplemented": true,
+        "id": 18,
+        "linearizedBaseContracts": [
+          18
+        ],
+        "name": "Address",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": {
+              "id": 16,
+              "nodeType": "Block",
+              "src": "691:367:0",
+              "statements": [
+                {
+                  "assignments": [
+                    9
+                  ],
+                  "declarations": [
+                    {
+                      "constant": false,
+                      "id": 9,
+                      "name": "size",
+                      "nodeType": "VariableDeclaration",
+                      "scope": 16,
+                      "src": "888:12:0",
+                      "stateVariable": false,
+                      "storageLocation": "default",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      },
+                      "typeName": {
+                        "id": 8,
+                        "name": "uint256",
+                        "nodeType": "ElementaryTypeName",
+                        "src": "888:7:0",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_uint256",
+                          "typeString": "uint256"
+                        }
+                      },
+                      "value": null,
+                      "visibility": "internal"
+                    }
+                  ],
+                  "id": 10,
+                  "initialValue": null,
+                  "nodeType": "VariableDeclarationStatement",
+                  "src": "888:12:0"
+                },
+                {
+                  "externalReferences": [
+                    {
+                      "size": {
+                        "declaration": 9,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "989:4:0",
+                        "valueSize": 1
+                      }
+                    },
+                    {
+                      "account": {
+                        "declaration": 3,
+                        "isOffset": false,
+                        "isSlot": false,
+                        "src": "1009:7:0",
+                        "valueSize": 1
+                      }
+                    }
+                  ],
+                  "id": 11,
+                  "nodeType": "InlineAssembly",
+                  "operations": "{ size := extcodesize(account) }",
+                  "src": "966:61:0"
+                },
+                {
+                  "expression": {
+                    "argumentTypes": null,
+                    "commonType": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    },
+                    "id": 14,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftExpression": {
+                      "argumentTypes": null,
+                      "id": 12,
+                      "name": "size",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 9,
+                      "src": "1043:4:0",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "BinaryOperation",
+                    "operator": ">",
+                    "rightExpression": {
+                      "argumentTypes": null,
+                      "hexValue": "30",
+                      "id": 13,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": true,
+                      "kind": "number",
+                      "lValueRequested": false,
+                      "nodeType": "Literal",
+                      "src": "1050:1:0",
+                      "subdenomination": null,
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_rational_0_by_1",
+                        "typeString": "int_const 0"
+                      },
+                      "value": "0"
+                    },
+                    "src": "1043:8:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "functionReturnParameters": 7,
+                  "id": 15,
+                  "nodeType": "Return",
+                  "src": "1036:15:0"
+                }
+              ]
+            },
+            "documentation": "@dev 만일 `account` 가 컨트랙트라면 참(true)를 반환합니다.\n     * 이 테스트는 불완전하며, false-negatives가 있을 수 있습니다:\n컨트랙트의 생성자를 실행하는 중, 주소는 컨트랙트를 포함하지\n않은 것으로 보고될 것입니다.\n     * > 이 함수가 거짓(false)을 반환하는 주소가 외부 소유 계정(EOA)\n이며 컨트랙트가 아니라고 가정하는 것은 확실하지 않습니다.",
+            "id": 17,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "isContract",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 4,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 3,
+                  "name": "account",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "645:15:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_address",
+                    "typeString": "address"
+                  },
+                  "typeName": {
+                    "id": 2,
+                    "name": "address",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "645:7:0",
+                    "stateMutability": "nonpayable",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_address",
+                      "typeString": "address"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "644:17:0"
+            },
+            "returnParameters": {
+              "id": 7,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 6,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 17,
+                  "src": "685:4:0",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 5,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "685:4:0",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "684:6:0"
+            },
+            "scope": 18,
+            "src": "625:433:0",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 19,
+        "src": "86:974:0"
+      }
+    ],
+    "src": "0:1061:0"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.1.0",
+  "updatedAt": "2022-02-10T14:14:17.180Z",
+  "devdoc": {
+    "details": "주소 타입과 관련된 함수의 모음,",
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

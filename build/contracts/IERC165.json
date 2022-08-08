@@ -1,0 +1,297 @@
+{
+  "contractName": "IERC165",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceID",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.16+commit.9c3226ce\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceID\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"[EIP](https://eips.ethereum.org/EIPS/eip-165)\\uc5d0 \\uc815\\uc758\\ub41c * ERC165 \\ud45c\\uc900\\uc758 \\uc778\\ud130\\ud398\\uc774\\uc2a4\\uc785\\ub2c8\\ub2e4. * \\uad6c\\ud604\\uccb4\\ub294 \\uc9c0\\uc6d0\\ud558\\ub294 \\ucee8\\ud2b8\\ub799\\ud2b8 \\uc778\\ud130\\ud398\\uc774\\uc2a4\\ub97c \\uc120\\uc5b8\\ud560 \\uc218 \\uc788\\uc73c\\uba70, \\uc678\\ubd80\\uc5d0\\uc11c (`ERC165Checker`) \\uc774 \\ud568\\uc218\\ub97c \\ud638\\ucd9c\\ud574 \\uc9c0\\uc6d0 \\uc5ec\\ubd80\\ub97c \\uc870\\ud68c\\ud560 \\uc218 \\uc788\\uc2b5\\ub2c8\\ub2e4. * \\uad6c\\ud604\\uc5d0 \\ub300\\ud574\\uc11c\\ub294 `ERC165`\\ub97c \\ucc38\\uc870\\ud558\\uc138\\uc694.\",\"methods\":{\"supportsInterface(bytes4)\":{\"details\":\"`ERC165`\\uc5d0\\uc11c \\uc9c0\\uc6d0\\ud558\\ub294 \\ucee8\\ud2b8\\ub799\\ud2b8 \\uc778\\ud130\\ud398\\uc774\\uc2a4\\ub97c \\uc870\\ud68c\\ud569\\ub2c8\\ub2e4.\\ub9cc\\uc77c \\ucee8\\ud2b8\\ub799\\ud2b8\\uac00 `interfaceId`\\ub85c \\uc815\\uc758\\ub41c \\uc778\\ud130\\ud398\\uc774\\uc2a4\\ub97c \\uad6c\\ud604\\ud588\\uc73c\\uba74, \\ucc38(true)\\uc744 \\ubc18\\ud658\\ud569\\ub2c8\\ub2e4. ID \\uc0dd\\uc131 \\ubc29\\ubc95\\uc5d0 \\ub300\\ud55c \\uc790\\uc138\\ud55c \\ub0b4\\uc6a9\\uc740 \\ud574\\ub2f9 [EIP section](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified) \\uc744 \\ucc38\\uc870\\ud558\\uc138\\uc694.     * \\uc774 \\ud568\\uc218 \\ud638\\ucd9c\\uc740 30000 \\uac00\\uc2a4\\ubcf4\\ub2e4 \\uc801\\uac8c \\uc0ac\\uc6a9\\ud560 \\uac83\\uc785\\ub2c8\\ub2e4.\",\"params\":{\"interfaceID\":\"\\ucee8\\ud2b8\\ub799\\ud2b8 \\uc778\\ud130\\ud398\\uc774\\uc2a4\\uc758 \\uace0\\uc720\\ud55c \\uac12\\uc785\\ub2c8\\ub2e4.\"},\"return\":\"\\uc9c0\\uc6d0\\ud558\\ub294 \\ucee8\\ud2b8\\ub799\\ud2b8 \\uc778\\ud130\\ud398\\uc774\\uc2a4\\uc758 \\uc9c0\\uc6d0 \\uc5ec\\ubd80\\uc785\\ub2c8\\ub2e4.\"}}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/IERC165.sol\":\"IERC165\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/IERC165.sol\":{\"keccak256\":\"0x2bb695519d136e6afe7dae34a55e0df9864af6aaa79f8d4683d87657af1e38fe\",\"urls\":[\"bzz-raw://7d9ab3eb3c4ef3fa8dd4fdae081358417dbda4565ce6ffe67dca1417277fe46e\",\"dweb:/ipfs/QmT5oworqwX7yQabWLCQrBtD48RJgAo6wVKSvuw9gKSAh6\"]}},\"version\":1}",
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "sourceMap": "",
+  "deployedSourceMap": "",
+  "source": "pragma solidity 0.5.16;\n\n/**\n * @dev [EIP](https://eips.ethereum.org/EIPS/eip-165)에 정의된 * ERC165 표준의 인터페이스입니다.\n *\n * 구현체는 지원하는 컨트랙트 인터페이스를 선언할 수 있으며,\n * 외부에서 (`ERC165Checker`) 이 함수를 호출해 지원 여부를 조회할 수 있습니다.\n *\n * 구현에 대해서는 `ERC165`를 참조하세요.\n */\ninterface IERC165 {\n    /**\n     * @dev `ERC165`에서 지원하는 컨트랙트 인터페이스를 조회합니다.\n     * @dev 만일 컨트랙트가 `interfaceId`로 정의된 인터페이스를 구현했으면,\n     * 참(true)을 반환합니다. ID 생성 방법에 대한 자세한 내용은 해당\n     * [EIP section](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified)\n     * 을 참조하세요.\n     *\n     * 이 함수 호출은 30000 가스보다 적게 사용할 것입니다.\n     * @param interfaceID 컨트랙트 인터페이스의 고유한 값입니다.\n     * @return 지원하는 컨트랙트 인터페이스의 지원 여부입니다.\n     */\n    function supportsInterface(bytes4 interfaceID) external view returns (bool);\n}\n",
+  "sourcePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/IERC165.sol",
+  "ast": {
+    "absolutePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/IERC165.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        1031
+      ]
+    },
+    "id": 1032,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1023,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".16"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:5"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "@dev [EIP](https://eips.ethereum.org/EIPS/eip-165)에 정의된 * ERC165 표준의 인터페이스입니다.\n * 구현체는 지원하는 컨트랙트 인터페이스를 선언할 수 있으며,\n외부에서 (`ERC165Checker`) 이 함수를 호출해 지원 여부를 조회할 수 있습니다.\n * 구현에 대해서는 `ERC165`를 참조하세요.",
+        "fullyImplemented": false,
+        "id": 1031,
+        "linearizedBaseContracts": [
+          1031
+        ],
+        "name": "IERC165",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev `ERC165`에서 지원하는 컨트랙트 인터페이스를 조회합니다.\n@dev 만일 컨트랙트가 `interfaceId`로 정의된 인터페이스를 구현했으면,\n참(true)을 반환합니다. ID 생성 방법에 대한 자세한 내용은 해당\n[EIP section](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified)\n을 참조하세요.\n     * 이 함수 호출은 30000 가스보다 적게 사용할 것입니다.\n@param interfaceID 컨트랙트 인터페이스의 고유한 값입니다.\n@return 지원하는 컨트랙트 인터페이스의 지원 여부입니다.",
+            "id": 1030,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "supportsInterface",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1026,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1025,
+                  "name": "interfaceID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1030,
+                  "src": "1110:18:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes4",
+                    "typeString": "bytes4"
+                  },
+                  "typeName": {
+                    "id": 1024,
+                    "name": "bytes4",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1110:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes4",
+                      "typeString": "bytes4"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1109:20:5"
+            },
+            "returnParameters": {
+              "id": 1029,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1028,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1030,
+                  "src": "1153:4:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 1027,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1153:4:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1152:6:5"
+            },
+            "scope": 1031,
+            "src": "1083:76:5",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1032,
+        "src": "395:766:5"
+      }
+    ],
+    "src": "0:1162:5"
+  },
+  "legacyAST": {
+    "absolutePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/ERC721/IERC165.sol",
+    "exportedSymbols": {
+      "IERC165": [
+        1031
+      ]
+    },
+    "id": 1032,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 1023,
+        "literals": [
+          "solidity",
+          "0.5",
+          ".16"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:23:5"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "interface",
+        "documentation": "@dev [EIP](https://eips.ethereum.org/EIPS/eip-165)에 정의된 * ERC165 표준의 인터페이스입니다.\n * 구현체는 지원하는 컨트랙트 인터페이스를 선언할 수 있으며,\n외부에서 (`ERC165Checker`) 이 함수를 호출해 지원 여부를 조회할 수 있습니다.\n * 구현에 대해서는 `ERC165`를 참조하세요.",
+        "fullyImplemented": false,
+        "id": 1031,
+        "linearizedBaseContracts": [
+          1031
+        ],
+        "name": "IERC165",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "body": null,
+            "documentation": "@dev `ERC165`에서 지원하는 컨트랙트 인터페이스를 조회합니다.\n@dev 만일 컨트랙트가 `interfaceId`로 정의된 인터페이스를 구현했으면,\n참(true)을 반환합니다. ID 생성 방법에 대한 자세한 내용은 해당\n[EIP section](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified)\n을 참조하세요.\n     * 이 함수 호출은 30000 가스보다 적게 사용할 것입니다.\n@param interfaceID 컨트랙트 인터페이스의 고유한 값입니다.\n@return 지원하는 컨트랙트 인터페이스의 지원 여부입니다.",
+            "id": 1030,
+            "implemented": false,
+            "kind": "function",
+            "modifiers": [],
+            "name": "supportsInterface",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 1026,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1025,
+                  "name": "interfaceID",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1030,
+                  "src": "1110:18:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bytes4",
+                    "typeString": "bytes4"
+                  },
+                  "typeName": {
+                    "id": 1024,
+                    "name": "bytes4",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1110:6:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bytes4",
+                      "typeString": "bytes4"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1109:20:5"
+            },
+            "returnParameters": {
+              "id": 1029,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 1028,
+                  "name": "",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 1030,
+                  "src": "1153:4:5",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_bool",
+                    "typeString": "bool"
+                  },
+                  "typeName": {
+                    "id": 1027,
+                    "name": "bool",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "1153:4:5",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_bool",
+                      "typeString": "bool"
+                    }
+                  },
+                  "value": null,
+                  "visibility": "internal"
+                }
+              ],
+              "src": "1152:6:5"
+            },
+            "scope": 1031,
+            "src": "1083:76:5",
+            "stateMutability": "view",
+            "superFunction": null,
+            "visibility": "external"
+          }
+        ],
+        "scope": 1032,
+        "src": "395:766:5"
+      }
+    ],
+    "src": "0:1162:5"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.16+commit.9c3226ce.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.1.0",
+  "updatedAt": "2022-02-10T14:14:17.210Z",
+  "devdoc": {
+    "details": "[EIP](https://eips.ethereum.org/EIPS/eip-165)에 정의된 * ERC165 표준의 인터페이스입니다. * 구현체는 지원하는 컨트랙트 인터페이스를 선언할 수 있으며, 외부에서 (`ERC165Checker`) 이 함수를 호출해 지원 여부를 조회할 수 있습니다. * 구현에 대해서는 `ERC165`를 참조하세요.",
+    "methods": {
+      "supportsInterface(bytes4)": {
+        "details": "`ERC165`에서 지원하는 컨트랙트 인터페이스를 조회합니다.만일 컨트랙트가 `interfaceId`로 정의된 인터페이스를 구현했으면, 참(true)을 반환합니다. ID 생성 방법에 대한 자세한 내용은 해당 [EIP section](https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified) 을 참조하세요.     * 이 함수 호출은 30000 가스보다 적게 사용할 것입니다.",
+        "params": {
+          "interfaceID": "컨트랙트 인터페이스의 고유한 값입니다."
+        },
+        "return": "지원하는 컨트랙트 인터페이스의 지원 여부입니다."
+      }
+    }
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}

@@ -1,6 +1,0 @@
-truffle-config.js
-truffle-config.dev.js
-migrations/
-contracts/
-node_modules/
-dist/

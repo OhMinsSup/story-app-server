@@ -33,17 +33,3 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-
-# env
-.env.development
-.env.production
-
-prisma/dev.db
-prisma/dev.db-journal
-prisma/migrations
-
-build/
-deployedABI
-deployedAddress
-
-scripts/
