@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["interactiveTransactions"]
@@ -5,299 +8,48 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique // 유저 이메일
-  password  String // 비밀번호
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  profile   Profile? // 유저 프로필 관계
-  account   Account? // 유저 지갑 관계
-  devices   Device[] // 유저 디바이스 관계
-  stories   Story[] // 유저 story 관계 (생성한 유저)
-  owners    Story[]   @relation("owner") // 내 스토리 관계 (생성 및 거래)
+  id Int @id @default(autoincrement())
 
-  Media Media[]
+  email String @unique // 이메일, max: 255
+
+  username String @unique // 유저명, max: 255
+
+  passwordHash String // 비밀번호
+
+  profileUrl String? // 유저 프로필 url, max: 1000
+
+  lastActiveAt DateTime? // 마지막 접속 시간
+
+  lastActiveIp String? // 마지막 접속 아이피
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  authentications UserAuthentication[]
 }
 
-model Profile {
-  id              Int      @id @default(autoincrement())
-  userId          Int      @unique
-  nickname        String // 유저 닉네임
-  profileUrl      String? // 유저 프로필 이미지
-  avatarSvg       String? // 아바타 svg
-  defaultProfile  Boolean  @default(true) // 기본 프로필 여부
-  gender          String // 성별
-  bio             String? // 간단한 소개
-  canNotification Boolean  @default(false) // 알림 설정 값
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model UserAuthentication {
+  id Int @id @default(autoincrement())
 
-  user User @relation(fields: [userId], references: [id]) // 유저 관계
+  accessToken String // 인증 토큰
+
+  expiresAt DateTime // 만료일
+
+  lastValidatedAt DateTime // 마지막으로 검증된 날짜
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  User   User? @relation(fields: [userId], references: [id]) // 로그인 유저 정보
+  userId Int? // 로그인 유저 아이디
 }
-
-model Account {
-  id         Int      @id @default(autoincrement())
-  userId     Int      @unique // 유저 아이디
-  address    String   @unique // 지갑 주소
-  privateKey String   @unique // 지갑 개인키
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id]) // 유저 관계
-}
-
-model Device {
-  id    Int     @id @default(autoincrement())
-  token String? // push token
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  user   User @relation(fields: [userId], references: [id])
-  userId Int
-}
-
-model Story {
-  id              Int      @id @default(autoincrement())
-  title           String // 스토리 제목
-  description     String // 스토리 설명
-  backgroundColor String? // 배경 색상
-  externalSite    String? // 외부 주소 ("opensea, krafterSpace" 등)
-  isPublic        Boolean  @default(false) // 공개 여부
-  price           String? // 가격 (Klaytn 단위)
-  beginDate       DateTime // 시작 날짜
-  endDate         DateTime // 종료 날짜
-  saleStatus      String   @default("pending") // 판매 상태 ("sale", "canceled", "expired", "pending", "trade")
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  media   Media @relation(fields: [mediaId], references: [id]) // 미디어
-  mediaId Int // 미디어 아이디
-
-  user   User @relation(fields: [userId], references: [id]) // 유저
-  userId Int //  유저 아이디
-
-  owner   User @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
-  ownerId Int // 소유권 아이디
-
-  nft   Nft? @relation(fields: [nftId], references: [id]) // nft
-  nftId Int? // nft 아이디
-
-  tags StoryTags[] // 스토리 태그 관계
-}
-
-model Nft {
-  id      Int    @id @default(autoincrement())
-  tokenId String @unique // 토큰 아이디
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  story Story[] // 스토리 관계  
-
-  @@index([tokenId])
-}
-
-model StoryTags {
-  id      Int    @id @default(autoincrement())
-  story   Story? @relation(fields: [storyId], references: [id]) // 스토리
-  tag     Tag?   @relation(fields: [tagId], references: [id]) // 태그
-  storyId Int? // 스토리 아이디
-  tagId   Int? // 태그 아이디
-}
-
-model Media {
-  id         Int      @id @default(autoincrement())
-  publidId   String // cloudinary 공개 아아디
-  version    String // cloudinary 버전 정보
-  contentUrl String // 컨텐츠 이미지
-  type       String // 이미지 타입
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  stories    Story[] // 스토리 관계
-  userId     Int? // 유저 관계
-  user       User?    @relation(fields: [userId], references: [id]) // 유저 관계
-}
-
-model Tag {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique // 태그 이름
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  storyTags StoryTags[] // 스토리 태그 관계
-
-  @@index([name])
-}
-
-// model User {
-//   id        Int      @id @default(autoincrement())
-//   email     String   @unique // 유저 이메일
-//   password  String // 비밀번로
-//   isDelete  Boolean  @default(false) // 삭제 여부
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   profile   Profile? // 유저 프로필 관계
-//   account   Account? // 유저 지갑 관계
-//   stories   Story[] // 유저 story 관계 (생성한 유저)
-//   devices   Device[] // 유저 디바이스 관계
-
-//   owners        Story[]        @relation("owner") // 내 스토리 관계 (생성 및 거래)
-//   likes         Like[] // 유저 좋아요 관계
-//   notifications Notification[] // 유저 알림 관계
-//   sellers       Offer[]        @relation("seller") // 유저 오퍼 관계
-//   buyers        Offer[]        @relation("buyer") // 유저 오퍼 관계
-// }
-
-// model Notification {
-//   id        Int      @id @default(autoincrement())
-//   type      String // 타입
-//   title     String // 제목
-//   message   String // 메시지
-//   link      String? // 링크
-//   isRead    Boolean  @default(false) // 읽음 여부
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   User      User?    @relation(fields: [userId], references: [id])
-//   userId    Int?
-// }
-
-// model Device {
-//   id    Int     @id @default(autoincrement())
-//   os    String // os 타입
-//   token String? // push token
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-//   User      User?    @relation(fields: [userId], references: [id])
-//   userId    Int?
-// }
-
-// model Profile {
-//   id              Int      @id @default(autoincrement())
-//   userId          Int      @unique
-//   nickname        String // 유저 닉네임
-//   profileUrl      String? // 유저 프로필 이미지
-//   avatarSvg       String? // 아바타 svg
-//   defaultProfile  Boolean  @default(true) // 기본 프로필 여부
-//   gender          String // 성별
-//   bio             String? // 간단한 소개
-//   canNotification Boolean  @default(false) // 알림 설정 값
-//   createdAt       DateTime @default(now())
-//   updatedAt       DateTime @updatedAt
-//   user            User     @relation(fields: [userId], references: [id]) // 유저 관계
-// }
-
-// model Account {
-//   id         Int      @id @default(autoincrement())
-//   userId     Int      @unique // 유저 아이디
-//   address    String   @unique // 지갑 주소
-//   privateKey String   @unique // 지갑 개인키
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-
-//   user User @relation(fields: [userId], references: [id]) // 유저 관계
-// }
-
-// model Offer {
-//   id Int @id @default(autoincrement())
-
-//   sellerId Int // 판매자 아이디
-//   buyerId  Int // 구매자 아이디
-//   storyId  Int // 스토리 아이디
-//   price    String // 가격
-//   unit     String // KLAY 단위
-
-//   seller User  @relation(name: "seller", fields: [sellerId], references: [id]) // 판매자
-//   buyer  User  @relation(name: "buyer", fields: [buyerId], references: [id]) // 구매자
-//   story  Story @relation(name: "story", fields: [storyId], references: [id]) // 스토리
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
-
-// model Transaction {
-//   id              Int    @id @default(autoincrement())
-//   status          String // 거래 상태
-//   blockHash       String // 블록 해시
-//   blockNumber     String // 블록 넘버
-//   transactionHash String // 트랜잭션 해시
-
-//   storyId Int // 스토리 아이디
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   story Story @relation(fields: [storyId], references: [id])
-// }
-
-// model Story {
-//   id              Int      @id @default(autoincrement())
-//   salesStatus     String   @default("waiting") // 판매 상태  (waiting : 판매대기, sale : 판매중, complete : 판매완료, end: 판매 종료)
-//   userId          Int //  유저 아이디
-//   ownerId         Int // 소유권 아이디
-//   mediaId         Int // 미디어 아이디
-//   name            String // 스토리 이름
-//   description     String // 스토리 설명
-//   backgroundColor String? // 배경 색상
-//   externalUrl     String? // 외부 주소
-//   tokenId         Int? // 토큰 아이디
-//   private         Boolean  @default(false) // 공개 여부
-//   createdAt       DateTime @default(now())
-//   updatedAt       DateTime @updatedAt
-//   isDelete        Boolean  @default(false) // 삭제 여부
-//   media           Media    @relation(fields: [mediaId], references: [id]) // 미디어
-//   user            User     @relation(fields: [userId], references: [id]) // 유저
-//   owner           User     @relation(name: "owner", fields: [ownerId], references: [id]) // 소유권
-
-//   storyTags   StoryTags[] // 스토리 태그 관계
-//   likes       Like[] // 스토리 좋아요 관계
-//   transaction Transaction[] // 스토리 거래 내역
-//   offer       Offer[]       @relation("story")
-// }
-
-// model Media {
-//   id         Int      @id @default(autoincrement())
-//   publidId   String // cloudinary 공개 아아디
-//   version    String // cloudinary 버전 정보
-//   contentUrl String // 컨텐츠 이미지
-//   type       String // 이미지 타입
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-//   stories    Story[] // 스토리 관계
-// }
-
-// model StoryTags {
-//   id      Int    @id @default(autoincrement())
-//   story   Story? @relation(fields: [storyId], references: [id]) // 스토리
-//   tag     Tag?   @relation(fields: [tagId], references: [id]) // 태그
-//   storyId Int? // 스토리 아이디
-//   tagId   Int? // 태그 아이디
-// }
-
-// model Tag {
-//   id        Int         @id @default(autoincrement())
-//   name      String      @unique // 태그 이름
-//   createdAt DateTime    @default(now())
-//   updatedAt DateTime    @updatedAt
-//   storyTags StoryTags[] // 스토리 태그 관계
-
-//   @@index([name])
-// }
-
-// model Like {
-//   id        Int      @id @default(autoincrement())
-//   userId    Int      @unique // 유저 아이디
-//   storyId   Int      @unique // 스토리 아이디
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   user  User  @relation(fields: [userId], references: [id]) // 유저
-//   story Story @relation(fields: [storyId], references: [id]) // 스토리
-// }
