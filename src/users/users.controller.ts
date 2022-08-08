@@ -98,7 +98,10 @@ export class UsersController {
     if (typeof data.result === 'object' && data.ok) {
       res.cookie('access_token', data.result.accessToken, {
         httpOnly: true,
+        domain: 'localhost',
+        path: '/',
         maxAge: 1000 * 60 * 60 * 24 * 30,
+        sameSite: 'lax',
       });
     }
 
@@ -108,7 +111,11 @@ export class UsersController {
   @Post('logout')
   @ApiOperation({ summary: '로그아웃' })
   logout(@Res() res: Response) {
-    res.clearCookie('access_token', { httpOnly: true });
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      domain: 'localhost',
+      path: '/',
+    });
     return res.status(HttpStatus.OK).json(true);
   }
 

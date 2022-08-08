@@ -2,7 +2,7 @@ export const EXCEPTION_CODE = {
   // 성공
   OK: 0,
   // 잘못된 패스워드
-  INCORRECT_PASSWORD: 4004,
+  INCORRECT_PASSWORD: 2000,
   // 존재하지 않음
   NOT_EXIST: 2001,
   // 삭제됨
