@@ -16,7 +16,7 @@ model User {
 
   email String @unique // 이메일, max: 255
 
-  username String @unique // 유저명, max: 255
+  username String // 유저명, max: 255
 
   passwordHash String // 비밀번호
 
@@ -37,12 +37,6 @@ model User {
 
 model UserAuthentication {
   id Int @id @default(autoincrement())
-
-  accessToken String // 인증 토큰
-
-  expiresAt DateTime // 만료일
-
-  lastValidatedAt DateTime // 마지막으로 검증된 날짜
 
   createdAt DateTime @default(now()) // 생성일
 
