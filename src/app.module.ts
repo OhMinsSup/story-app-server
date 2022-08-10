@@ -7,6 +7,7 @@ import * as joi from '@hapi/joi';
 // import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from './modules/jwt/jwt.module';
+import { KlaytnModule } from './modules/klaytn/klaytn.module';
 
 // const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
@@ -32,6 +33,7 @@ import { JwtModule } from './modules/jwt/jwt.module';
       privateKey: process.env.PRIVATE_KEY,
     }),
     AuthModule,
+    KlaytnModule,
   ],
 })
 export class AppModule {}
