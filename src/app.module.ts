@@ -27,13 +27,14 @@ import { KlaytnModule } from './modules/klaytn/klaytn.module';
         PORT: joi.number().optional().default(8000),
         SALT_ROUNDS: joi.number().optional().default(8),
         PRIVATE_KEY: joi.string().required(),
+        BAOBAB_TESTNET_RPC_URL: joi.string().uri().required(),
       }),
     }),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
-    AuthModule,
     KlaytnModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
