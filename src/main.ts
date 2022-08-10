@@ -9,6 +9,9 @@ import * as compression from 'compression';
 
 import { PrismaService } from './database/prisma.service';
 
+import { HttpExceptionFilter } from './libs/http-exception.filter';
+import { HttpTransformInterceptor } from './libs/http-transform.interceptor';
+
 import { AppModule } from './app.module';
 
 import type { NestExpressApplication } from '@nestjs/platform-express';
@@ -19,6 +22,8 @@ async function bootstrap() {
   const prisma = app.get(PrismaService);
   await prisma.enableShutdownHooks(app);
 
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new HttpTransformInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,

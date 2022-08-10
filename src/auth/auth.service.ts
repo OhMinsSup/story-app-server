@@ -51,8 +51,9 @@ export class AuthService {
     // 이미 가입한 이메일이 존재하는 경우
     if (exists) {
       throw new BadRequestException({
-        resultCode: EXCEPTION_CODE.ALREADY_EXIST,
-        message: 'already exists',
+        status: EXCEPTION_CODE.ALREADY_EXIST,
+        message: ['이미 가입한 유저의 이메일 입니다.'],
+        error: 'Already Exists',
       });
     }
 
@@ -70,6 +71,14 @@ export class AuthService {
 
     const { accessToken } = await this.generateToken(user);
 
-    return accessToken;
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: {
+        userId: user.id,
+        accessToken,
+      },
+    };
   }
 }
