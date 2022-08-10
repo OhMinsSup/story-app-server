@@ -6,6 +6,7 @@ import * as joi from '@hapi/joi';
 // import { AppController } from './app.controller';
 // import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { JwtModule } from './modules/jwt/jwt.module';
 
 // const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
@@ -24,7 +25,11 @@ import { AuthModule } from './auth/auth.module';
         COOKIE_SECRET: joi.string().required(),
         PORT: joi.number().optional().default(8000),
         SALT_ROUNDS: joi.number().optional().default(8),
+        PRIVATE_KEY: joi.string().required(),
       }),
+    }),
+    JwtModule.forRoot({
+      privateKey: process.env.PRIVATE_KEY,
     }),
     AuthModule,
   ],

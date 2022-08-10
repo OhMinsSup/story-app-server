@@ -1,10 +1,11 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { EXCEPTION_CODE } from 'src/constants/exception.code';
 
 import { PrismaService } from 'src/database/prisma.service';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from 'src/modules/jwt/jwt.service';
 
 import { CreateRequestDto } from './dto/create.request.dto';
 
@@ -15,10 +16,11 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly jwt: JwtService,
   ) {}
 
   async generateToken(user: User, authentication?: UserAuthentication | null) {
-    const { id: userId, username } = user;
+    const { id: userId } = user;
     const auth =
       authentication ??
       (await (async () => {
@@ -28,6 +30,15 @@ export class AuthService {
           },
         });
       })());
+
+    const token = await this.jwt.sign({
+      authId: auth.id,
+      userId: userId,
+    });
+
+    return {
+      accessToken: token,
+    };
   }
 
   async create(input: CreateRequestDto) {
@@ -45,10 +56,8 @@ export class AuthService {
       });
     }
 
-    const hash = await bcrypt.hash(
-      input.password,
-      this.config.get('SALT_ROUNDS'),
-    );
+    const salt = await bcrypt.genSalt(this.config.get('SALT_ROUNDS'));
+    const hash = await bcrypt.hash(input.password, salt);
 
     const user = await this.prisma.user.create({
       data: {
@@ -58,8 +67,9 @@ export class AuthService {
         profileUrl: input.profileUrl || null,
       },
     });
-    console.log('exists', exists);
 
-    return null;
+    const { accessToken } = await this.generateToken(user);
+
+    return accessToken;
   }
 }
