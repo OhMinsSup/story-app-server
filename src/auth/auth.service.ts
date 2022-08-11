@@ -10,6 +10,7 @@ import { JwtService } from 'src/modules/jwt/jwt.service';
 import { CreateRequestDto } from './dto/create.request.dto';
 
 import type { User, UserAuthentication } from '@prisma/client';
+import { SigninRequestDto } from './dto/signin.request.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,6 +42,23 @@ export class AuthService {
     };
   }
 
+  /**
+   * @description 로그인
+   * @param {SigninRequestDto} input
+   */
+  async signin(input: SigninRequestDto) {
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: null,
+    };
+  }
+
+  /**
+   * @description 회원가입
+   * @param {CreateRequestDto} input
+   */
   async create(input: CreateRequestDto) {
     const exists = await this.prisma.user.findUnique({
       where: {
