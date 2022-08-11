@@ -7,7 +7,7 @@ module.exports = function (deployer) {
     if (Story._json) {
       // 1. Record recently deployed contract's abi file to 'deployedABI'
       fs.writeFile(
-        '../deployed/deployedABI',
+        './deployed/deployedABI',
         JSON.stringify(Story._json.abi, 2),
         (err) => {
           if (err) throw err;
@@ -19,7 +19,7 @@ module.exports = function (deployer) {
     }
 
     // 2. Record recently deployed contract's address to 'deployedAddress'
-    fs.writeFile('../deployed/deployedAddress', Story.address, (err) => {
+    fs.writeFile('./deployed/deployedAddress', Story.address, (err) => {
       if (err) throw err;
       console.log(
         `The deployed contract address * ${Story.address} * is recorded on deployedAddress file`,

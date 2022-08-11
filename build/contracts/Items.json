@@ -1,0 +1,607 @@
+{
+  "contractName": "Items",
+  "abi": [],
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"project:/contracts/Item.sol\":\"Items\"},\"evmVersion\":\"london\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"project:/contracts/Item.sol\":{\"keccak256\":\"0xcb1f699a1b55c4e180888f336b45bd33b740c5d8981defdddf9da2d7bc67e188\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://e9b4d53c53be87d0e947d0342865a0bed0cc20a858bbd5188565524bceae5e28\",\"dweb:/ipfs/QmbMGg6zT1FLk11ju5pRGT73aC3YBwPQf1gzQLESzLdLzP\"]}},\"version\":1}",
+  "bytecode": "0x60566050600b82828239805160001a6073146043577f4e487b7100000000000000000000000000000000000000000000000000000000600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212209ad98151209ebd1f1c3c7374d6c8c19705dfcc01232f552466e75ca4a7d50aa764736f6c63430008070033",
+  "deployedBytecode": "0x73000000000000000000000000000000000000000030146080604052600080fdfea26469706673582212209ad98151209ebd1f1c3c7374d6c8c19705dfcc01232f552466e75ca4a7d50aa764736f6c63430008070033",
+  "immutableReferences": {},
+  "generatedSources": [],
+  "deployedGeneratedSources": [],
+  "sourceMap": "57:463:14:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",
+  "deployedSourceMap": "57:463:14:-:0;;;;;;;;",
+  "source": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nlibrary Items {\n    struct Item {\n        uint256 _tokenId;\n        uint256 _storyId;\n        uint256 _timestamp;\n    }\n\n    function current(Item storage item) internal view returns (uint256) {\n        return item._tokenId;\n    }\n\n    function setItem(\n        Item storage item,\n        uint256 tokenId,\n        uint256 storyId\n    ) internal {\n        item._tokenId = tokenId;\n        item._storyId = storyId;\n        item._timestamp = block.timestamp;\n    }\n}\n",
+  "sourcePath": "/Users/ominseob/Project/WebProject/story/story-app-server/contracts/Item.sol",
+  "ast": {
+    "absolutePath": "project:/contracts/Item.sol",
+    "exportedSymbols": {
+      "Items": [
+        2339
+      ]
+    },
+    "id": 2340,
+    "license": "MIT",
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 2289,
+        "literals": [
+          "solidity",
+          "^",
+          "0.8",
+          ".0"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "32:23:14"
+      },
+      {
+        "abstract": false,
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "library",
+        "fullyImplemented": true,
+        "id": 2339,
+        "linearizedBaseContracts": [
+          2339
+        ],
+        "name": "Items",
+        "nameLocation": "65:5:14",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "canonicalName": "Items.Item",
+            "id": 2296,
+            "members": [
+              {
+                "constant": false,
+                "id": 2291,
+                "mutability": "mutable",
+                "name": "_tokenId",
+                "nameLocation": "107:8:14",
+                "nodeType": "VariableDeclaration",
+                "scope": 2296,
+                "src": "99:16:14",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 2290,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "99:7:14",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 2293,
+                "mutability": "mutable",
+                "name": "_storyId",
+                "nameLocation": "133:8:14",
+                "nodeType": "VariableDeclaration",
+                "scope": 2296,
+                "src": "125:16:14",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 2292,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "125:7:14",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              },
+              {
+                "constant": false,
+                "id": 2295,
+                "mutability": "mutable",
+                "name": "_timestamp",
+                "nameLocation": "159:10:14",
+                "nodeType": "VariableDeclaration",
+                "scope": 2296,
+                "src": "151:18:14",
+                "stateVariable": false,
+                "storageLocation": "default",
+                "typeDescriptions": {
+                  "typeIdentifier": "t_uint256",
+                  "typeString": "uint256"
+                },
+                "typeName": {
+                  "id": 2294,
+                  "name": "uint256",
+                  "nodeType": "ElementaryTypeName",
+                  "src": "151:7:14",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  }
+                },
+                "visibility": "internal"
+              }
+            ],
+            "name": "Item",
+            "nameLocation": "84:4:14",
+            "nodeType": "StructDefinition",
+            "scope": 2339,
+            "src": "77:99:14",
+            "visibility": "public"
+          },
+          {
+            "body": {
+              "id": 2307,
+              "nodeType": "Block",
+              "src": "250:37:14",
+              "statements": [
+                {
+                  "expression": {
+                    "expression": {
+                      "id": 2304,
+                      "name": "item",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2299,
+                      "src": "267:4:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                        "typeString": "struct Items.Item storage pointer"
+                      }
+                    },
+                    "id": 2305,
+                    "isConstant": false,
+                    "isLValue": true,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "memberName": "_tokenId",
+                    "nodeType": "MemberAccess",
+                    "referencedDeclaration": 2291,
+                    "src": "267:13:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "functionReturnParameters": 2303,
+                  "id": 2306,
+                  "nodeType": "Return",
+                  "src": "260:20:14"
+                }
+              ]
+            },
+            "id": 2308,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "current",
+            "nameLocation": "191:7:14",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2300,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2299,
+                  "mutability": "mutable",
+                  "name": "item",
+                  "nameLocation": "212:4:14",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2308,
+                  "src": "199:17:14",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                    "typeString": "struct Items.Item"
+                  },
+                  "typeName": {
+                    "id": 2298,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2297,
+                      "name": "Item",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2296,
+                      "src": "199:4:14"
+                    },
+                    "referencedDeclaration": 2296,
+                    "src": "199:4:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                      "typeString": "struct Items.Item"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "198:19:14"
+            },
+            "returnParameters": {
+              "id": 2303,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2302,
+                  "mutability": "mutable",
+                  "name": "",
+                  "nameLocation": "-1:-1:-1",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2308,
+                  "src": "241:7:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2301,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "241:7:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "240:9:14"
+            },
+            "scope": 2339,
+            "src": "182:105:14",
+            "stateMutability": "view",
+            "virtual": false,
+            "visibility": "internal"
+          },
+          {
+            "body": {
+              "id": 2337,
+              "nodeType": "Block",
+              "src": "402:116:14",
+              "statements": [
+                {
+                  "expression": {
+                    "id": 2322,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 2318,
+                        "name": "item",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2311,
+                        "src": "412:4:14",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                          "typeString": "struct Items.Item storage pointer"
+                        }
+                      },
+                      "id": 2320,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "_tokenId",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 2291,
+                      "src": "412:13:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2321,
+                      "name": "tokenId",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2313,
+                      "src": "428:7:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "412:23:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2323,
+                  "nodeType": "ExpressionStatement",
+                  "src": "412:23:14"
+                },
+                {
+                  "expression": {
+                    "id": 2328,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 2324,
+                        "name": "item",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2311,
+                        "src": "445:4:14",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                          "typeString": "struct Items.Item storage pointer"
+                        }
+                      },
+                      "id": 2326,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "_storyId",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 2293,
+                      "src": "445:13:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "id": 2327,
+                      "name": "storyId",
+                      "nodeType": "Identifier",
+                      "overloadedDeclarations": [],
+                      "referencedDeclaration": 2315,
+                      "src": "461:7:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "445:23:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2329,
+                  "nodeType": "ExpressionStatement",
+                  "src": "445:23:14"
+                },
+                {
+                  "expression": {
+                    "id": 2335,
+                    "isConstant": false,
+                    "isLValue": false,
+                    "isPure": false,
+                    "lValueRequested": false,
+                    "leftHandSide": {
+                      "expression": {
+                        "id": 2330,
+                        "name": "item",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 2311,
+                        "src": "478:4:14",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                          "typeString": "struct Items.Item storage pointer"
+                        }
+                      },
+                      "id": 2332,
+                      "isConstant": false,
+                      "isLValue": true,
+                      "isPure": false,
+                      "lValueRequested": true,
+                      "memberName": "_timestamp",
+                      "nodeType": "MemberAccess",
+                      "referencedDeclaration": 2295,
+                      "src": "478:15:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "nodeType": "Assignment",
+                    "operator": "=",
+                    "rightHandSide": {
+                      "expression": {
+                        "id": 2333,
+                        "name": "block",
+                        "nodeType": "Identifier",
+                        "overloadedDeclarations": [],
+                        "referencedDeclaration": 4294967292,
+                        "src": "496:5:14",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_magic_block",
+                          "typeString": "block"
+                        }
+                      },
+                      "id": 2334,
+                      "isConstant": false,
+                      "isLValue": false,
+                      "isPure": false,
+                      "lValueRequested": false,
+                      "memberName": "timestamp",
+                      "nodeType": "MemberAccess",
+                      "src": "496:15:14",
+                      "typeDescriptions": {
+                        "typeIdentifier": "t_uint256",
+                        "typeString": "uint256"
+                      }
+                    },
+                    "src": "478:33:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "id": 2336,
+                  "nodeType": "ExpressionStatement",
+                  "src": "478:33:14"
+                }
+              ]
+            },
+            "id": 2338,
+            "implemented": true,
+            "kind": "function",
+            "modifiers": [],
+            "name": "setItem",
+            "nameLocation": "302:7:14",
+            "nodeType": "FunctionDefinition",
+            "parameters": {
+              "id": 2316,
+              "nodeType": "ParameterList",
+              "parameters": [
+                {
+                  "constant": false,
+                  "id": 2311,
+                  "mutability": "mutable",
+                  "name": "item",
+                  "nameLocation": "332:4:14",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2338,
+                  "src": "319:17:14",
+                  "stateVariable": false,
+                  "storageLocation": "storage",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                    "typeString": "struct Items.Item"
+                  },
+                  "typeName": {
+                    "id": 2310,
+                    "nodeType": "UserDefinedTypeName",
+                    "pathNode": {
+                      "id": 2309,
+                      "name": "Item",
+                      "nodeType": "IdentifierPath",
+                      "referencedDeclaration": 2296,
+                      "src": "319:4:14"
+                    },
+                    "referencedDeclaration": 2296,
+                    "src": "319:4:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_struct$_Item_$2296_storage_ptr",
+                      "typeString": "struct Items.Item"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2313,
+                  "mutability": "mutable",
+                  "name": "tokenId",
+                  "nameLocation": "354:7:14",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2338,
+                  "src": "346:15:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2312,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "346:7:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                },
+                {
+                  "constant": false,
+                  "id": 2315,
+                  "mutability": "mutable",
+                  "name": "storyId",
+                  "nameLocation": "379:7:14",
+                  "nodeType": "VariableDeclaration",
+                  "scope": 2338,
+                  "src": "371:15:14",
+                  "stateVariable": false,
+                  "storageLocation": "default",
+                  "typeDescriptions": {
+                    "typeIdentifier": "t_uint256",
+                    "typeString": "uint256"
+                  },
+                  "typeName": {
+                    "id": 2314,
+                    "name": "uint256",
+                    "nodeType": "ElementaryTypeName",
+                    "src": "371:7:14",
+                    "typeDescriptions": {
+                      "typeIdentifier": "t_uint256",
+                      "typeString": "uint256"
+                    }
+                  },
+                  "visibility": "internal"
+                }
+              ],
+              "src": "309:83:14"
+            },
+            "returnParameters": {
+              "id": 2317,
+              "nodeType": "ParameterList",
+              "parameters": [],
+              "src": "402:0:14"
+            },
+            "scope": 2339,
+            "src": "293:225:14",
+            "stateMutability": "nonpayable",
+            "virtual": false,
+            "visibility": "internal"
+          }
+        ],
+        "scope": 2340,
+        "src": "57:463:14",
+        "usedErrors": []
+      }
+    ],
+    "src": "32:489:14"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.8.7+commit.e28d00a7.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.4.8",
+  "updatedAt": "2022-08-11T04:47:11.835Z",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  }
+}
