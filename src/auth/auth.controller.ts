@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CookiInterceptor } from 'src/libs/cookie.interceptor';
 import { AuthService } from './auth.service';
 
 import { CreateRequestDto } from './dto/create.request.dto';
@@ -17,16 +18,8 @@ export class AuthController {
     description: '로그인 API',
     type: SigninRequestDto,
   })
+  @UseInterceptors(CookiInterceptor)
   signin(@Body() input: SigninRequestDto) {
-    // if (typeof data.result === 'object' && data.ok) {
-    //   res.cookie('access_token', data.result.accessToken, {
-    //     httpOnly: true,
-    //     domain: 'localhost',
-    //     path: '/',
-    //     maxAge: 1000 * 60 * 60 * 24 * 30,
-    //     sameSite: 'lax',
-    //   });
-    // }
     return this.service.signin(input);
   }
 
@@ -37,16 +30,8 @@ export class AuthController {
     description: '회원가입 API',
     type: CreateRequestDto,
   })
+  @UseInterceptors(CookiInterceptor)
   signup(@Body() input: CreateRequestDto) {
-    // if (typeof data.result === 'object' && data.ok) {
-    //   res.cookie('access_token', data.result.accessToken, {
-    //     httpOnly: true,
-    //     domain: 'localhost',
-    //     path: '/',
-    //     maxAge: 1000 * 60 * 60 * 24 * 30,
-    //     sameSite: 'lax',
-    //   });
-    // }
     return this.service.create(input);
   }
 }
