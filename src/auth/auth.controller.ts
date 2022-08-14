@@ -18,6 +18,15 @@ export class AuthController {
     type: SigninRequestDto,
   })
   signin(@Body() input: SigninRequestDto) {
+    // if (typeof data.result === 'object' && data.ok) {
+    //   res.cookie('access_token', data.result.accessToken, {
+    //     httpOnly: true,
+    //     domain: 'localhost',
+    //     path: '/',
+    //     maxAge: 1000 * 60 * 60 * 24 * 30,
+    //     sameSite: 'lax',
+    //   });
+    // }
     return this.service.signin(input);
   }
 
@@ -29,6 +38,15 @@ export class AuthController {
     type: CreateRequestDto,
   })
   signup(@Body() input: CreateRequestDto) {
+    // if (typeof data.result === 'object' && data.ok) {
+    //   res.cookie('access_token', data.result.accessToken, {
+    //     httpOnly: true,
+    //     domain: 'localhost',
+    //     path: '/',
+    //     maxAge: 1000 * 60 * 60 * 24 * 30,
+    //     sameSite: 'lax',
+    //   });
+    // }
     return this.service.create(input);
   }
 }

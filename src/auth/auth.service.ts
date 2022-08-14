@@ -3,6 +3,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 
 import { EXCEPTION_CODE } from 'src/constants/exception.code';
@@ -14,7 +15,7 @@ import { KlaytnService } from 'src/modules/klaytn/klaytn.service';
 
 import { CreateRequestDto } from './dto/create.request.dto';
 
-import type { User, UserAuthentication, UserWallet } from '@prisma/client';
+import type { UserAuthentication } from '@prisma/client';
 import { SigninRequestDto } from './dto/signin.request.dto';
 
 @Injectable()
@@ -27,11 +28,10 @@ export class AuthService {
   ) {}
 
   async generateToken(
-    user: User,
-    wallet?: UserWallet | null,
+    userId: number,
+    address?: string | null,
     authentication?: UserAuthentication | null,
   ) {
-    const { id: userId } = user;
     const auth =
       authentication ??
       (await (async () => {
@@ -44,8 +44,8 @@ export class AuthService {
 
     const token = await this.jwt.sign({
       authId: auth.id,
-      userId: userId,
-      address: wallet.address,
+      userId,
+      address,
     });
 
     return {
@@ -58,11 +58,59 @@ export class AuthService {
    * @param {SigninRequestDto} input
    */
   async signin(input: SigninRequestDto) {
+    const existsByUser = await this.prisma.user.findFirst({
+      where: {
+        email: input.email,
+      },
+      select: {
+        id: true,
+        passwordHash: true,
+      },
+    });
+
+    if (!existsByUser) {
+      throw new NotFoundException({
+        status: EXCEPTION_CODE.NOT_EXIST,
+        message: ['존재하지 않는 사용자 입니다.'],
+        error: 'Not Found User',
+      });
+    }
+
+    const compare = await bcrypt.compare(
+      input.password,
+      existsByUser.passwordHash,
+    );
+
+    if (!compare) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.INCORRECT_PASSWORD,
+        message: ['비밀번호가 일치하지 않습니다.'],
+        error: 'Incorrect Password',
+      });
+    }
+
+    const wallet = await this.prisma.userWallet.findFirst({
+      where: {
+        userId: existsByUser.id,
+      },
+      select: {
+        address: true,
+      },
+    });
+
+    const { accessToken } = await this.generateToken(
+      existsByUser.id,
+      wallet.address,
+    );
+
     return {
       resultCode: EXCEPTION_CODE.OK,
       message: null,
       error: null,
-      result: null,
+      result: {
+        userId: existsByUser.id,
+        accessToken,
+      },
     };
   }
 
@@ -132,7 +180,7 @@ export class AuthService {
       },
     });
 
-    const { accessToken } = await this.generateToken(user, wallet);
+    const { accessToken } = await this.generateToken(user.id, wallet.address);
 
     return {
       resultCode: EXCEPTION_CODE.OK,
