@@ -23,3 +23,5 @@ export class SigninRequestDto {
   })
   password: string;
 }
+
+export class SigninByKeyStoryRequestDto {}
