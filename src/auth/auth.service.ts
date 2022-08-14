@@ -1,15 +1,20 @@
 import * as bcrypt from 'bcrypt';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 import { EXCEPTION_CODE } from 'src/constants/exception.code';
 
 import { PrismaService } from 'src/database/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/modules/jwt/jwt.service';
+import { KlaytnService } from 'src/modules/klaytn/klaytn.service';
 
 import { CreateRequestDto } from './dto/create.request.dto';
 
-import type { User, UserAuthentication } from '@prisma/client';
+import type { User, UserAuthentication, UserWallet } from '@prisma/client';
 import { SigninRequestDto } from './dto/signin.request.dto';
 
 @Injectable()
@@ -18,9 +23,14 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
     private readonly jwt: JwtService,
+    private readonly klaytn: KlaytnService,
   ) {}
 
-  async generateToken(user: User, authentication?: UserAuthentication | null) {
+  async generateToken(
+    user: User,
+    wallet?: UserWallet | null,
+    authentication?: UserAuthentication | null,
+  ) {
     const { id: userId } = user;
     const auth =
       authentication ??
@@ -35,6 +45,7 @@ export class AuthService {
     const token = await this.jwt.sign({
       authId: auth.id,
       userId: userId,
+      address: wallet.address,
     });
 
     return {
@@ -87,7 +98,41 @@ export class AuthService {
       },
     });
 
-    const { accessToken } = await this.generateToken(user);
+    const inMemoryWallet = this.klaytn.createWallet();
+    if (!inMemoryWallet) {
+      throw new InternalServerErrorException({
+        status: EXCEPTION_CODE.WALLET_GENERATE_ERROR,
+        message: ['지갑생성 오류'],
+        error: 'Wallet Generate Error',
+      });
+    }
+
+    const existsWallet = await this.prisma.userWallet.findUnique({
+      where: {
+        address: inMemoryWallet.address,
+      },
+    });
+
+    if (existsWallet) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.ALREADY_EXIST_FOR_WALLET,
+        message: ['이미 등록된 지갑 주소 입니다.'],
+        error: 'Already Exists For Wallet',
+      });
+    }
+
+    const wallet = await this.prisma.userWallet.create({
+      data: {
+        address: inMemoryWallet.address,
+        user: {
+          connect: {
+            id: user.id,
+          },
+        },
+      },
+    });
+
+    const { accessToken } = await this.generateToken(user, wallet);
 
     return {
       resultCode: EXCEPTION_CODE.OK,

@@ -1,19 +1,19 @@
 import Caver from 'caver-js';
 import { type DynamicModule, Module, Global } from '@nestjs/common';
-import { BAOBAB_TESTNET_RPC_URL, KLAYTN } from 'src/constants/config';
-// import type { Klaytn } from './klaytn.interface';
+import { KLAYTN } from 'src/constants/config';
 import { KlaytnService } from './klaytn.service';
+import type { Klaytn } from './klaytn.interface';
 
 @Module({})
 @Global()
 export class KlaytnModule {
-  static forRoot(): DynamicModule {
+  static forRoot(options: Klaytn): DynamicModule {
     return {
       module: KlaytnModule,
       providers: [
         {
           provide: KLAYTN,
-          useValue: new Caver(BAOBAB_TESTNET_RPC_URL),
+          useValue: new Caver(options.klaytnNetRpcUrl),
         },
         KlaytnService,
       ],

@@ -33,6 +33,8 @@ model User {
   deletedAt DateTime? // 삭제일 
 
   authentications UserAuthentication[]
+
+  wallets UserWallet[]
 }
 
 model UserAuthentication {
@@ -44,6 +46,21 @@ model UserAuthentication {
 
   deletedAt DateTime? // 삭제일 
 
-  User   User? @relation(fields: [userId], references: [id]) // 로그인 유저 정보
+  user   User? @relation(fields: [userId], references: [id]) // 로그인 유저 정보
   userId Int? // 로그인 유저 아이디
+}
+
+model UserWallet {
+  id Int @id @default(autoincrement())
+
+  address String @unique // 지갑주소
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  user   User @relation(fields: [userId], references: [id]) // 유저 wallet 정보
+  userId Int
 }

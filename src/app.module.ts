@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
-import * as joi from '@hapi/joi';
+import joi from '@hapi/joi';
 
 // import { AppController } from './app.controller';
 // import { AppService } from './app.service';
@@ -27,13 +27,15 @@ import { KlaytnModule } from './modules/klaytn/klaytn.module';
         PORT: joi.number().optional().default(8000),
         SALT_ROUNDS: joi.number().optional().default(8),
         PRIVATE_KEY: joi.string().required(),
-        BAOBAB_TESTNET_RPC_URL: joi.string().uri().required(),
+        KLAYTN_NET_RPC_URL: joi.string().uri().required(),
       }),
     }),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
     }),
-    KlaytnModule,
+    KlaytnModule.forRoot({
+      klaytnNetRpcUrl: process.env.KLAYTN_NET_RPC_URL,
+    }),
     AuthModule,
   ],
 })
