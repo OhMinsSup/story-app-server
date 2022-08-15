@@ -32,9 +32,11 @@ model User {
 
   deletedAt DateTime? // 삭제일 
 
+  walletId Int
+
   authentications UserAuthentication[]
 
-  wallets UserWallet[]
+  wallet UserWallet @relation(fields: [walletId], references: [id])
 }
 
 model UserAuthentication {
@@ -61,6 +63,5 @@ model UserWallet {
 
   deletedAt DateTime? // 삭제일 
 
-  user   User @relation(fields: [userId], references: [id]) // 유저 wallet 정보
-  userId Int
+  user User[]
 }

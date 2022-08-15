@@ -5,6 +5,8 @@ import joi from '@hapi/joi';
 
 // import { AppController } from './app.controller';
 // import { AppService } from './app.service';
+import { MulterModule } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from './modules/jwt/jwt.module';
 import { KlaytnModule } from './modules/klaytn/klaytn.module';
@@ -32,6 +34,9 @@ import { KlaytnModule } from './modules/klaytn/klaytn.module';
     }),
     JwtModule.forRoot({
       privateKey: process.env.PRIVATE_KEY,
+    }),
+    MulterModule.register({
+      storage: memoryStorage(), // use memory storage for having the buffer
     }),
     KlaytnModule.forRoot({
       klaytnNetRpcUrl: process.env.KLAYTN_NET_RPC_URL,

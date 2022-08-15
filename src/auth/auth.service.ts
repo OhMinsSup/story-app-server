@@ -13,10 +13,17 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from 'src/modules/jwt/jwt.service';
 import { KlaytnService } from 'src/modules/klaytn/klaytn.service';
 
-import { CreateRequestDto } from './dto/create.request.dto';
+import {
+  CreateKeystoreRequestDto,
+  CreateRequestDto,
+} from './dto/create.request.dto';
+import {
+  SigninByKeyStoryRequestDto,
+  SigninRequestDto,
+} from './dto/signin.request.dto';
 
 import type { UserAuthentication } from '@prisma/client';
-import { SigninRequestDto } from './dto/signin.request.dto';
+import type { Keystore } from 'caver-js';
 
 @Injectable()
 export class AuthService {
@@ -54,17 +61,44 @@ export class AuthService {
   }
 
   /**
-   * @description 로그인
-   * @param {SigninRequestDto} input
+   * @description 로그인 keystore
+   * @param {SigninByKeyStoryRequestDto} input
+   * @param {Express.Multer.File} file
    */
-  async signin(input: SigninRequestDto) {
+  async signinForKeystore(
+    input: SigninByKeyStoryRequestDto,
+    file: Express.Multer.File,
+  ) {
+    const parsedKeystore = JSON.parse(file.buffer.toString()) as Keystore;
+    const keys = ['version', 'id', 'address', 'keyring'];
+    if (!keys.every((key) => parsedKeystore[key])) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.INVALID_JSON_FILE,
+        message: ['유효하지않는 Json 파일입니다.'],
+        error: 'Invalid Json File',
+      });
+    }
+
+    const decrypted = this.klaytn.decrypt(parsedKeystore, input.password);
+
+    this.klaytn.walletAdd(decrypted);
+
+    const keyring = this.klaytn.getKeyring(decrypted.address);
+
     const existsByUser = await this.prisma.user.findFirst({
       where: {
-        email: input.email,
+        wallet: {
+          address: keyring.address,
+        },
       },
       select: {
         id: true,
         passwordHash: true,
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
       },
     });
 
@@ -89,18 +123,68 @@ export class AuthService {
       });
     }
 
-    const wallet = await this.prisma.userWallet.findFirst({
-      where: {
+    const { accessToken } = await this.generateToken(
+      existsByUser.id,
+      decrypted.address,
+    );
+
+    this.klaytn.walletRemove(decrypted.address);
+
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: {
         userId: existsByUser.id,
+        accessToken,
+      },
+    };
+  }
+
+  /**
+   * @description 로그인
+   * @param {SigninRequestDto} input
+   */
+  async signin(input: SigninRequestDto) {
+    const existsByUser = await this.prisma.user.findFirst({
+      where: {
+        email: input.email,
       },
       select: {
-        address: true,
+        id: true,
+        passwordHash: true,
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
       },
     });
 
+    if (!existsByUser) {
+      throw new NotFoundException({
+        status: EXCEPTION_CODE.NOT_EXIST,
+        message: ['존재하지 않는 사용자 입니다.'],
+        error: 'Not Found User',
+      });
+    }
+
+    const compare = await bcrypt.compare(
+      input.password,
+      existsByUser.passwordHash,
+    );
+
+    if (!compare) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.INCORRECT_PASSWORD,
+        message: ['비밀번호가 일치하지 않습니다.'],
+        error: 'Incorrect Password',
+      });
+    }
+
     const { accessToken } = await this.generateToken(
       existsByUser.id,
-      wallet.address,
+      existsByUser.wallet.address,
     );
 
     return {
@@ -109,6 +193,99 @@ export class AuthService {
       error: null,
       result: {
         userId: existsByUser.id,
+        accessToken,
+      },
+    };
+  }
+
+  async createForKeystore(
+    input: CreateKeystoreRequestDto,
+    file: Express.Multer.File,
+  ) {
+    const existsEmail = await this.prisma.user.findUnique({
+      where: {
+        email: input.email,
+      },
+    });
+
+    // 이미 가입한 이메일이 존재하는 경우
+    if (existsEmail) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.ALREADY_EXIST,
+        message: ['이미 가입한 유저의 이메일 입니다.'],
+        error: 'Already Exists',
+      });
+    }
+
+    const parsedKeystore = JSON.parse(file.buffer.toString()) as Keystore;
+    const keys = ['version', 'id', 'address', 'keyring'];
+    if (!keys.every((key) => parsedKeystore[key])) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.INVALID_JSON_FILE,
+        message: ['유효하지않는 Json 파일입니다.'],
+        error: 'Invalid Json File',
+      });
+    }
+
+    const decrypted = this.klaytn.decrypt(parsedKeystore, input.password);
+
+    this.klaytn.walletAdd(decrypted);
+
+    const keyring = this.klaytn.getKeyring(decrypted.address);
+
+    const existsByWallet = await this.prisma.user.findFirst({
+      where: {
+        wallet: {
+          address: keyring.address,
+        },
+      },
+      select: {
+        id: true,
+        wallet: {
+          select: {
+            address: true,
+          },
+        },
+      },
+    });
+
+    if (existsByWallet) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.ALREADY_EXIST,
+        message: ['이미 가입한 유저의 지갑 입니다.'],
+        error: 'Already Exists',
+      });
+    }
+
+    const wallet = await this.prisma.userWallet.create({
+      data: {
+        address: decrypted.address,
+      },
+    });
+
+    const salt = await bcrypt.genSalt(this.config.get('SALT_ROUNDS'));
+    const hash = await bcrypt.hash(input.password, salt);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: input.email,
+        username: input.username,
+        passwordHash: hash,
+        profileUrl: input.profileUrl || null,
+        walletId: wallet.id,
+      },
+    });
+
+    const { accessToken } = await this.generateToken(user.id, wallet.address);
+
+    this.klaytn.walletRemove(decrypted.address);
+
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: {
+        userId: user.id,
         accessToken,
       },
     };
@@ -133,18 +310,6 @@ export class AuthService {
         error: 'Already Exists',
       });
     }
-
-    const salt = await bcrypt.genSalt(this.config.get('SALT_ROUNDS'));
-    const hash = await bcrypt.hash(input.password, salt);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: input.email,
-        username: input.username,
-        passwordHash: hash,
-        profileUrl: input.profileUrl || null,
-      },
-    });
 
     const inMemoryWallet = this.klaytn.createWallet();
     if (!inMemoryWallet) {
@@ -172,11 +337,19 @@ export class AuthService {
     const wallet = await this.prisma.userWallet.create({
       data: {
         address: inMemoryWallet.address,
-        user: {
-          connect: {
-            id: user.id,
-          },
-        },
+      },
+    });
+
+    const salt = await bcrypt.genSalt(this.config.get('SALT_ROUNDS'));
+    const hash = await bcrypt.hash(input.password, salt);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: input.email,
+        username: input.username,
+        passwordHash: hash,
+        profileUrl: input.profileUrl || null,
+        walletId: wallet.id,
       },
     });
 

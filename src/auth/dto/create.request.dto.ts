@@ -46,3 +46,14 @@ export class CreateRequestDto {
   })
   profileUrl?: string | null;
 }
+
+export class CreateKeystoreRequestDto extends CreateRequestDto {
+  @ApiProperty({
+    example: 'KakaoTalk_Photo_2021-08-11-01-13-45.json',
+    description: '업로드 파일',
+    required: true,
+    type: 'string',
+    format: 'binary',
+  })
+  file: Express.Multer.File;
+}

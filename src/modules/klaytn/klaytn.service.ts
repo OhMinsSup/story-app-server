@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type Caver from 'caver-js';
-import { Contract } from 'caver-js';
+import type { Contract, Keyring, Keystore } from 'caver-js';
 import { DEPLOYED_ABI, DEPLOYED_ADDRESS, KLAYTN } from '../../constants/config';
 
 @Injectable()
@@ -21,6 +21,22 @@ export class KlaytnService {
   }
 
   /**
+   * @description 인 메모리에 지갑 등록
+   * @param {Keyring} keyring
+   */
+  walletAdd(keyring: Keyring) {
+    return this.caver.wallet.add(keyring);
+  }
+
+  /**
+   * @description 인 메모리에 지갑 제거
+   * @param {string} address
+   */
+  walletRemove(address: string) {
+    return this.caver.wallet.remove(address);
+  }
+
+  /**
    * @description Keyring은 Klaytn 계정의 주소와 개인 키를 포함하는 구조입니다. */
   createWallet() {
     const randomHex = this.caver.utils.randomHex(32);
@@ -33,5 +49,14 @@ export class KlaytnService {
    */
   getKeyring(address: string) {
     return this.caver.wallet.getKeyring(address);
+  }
+
+  /**
+   * @description keystore decrypt를 한다.
+   * @param {Keystore} keystore
+   * @param {string} password
+   */
+  decrypt(keystore: Keystore, password: string) {
+    return this.caver.wallet.keyring.decrypt(keystore, password);
   }
 }

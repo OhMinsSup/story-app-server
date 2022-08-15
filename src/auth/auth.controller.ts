@@ -1,10 +1,24 @@
-import { Body, Controller, Post, UseInterceptors } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { CookiInterceptor } from 'src/libs/cookie.interceptor';
+import {
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  ParseFilePipeBuilder,
+} from '@nestjs/common';
+import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { CookiInterceptor } from '../libs/cookie.interceptor';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 
-import { CreateRequestDto } from './dto/create.request.dto';
-import { SigninRequestDto } from './dto/signin.request.dto';
+import {
+  CreateKeystoreRequestDto,
+  CreateRequestDto,
+} from './dto/create.request.dto';
+import {
+  SigninByKeyStoryRequestDto,
+  SigninRequestDto,
+} from './dto/signin.request.dto';
 
 @ApiTags('인증')
 @Controller('api/auth')
@@ -33,5 +47,55 @@ export class AuthController {
   @UseInterceptors(CookiInterceptor)
   signup(@Body() input: CreateRequestDto) {
     return this.service.create(input);
+  }
+
+  @Post('keystore/signup')
+  @ApiOperation({ summary: 'keystore 회원가입' })
+  @ApiBody({
+    required: true,
+    type: CreateKeystoreRequestDto,
+    description: 'keystore 회원가입 API',
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  signupForKeystore(
+    @Body() input: CreateKeystoreRequestDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'json',
+        })
+        .build({
+          fileIsRequired: true,
+        }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.service.createForKeystore(input, file);
+  }
+
+  @Post('keystore/signin')
+  @ApiOperation({ summary: 'keystore 로그인' })
+  @ApiBody({
+    required: true,
+    type: SigninByKeyStoryRequestDto,
+    description: 'keystore 로그인 API',
+  })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('file'))
+  signinForKeystore(
+    @Body() input: SigninByKeyStoryRequestDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: 'json',
+        })
+        .build({
+          fileIsRequired: true,
+        }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.service.signinForKeystore(input, file);
   }
 }

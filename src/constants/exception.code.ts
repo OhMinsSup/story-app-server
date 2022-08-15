@@ -19,6 +19,8 @@ export const EXCEPTION_CODE = {
   NO_PERMISSION: 2007,
   // 지갑 주소 중복
   ALREADY_EXIST_FOR_WALLET: 2008,
+  // 유효하지 않는 json 파일
+  INVALID_JSON_FILE: 2009,
 
   // 만료된 토큰
   TOKEN_EXPIRED: 4001,
