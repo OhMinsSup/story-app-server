@@ -10,9 +10,8 @@ import type { SignOptions } from 'jsonwebtoken';
 export class JwtService {
   constructor(@Inject(CONFIG_OPTIONS) private readonly options: Jwt) {}
 
-  async sign(payload: any, options?: SignOptions) {
+  async sign(payload: Record<string, string | number>, options?: SignOptions) {
     const jwtOptions: SignOptions = {
-      issuer: 'story-app.io',
       expiresIn: '7d',
       ...options,
     };
@@ -23,12 +22,17 @@ export class JwtService {
     }
 
     return new Promise<string>((resolve, reject) => {
-      jwt.sign(payload, this.options.privateKey, (err, token: string) => {
-        if (err || !token) {
-          return reject(err);
-        }
-        resolve(token);
-      });
+      jwt.sign(
+        payload,
+        this.options.privateKey,
+        jwtOptions,
+        (err, token: string) => {
+          if (err || !token) {
+            return reject(err);
+          }
+          resolve(token);
+        },
+      );
     });
   }
 

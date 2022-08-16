@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from './modules/jwt/jwt.module';
 import { KlaytnModule } from './modules/klaytn/klaytn.module';
 import { UsersModule } from './users/users.module';
+import { AuthGuardModule } from './modules/auth/auth.module';
 
 // const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
@@ -42,6 +43,7 @@ import { UsersModule } from './users/users.module';
     KlaytnModule.forRoot({
       klaytnNetRpcUrl: process.env.KLAYTN_NET_RPC_URL,
     }),
+    AuthGuardModule,
     AuthModule,
     UsersModule,
   ],
