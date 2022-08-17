@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CreateRequestDto {
   @IsEmail()
@@ -14,11 +20,13 @@ export class CreateRequestDto {
   email: string;
 
   @IsString()
-  @MaxLength(255)
+  @MinLength(2)
+  @MaxLength(20)
   @ApiProperty({
     example: 'tester',
     description: '유저명',
-    maxLength: 255,
+    maxLength: 20,
+    minLength: 2,
     type: 'string',
     required: true,
   })

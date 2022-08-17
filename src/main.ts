@@ -22,15 +22,15 @@ async function bootstrap() {
   const prisma = app.get(PrismaService);
   await prisma.enableShutdownHooks(app);
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  const config = app.get(ConfigService);
+
+  app.useGlobalFilters(new HttpExceptionFilter(config));
   app.useGlobalInterceptors(new HttpTransformInterceptor());
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true,
     }),
   );
-
-  const config = app.get(ConfigService);
 
   app.enableCors({
     origin: (origin, callback) => {
