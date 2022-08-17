@@ -24,6 +24,7 @@ import {
 
 import type { UserAuthentication } from '@prisma/client';
 import type { Keystore } from 'caver-js';
+import type { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -363,6 +364,26 @@ export class AuthService {
         userId: user.id,
         accessToken,
       },
+    };
+  }
+
+  /**
+   * @description 로그아웃
+   * @param {Response} res
+   */
+  logout(res: Response) {
+    res.clearCookie(this.config.get('COOKIE_TOKEN_NAME'), {
+      httpOnly: true,
+      domain: this.config.get('COOKIE_DOMAIN'),
+      path: this.config.get('COOKIE_PATH'),
+      sameSite: this.config.get('COOKIE_SAMESITE'),
+    });
+
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: null,
     };
   }
 }

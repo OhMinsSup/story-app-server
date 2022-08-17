@@ -5,11 +5,15 @@ import {
   UploadedFile,
   UseInterceptors,
   ParseFilePipeBuilder,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CookiInterceptor } from '../libs/cookie.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
+
+import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 
 import {
   CreateKeystoreRequestDto,
@@ -19,6 +23,9 @@ import {
   SigninByKeyStoryRequestDto,
   SigninRequestDto,
 } from './dto/signin.request.dto';
+
+// types
+import type { Response } from 'express';
 
 @ApiTags('인증')
 @Controller('api/auth')
@@ -97,5 +104,12 @@ export class AuthController {
     file: Express.Multer.File,
   ) {
     return this.service.signinForKeystore(input, file);
+  }
+
+  @Post('logout')
+  @ApiOperation({ summary: '로그아웃' })
+  @UseGuards(LoggedInGuard)
+  logout(@Res() res: Response) {
+    return this.service.logout(res);
   }
 }
