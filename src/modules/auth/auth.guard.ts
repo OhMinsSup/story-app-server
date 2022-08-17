@@ -47,7 +47,7 @@ export class AuthGuard implements CanActivate {
         accessTokenData = null;
       }
 
-      if (accessTokenData) {
+      if (accessTokenData && accessTokenData.authId) {
         // access token is valid expire date diff is less than 30 days
         const diff = accessTokenData.exp - Math.floor(Date.now() / 1000);
         if (diff > 0) {
@@ -71,6 +71,7 @@ export class AuthGuard implements CanActivate {
             select: {
               id: true,
               email: true,
+              username: true,
               profileUrl: true,
               wallet: {
                 select: {
