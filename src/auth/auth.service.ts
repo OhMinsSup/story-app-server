@@ -371,7 +371,7 @@ export class AuthService {
    * @description 로그아웃
    * @param {Response} res
    */
-  logout(res: Response) {
+  async logout(res: Response) {
     res.clearCookie(this.config.get('COOKIE_TOKEN_NAME'), {
       httpOnly: true,
       domain: this.config.get('COOKIE_DOMAIN'),

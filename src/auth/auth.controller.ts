@@ -7,6 +7,7 @@ import {
   ParseFilePipeBuilder,
   Res,
   UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CookiInterceptor } from '../libs/cookie.interceptor';
@@ -110,6 +111,6 @@ export class AuthController {
   @ApiOperation({ summary: '로그아웃' })
   @UseGuards(LoggedInGuard)
   logout(@Res() res: Response) {
-    return this.service.logout(res);
+    return res.status(HttpStatus.OK).json(this.service.logout(res));
   }
 }
