@@ -12,6 +12,7 @@ import { JwtModule } from './modules/jwt/jwt.module';
 import { KlaytnModule } from './modules/klaytn/klaytn.module';
 import { UsersModule } from './users/users.module';
 import { AuthGuardModule } from './modules/auth/auth.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 
 // const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
@@ -42,6 +43,11 @@ import { AuthGuardModule } from './modules/auth/auth.module';
     }),
     KlaytnModule.forRoot({
       klaytnNetRpcUrl: process.env.KLAYTN_NET_RPC_URL,
+    }),
+    CloudinaryModule.forRoot({
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
+      cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
     }),
     AuthGuardModule,
     AuthModule,
