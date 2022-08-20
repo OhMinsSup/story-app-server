@@ -9,7 +9,13 @@ import {
   UseGuards,
   HttpStatus,
 } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CookiInterceptor } from '../libs/cookie.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
@@ -27,6 +33,7 @@ import {
 
 // types
 import type { Response } from 'express';
+import { LogoutResponseDto } from './dto/auth.dto';
 
 @ApiTags('인증')
 @Controller('api/auth')
@@ -109,6 +116,9 @@ export class AuthController {
 
   @Post('logout')
   @ApiOperation({ summary: '로그아웃' })
+  @ApiOkResponse({
+    type: LogoutResponseDto,
+  })
   @UseGuards(LoggedInGuard)
   logout(@Res() res: Response) {
     return res.status(HttpStatus.OK).json(this.service.logout(res));
