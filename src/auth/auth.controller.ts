@@ -73,6 +73,7 @@ export class AuthController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(CookiInterceptor)
   signupForKeystore(
     @Body() input: CreateKeystoreRequestDto,
     @UploadedFile(
@@ -98,6 +99,7 @@ export class AuthController {
   })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(CookiInterceptor)
   signinForKeystore(
     @Body() input: SigninByKeyStoryRequestDto,
     @UploadedFile(
