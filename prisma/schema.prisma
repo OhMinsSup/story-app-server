@@ -65,3 +65,31 @@ model UserWallet {
 
   user User[]
 }
+
+model File {
+  id Int @id @default(autoincrement())
+
+  publicId String @unique // cloudinary 업로드 아이디
+
+  version String // 버전 정보
+
+  signature String // 서명정보
+
+  foramt String // 파일 형식
+
+  resourceType String // 리소스에 대한 타입
+
+  url String // http 주소
+
+  secureUrl String // https 주소
+
+  uploadType String // PROFILE | NFT
+
+  mediaType String // VIDEO | IMAGE
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+}

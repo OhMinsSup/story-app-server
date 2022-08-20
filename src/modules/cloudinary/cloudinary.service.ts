@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { v2 } from 'cloudinary';
+import type { MediaType, UploadType } from '../../file/dto/upload.request.dto';
 
 @Injectable()
 export class CloudinaryService {
@@ -8,7 +9,12 @@ export class CloudinaryService {
    * @param {Express.Multer.File} file - file to upload
    * @param {number} userId - user id
    */
-  async upload(file: Express.Multer.File, userId: number) {
+  async upload(
+    file: Express.Multer.File,
+    mediaType: MediaType,
+    uploadType: UploadType,
+    userId?: number | null,
+  ) {
     const dataURL = this.makeDataURL(file);
     const splitFileName: string[] = file.originalname.split('.');
     const filename: string = splitFileName[0];
