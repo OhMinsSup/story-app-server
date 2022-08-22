@@ -66,6 +66,52 @@ model UserWallet {
   user User[]
 }
 
+model Item {
+  id Int @id @default(autoincrement())
+
+  title String // 타이틀 max 100
+
+  description String // 설명 max 1000
+
+  price Float // 가격
+
+  beginDate DateTime // 판매 시작일
+
+  endDate DateTime // 판매 종료일
+
+  isPublic Boolean @default(false) // 공개여부
+
+  backgroundColor String? // 배경색
+
+  externalSite String? // 외부주소
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  fileId Int // 파일 아이디
+
+  tags Tag[] // 태그
+
+  file File @relation(fields: [fileId], references: [id])
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+
+  name String @unique
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  items Item[]
+}
+
 model File {
   id Int @id @default(autoincrement())
 
@@ -92,4 +138,6 @@ model File {
   updatedAt DateTime @updatedAt // 업데이트일
 
   deletedAt DateTime? // 삭제일 
+
+  items Item[]
 }
