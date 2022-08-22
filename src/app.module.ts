@@ -15,14 +15,14 @@ import { AuthGuardModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FileModule } from './file/file.module';
 
-// const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: isDev ? '.env.development' : '.env',
       validationSchema: joi.object({
         NODE_ENV: joi
           .string()
