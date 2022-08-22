@@ -66,7 +66,7 @@ export class AuthService {
    * @param {SigninByKeyStoryRequestDto} input
    * @param {Express.Multer.File} file
    */
-  async signinForKeystore(
+  async keystoreSignin(
     input: SigninByKeyStoryRequestDto,
     file: Express.Multer.File,
   ) {
@@ -199,7 +199,7 @@ export class AuthService {
     };
   }
 
-  async createForKeystore(
+  async keystoreSignup(
     input: CreateKeystoreRequestDto,
     file: Express.Multer.File,
   ) {
@@ -296,7 +296,7 @@ export class AuthService {
    * @description 회원가입
    * @param {CreateRequestDto} input
    */
-  async create(input: CreateRequestDto) {
+  async signup(input: CreateRequestDto) {
     const exists = await this.prisma.user.findUnique({
       where: {
         email: input.email,

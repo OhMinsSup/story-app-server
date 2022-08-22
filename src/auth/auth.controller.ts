@@ -61,7 +61,7 @@ export class AuthController {
   })
   @UseInterceptors(CookiInterceptor)
   signup(@Body() input: CreateRequestDto) {
-    return this.service.create(input);
+    return this.service.signup(input);
   }
 
   @Post('keystore/signup')
@@ -74,7 +74,7 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @UseInterceptors(CookiInterceptor)
-  signupForKeystore(
+  keystoreSignup(
     @Body() input: CreateKeystoreRequestDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
@@ -87,7 +87,7 @@ export class AuthController {
     )
     file: Express.Multer.File,
   ) {
-    return this.service.createForKeystore(input, file);
+    return this.service.keystoreSignup(input, file);
   }
 
   @Post('keystore/signin')
@@ -100,7 +100,7 @@ export class AuthController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('file'))
   @UseInterceptors(CookiInterceptor)
-  signinForKeystore(
+  keystoreSignin(
     @Body() input: SigninByKeyStoryRequestDto,
     @UploadedFile(
       new ParseFilePipeBuilder()
@@ -113,7 +113,7 @@ export class AuthController {
     )
     file: Express.Multer.File,
   ) {
-    return this.service.signinForKeystore(input, file);
+    return this.service.keystoreSignin(input, file);
   }
 
   @Post('logout')

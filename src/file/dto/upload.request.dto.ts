@@ -11,6 +11,7 @@ export type UploadType = keyof typeof UPLOAD_TYPE;
 const MEDIA_TYPE = {
   IMAGE: 'IMAGE',
   VIDEO: 'VIDEO',
+  MODEL: 'MODEL',
 };
 
 export type MediaType = keyof typeof MEDIA_TYPE;

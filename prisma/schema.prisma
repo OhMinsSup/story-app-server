@@ -71,7 +71,7 @@ model File {
 
   publicId String @unique // cloudinary 업로드 아이디
 
-  version String // 버전 정보
+  version Int // 버전 정보
 
   signature String // 서명정보
 

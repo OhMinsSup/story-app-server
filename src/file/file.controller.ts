@@ -22,7 +22,7 @@ import { AuthUser, AuthUserSchema } from 'src/libs/get-user.decorator';
 export class FileController {
   constructor(private readonly service: FileService) {}
 
-  @Post('uplaod')
+  @Post('upload')
   @ApiOperation({ summary: '파일 업로드' })
   @ApiBody({
     required: true,
@@ -36,13 +36,9 @@ export class FileController {
     @AuthUser() user: AuthUserSchema,
     @Body() input: UploadRequestDto,
     @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addFileTypeValidator({
-          fileType: 'json',
-        })
-        .build({
-          fileIsRequired: true,
-        }),
+      new ParseFilePipeBuilder().build({
+        fileIsRequired: true,
+      }),
     )
     file: Express.Multer.File,
   ) {
