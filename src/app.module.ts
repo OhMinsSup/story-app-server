@@ -14,6 +14,7 @@ import { UsersModule } from './users/users.module';
 import { AuthGuardModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FileModule } from './file/file.module';
+import { ItemModule } from './item/item.module';
 
 const isDev = process.env.NODE_ENV === 'development';
 // const isProd = process.env.NODE_ENV === 'production';
@@ -54,6 +55,7 @@ const isDev = process.env.NODE_ENV === 'development';
     AuthModule,
     UsersModule,
     FileModule,
+    ItemModule,
   ],
 })
 export class AppModule {}

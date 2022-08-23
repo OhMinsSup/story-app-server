@@ -59,4 +59,6 @@ export class KlaytnService {
   decrypt(keystore: Keystore, password: string) {
     return this.caver.wallet.keyring.decrypt(keystore, password);
   }
+
+  mint() {}
 }

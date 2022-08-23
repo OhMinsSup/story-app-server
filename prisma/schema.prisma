@@ -36,6 +36,8 @@ model User {
 
   authentications UserAuthentication[]
 
+  items Item[]
+
   wallet UserWallet @relation(fields: [walletId], references: [id])
 }
 
@@ -85,6 +87,8 @@ model Item {
 
   externalSite String? // 외부주소
 
+  status String @default("pending") // 판매 상태 ("sale", "canceled", "expired", "pending", "trade")
+
   createdAt DateTime @default(now()) // 생성일
 
   updatedAt DateTime @updatedAt // 업데이트일
@@ -93,9 +97,49 @@ model Item {
 
   fileId Int // 파일 아이디
 
-  tags Tag[] // 태그
+  userId Int //  유저 아이디
 
-  file File @relation(fields: [fileId], references: [id])
+  nftId Int? // nft 아아디
+
+  user User @relation(fields: [userId], references: [id]) // 유저
+
+  file File @relation(fields: [fileId], references: [id]) // 파일
+
+  nft NFT? @relation(fields: [nftId], references: [id])
+
+  itemsTags ItemsTags[]
+}
+
+model NFT {
+  id Int @id @default(autoincrement())
+
+  tokenId String @unique // 토큰 아이디
+
+  assetFileName String? // 애셋명
+
+  assetContentType String? // 애셋 타입
+
+  assetsUrl String? // https://docs.klaytnapi.com/tutorial/metadata-api/meta-api, https://docs.klaytnapi.com/tutorial
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  deletedAt DateTime? // 삭제일 
+
+  items Item[]
+}
+
+model ItemsTags {
+  id Int @id @default(autoincrement())
+
+  item Item? @relation(fields: [itemId], references: [id]) // 스토리
+
+  tag Tag? @relation(fields: [tagId], references: [id]) // 태그
+
+  itemId Int? // 아이템 아이디
+
+  tagId Int? // 태그 아이디
 }
 
 model Tag {
@@ -109,7 +153,11 @@ model Tag {
 
   deletedAt DateTime? // 삭제일 
 
-  items Item[]
+  itemId Int?
+
+  itemsTags ItemsTags[]
+
+  @@index([name])
 }
 
 model File {
