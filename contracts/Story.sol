@@ -9,8 +9,9 @@ import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/utils/math/SafeMath.sol';
+import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 
-contract Story is ERC721, Ownable {
+contract Story is Ownable, ERC721URIStorage {
     using Strings for string;
     using SafeMath for uint256;
     using Counters for Counters.Counter;
@@ -67,17 +68,26 @@ contract Story is ERC721, Ownable {
         emit Transfer(_from, _to);
     }
 
-    function mint(uint256 _idx, address _toAddress) public {
+    function setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
+        _setTokenURI(_tokenId, _tokenURI);
+    }
+
+    function mint(
+        uint256 _idx,
+        string memory _tokenURI,
+        address _toAddress
+    ) public {
         assert(owner() == _msgSender());
 
         require(_storiesIdxs[_idx] == 0, 'idx has already been created');
 
-        uint256 currentTokenId = _nextTokenId.current();
-        _storiesItems[currentTokenId] = StoryItem(_idx);
-        _storiesIdxs[_idx] = currentTokenId;
+        uint256 _currentTokenId = _nextTokenId.current();
+        _storiesItems[_currentTokenId] = StoryItem(_idx);
+        _storiesIdxs[_idx] = _currentTokenId;
 
         mintTo(_toAddress);
+        setTokenURI(_currentTokenId, _tokenURI);
 
-        emit Minting(currentTokenId, _idx);
+        emit Minting(_currentTokenId, _idx);
     }
 }

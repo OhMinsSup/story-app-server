@@ -1,13 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type Caver from 'caver-js';
-import type { Contract, Keyring, Keystore } from 'caver-js';
-import { DEPLOYED_ABI, DEPLOYED_ADDRESS, KLAYTN } from '../../constants/config';
+import type {
+  FeeDelegatedTransaction,
+  Contract,
+  Keyring,
+  Keystore,
+} from 'caver-js';
+import {
+  DEPLOYED_ABI,
+  DEPLOYED_ADDRESS,
+  FEE_PAYER_WALLET,
+  KLAYTN,
+} from '../../constants/config';
 
 @Injectable()
 export class KlaytnService {
   private contract: Contract | null;
 
-  constructor(@Inject(KLAYTN) private readonly caver: Caver) {
+  constructor(
+    @Inject(KLAYTN) private readonly caver: Caver,
+    @Inject(FEE_PAYER_WALLET) private readonly feePayerAddress: string,
+  ) {
     if ([DEPLOYED_ABI, DEPLOYED_ADDRESS].every(Boolean)) {
       const contractInstance = this.caver.contract.create(
         DEPLOYED_ABI,
@@ -60,5 +73,48 @@ export class KlaytnService {
     return this.caver.wallet.keyring.decrypt(keystore, password);
   }
 
-  mint() {}
+  /**
+   * @description 데이터를 contract에 minting한다.
+   * @param {string} address
+   * @param {number} itemId
+   * @param {string} tokenURI
+   */
+  async mint(address: string, itemId: number, tokenURI: string) {
+    const toKerging = this.getKeyring(address);
+    this.walletAdd(toKerging);
+
+    const feeKerging = this.getKeyring(this.feePayerAddress);
+    this.walletAdd(feeKerging);
+
+    const signed = (await this.contract.sign(
+      {
+        from: toKerging.address,
+        gas: 1000000,
+        feeDelegation: true,
+      },
+      'mint',
+      itemId,
+      tokenURI,
+      toKerging.address,
+    )) as FeeDelegatedTransaction;
+
+    await this.caver.wallet.signAsFeePayer(feeKerging.address, signed);
+
+    const receipt = await this.caver.rpc.klay.sendRawTransaction(signed);
+
+    this.contract.events
+      .Mint(receipt.transactionHash)
+      .on('data', (event) => {
+        console.log(event);
+      })
+      .on('error', (error) => {
+        console.log(error);
+      })
+      .on('end', () => {
+        console.log('Mint event ended');
+      })
+      .start();
+
+    return receipt;
+  }
 }

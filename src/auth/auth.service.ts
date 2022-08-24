@@ -129,8 +129,6 @@ export class AuthService {
       decrypted.address,
     );
 
-    this.klaytn.walletRemove(decrypted.address);
-
     return {
       resultCode: EXCEPTION_CODE.OK,
       message: null,
@@ -278,8 +276,6 @@ export class AuthService {
     });
 
     const { accessToken } = await this.generateToken(user.id, wallet.address);
-
-    this.klaytn.walletRemove(decrypted.address);
 
     return {
       resultCode: EXCEPTION_CODE.OK,

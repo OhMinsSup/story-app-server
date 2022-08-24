@@ -15,15 +15,21 @@ import { AuthGuardModule } from './modules/auth/auth.module';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FileModule } from './file/file.module';
 import { ItemModule } from './item/item.module';
+import { IpfsModule } from './modules/ipfs/ipfs.module';
 
 const isDev = process.env.NODE_ENV === 'development';
-// const isProd = process.env.NODE_ENV === 'production';
+const isProd = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: isDev ? '.env.development' : '.env',
+      cache: true,
+      envFilePath: isDev
+        ? '.env.development'
+        : isProd
+        ? '.env.production'
+        : '.env',
       validationSchema: joi.object({
         NODE_ENV: joi
           .string()
@@ -35,6 +41,10 @@ const isDev = process.env.NODE_ENV === 'development';
         SALT_ROUNDS: joi.number().optional().default(8),
         PRIVATE_KEY: joi.string().required(),
         KLAYTN_NET_RPC_URL: joi.string().uri().required(),
+        CLOUDINARY_CLOUD_NAME: joi.string().required(),
+        CLOUDINARY_API_KEY: joi.string().required(),
+        CLOUDINARY_API_SECRET: joi.string().required(),
+        NFT_STORAGE_API_KEY: joi.string().required(),
       }),
     }),
     JwtModule.forRoot({
@@ -50,6 +60,9 @@ const isDev = process.env.NODE_ENV === 'development';
       cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
       cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET,
       cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    }),
+    IpfsModule.forRoot({
+      nftStorageApiKey: process.env.NFT_STORAGE_API_KEY,
     }),
     AuthGuardModule,
     AuthModule,

@@ -115,11 +115,10 @@ model NFT {
 
   tokenId String @unique // 토큰 아이디
 
-  assetFileName String? // 애셋명
+  cid String @unique // ipfs 콘텐츠 아이디
 
-  assetContentType String? // 애셋 타입
-
-  assetsUrl String? // https://docs.klaytnapi.com/tutorial/metadata-api/meta-api, https://docs.klaytnapi.com/tutorial
+  // https://docs.klaytnapi.com/tutorial/metadata-api/meta-api, https://docs.klaytnapi.com/tutorial
+  ipfsUrl String
 
   createdAt DateTime @default(now()) // 생성일
 

@@ -1,6 +1,6 @@
 import Caver from 'caver-js';
 import { type DynamicModule, Module, Global } from '@nestjs/common';
-import { KLAYTN } from 'src/constants/config';
+import { KLAYTN, FEE_PAYER_WALLET } from '../../constants/config';
 import { KlaytnService } from './klaytn.service';
 import type { Klaytn } from './klaytn.interface';
 
@@ -14,6 +14,10 @@ export class KlaytnModule {
         {
           provide: KLAYTN,
           useValue: new Caver(options.klaytnNetRpcUrl),
+        },
+        {
+          provide: FEE_PAYER_WALLET,
+          useValue: options.feePayerAddress,
         },
         KlaytnService,
       ],

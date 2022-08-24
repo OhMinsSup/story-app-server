@@ -3,6 +3,7 @@ import * as fs from 'fs';
 export const CONFIG_OPTIONS = 'CONFIG_OPTIONS';
 export const KLAYTN = 'KLAYTN';
 export const FEE_PAYER_WALLET = 'FEE_PAYER_WALLET'; // 대납주소 지갑
+export const NFT_STORAGE = 'NFT_STORAGE';
 
 export const KLAYTN_NET_RPC_URL = process.env.KLAYTN_NET_RPC_URL;
 
