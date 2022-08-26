@@ -2,14 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
-  IsEmail,
   IsHexColor,
   IsNumber,
   IsOptional,
   IsString,
   IsUrl,
   MaxLength,
-  MinLength,
 } from 'class-validator';
 
 export class CreateRequestDto {
@@ -124,4 +122,12 @@ export class CreateRequestDto {
     required: true,
   })
   fileId: number;
+
+  @IsNumber()
+  @ApiProperty({
+    example: 1,
+    description: '썸네일 아이디',
+    required: true,
+  })
+  thumbnailId: number;
 }

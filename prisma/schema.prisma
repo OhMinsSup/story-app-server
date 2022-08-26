@@ -59,6 +59,8 @@ model UserWallet {
 
   address String @unique // 지갑주소
 
+  privateKey String @unique // 지갑 키
+
   createdAt DateTime @default(now()) // 생성일
 
   updatedAt DateTime @updatedAt // 업데이트일
@@ -99,15 +101,19 @@ model Item {
 
   userId Int //  유저 아이디
 
+  thumbnailId Int // 썸네일 아이디
+
   nftId Int? // nft 아아디
 
   user User @relation(fields: [userId], references: [id]) // 유저
 
   file File @relation(fields: [fileId], references: [id]) // 파일
 
-  nft NFT? @relation(fields: [nftId], references: [id])
+  thumbnail Thumbnail @relation(fields: [thumbnailId], references: [id]) // 썸네일
 
-  itemsTags ItemsTags[]
+  nft NFT? @relation(fields: [nftId], references: [id]) // nft
+
+  tags ItemsOnTags[]
 }
 
 model NFT {
@@ -127,18 +133,36 @@ model NFT {
   deletedAt DateTime? // 삭제일 
 
   items Item[]
+
+  transactionReceipt TransactionReceipt[]
 }
 
-model ItemsTags {
+model TransactionReceipt {
   id Int @id @default(autoincrement())
 
-  item Item? @relation(fields: [itemId], references: [id]) // 스토리
+  transactionHash String @unique // 트랜잭션 해시
 
-  tag Tag? @relation(fields: [tagId], references: [id]) // 태그
+  createdAt DateTime @default(now()) // 생성일
 
-  itemId Int? // 아이템 아이디
+  updatedAt DateTime @updatedAt // 업데이트일
 
-  tagId Int? // 태그 아이디
+  deletedAt DateTime? // 삭제일 
+
+  nftId Int // nft 아이디
+
+  nft NFT @relation(fields: [nftId], references: [id]) // nft
+}
+
+model ItemsOnTags {
+  id Int @id @default(autoincrement())
+
+  item Item @relation(fields: [itemId], references: [id]) // 스토리
+
+  tag Tag @relation(fields: [tagId], references: [id]) // 태그
+
+  itemId Int // 아이템 아이디
+
+  tagId Int // 태그 아이디
 }
 
 model Tag {
@@ -152,11 +176,23 @@ model Tag {
 
   deletedAt DateTime? // 삭제일 
 
-  itemId Int?
-
-  itemsTags ItemsTags[]
+  items ItemsOnTags[]
 
   @@index([name])
+}
+
+model Thumbnail {
+  id Int @id @default(autoincrement())
+
+  url String // http 주소
+
+  secureUrl String // https 주소
+
+  createdAt DateTime @default(now()) // 생성일
+
+  updatedAt DateTime @updatedAt // 업데이트일
+
+  items Item[]
 }
 
 model File {

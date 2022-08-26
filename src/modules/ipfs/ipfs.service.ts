@@ -1,10 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { type NFTStorage } from 'nft.storage';
+import axios from 'axios';
+import { type NFTStorage, Blob } from 'nft.storage';
 import { NFT_STORAGE } from '../../constants/config';
 
 interface IpfsAddParams {
   name: string;
   description: string;
+  thumbnailUrl: string;
   contentUrl: string;
   tags: string[];
   price: number;
@@ -16,9 +18,14 @@ interface IpfsAddParams {
 export class IpfsService {
   constructor(@Inject(NFT_STORAGE) private readonly client: NFTStorage) {}
 
+  /**
+   * @description IPFS 업로드
+   * @param {IpfsAddParams} params
+   */
   async add(params: IpfsAddParams) {
     const {
       name,
+      thumbnailUrl,
       contentUrl,
       description,
       tags,
@@ -27,15 +34,31 @@ export class IpfsService {
       price,
     } = params;
 
-    const blob = await fetch(contentUrl).then((res) => res.blob());
+    const [thumbnail, content] = await Promise.all([
+      axios.get(thumbnailUrl, {
+        responseType: 'arraybuffer',
+      }),
+      axios.get(contentUrl, {
+        responseType: 'arraybuffer',
+      }),
+    ]);
+
+    const thumbnailBlob = new Blob([thumbnail.data], {
+      type: 'image/jpeg',
+    });
+
+    const contentBlob = new Blob([content.data], {
+      type: 'application/octet-stream',
+    });
 
     return this.client.store({
       name,
       description,
-      image: blob,
+      image: thumbnailBlob,
       properties: {
-        contentFile: blob,
+        content: contentBlob,
         contentUrl,
+        thumbnailUrl,
         price,
         ...(tags && { tags }),
         ...(backgroundColor && {

@@ -45,6 +45,8 @@ const isProd = process.env.NODE_ENV === 'production';
         CLOUDINARY_API_KEY: joi.string().required(),
         CLOUDINARY_API_SECRET: joi.string().required(),
         NFT_STORAGE_API_KEY: joi.string().required(),
+        KLAYTN_FEE_PAYER_ADDRESS: joi.string().required(),
+        KLAYTN_FEE_PAYER_PRIVATE_KEY: joi.string().required(),
       }),
     }),
     JwtModule.forRoot({
@@ -54,6 +56,8 @@ const isProd = process.env.NODE_ENV === 'production';
       storage: memoryStorage(), // use memory storage for having the buffer
     }),
     KlaytnModule.forRoot({
+      feePayerAddress: process.env.KLAYTN_FEE_PAYER_ADDRESS,
+      feePayerPrivateKey: process.env.KLAYTN_FEE_PAYER_PRIVATE_KEY,
       klaytnNetRpcUrl: process.env.KLAYTN_NET_RPC_URL,
     }),
     CloudinaryModule.forRoot({

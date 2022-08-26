@@ -4,6 +4,7 @@ import {} from 'class-validator';
 const UPLOAD_TYPE = {
   PROFILE: 'PROFILE',
   NFT: 'NFT',
+  THUMBNAIL: 'THUMBNAIL',
 };
 
 export type UploadType = keyof typeof UPLOAD_TYPE;
@@ -12,6 +13,7 @@ const MEDIA_TYPE = {
   IMAGE: 'IMAGE',
   VIDEO: 'VIDEO',
   MODEL: 'MODEL',
+  THUMBNAIL: 'THUMBNAIL',
 };
 
 export type MediaType = keyof typeof MEDIA_TYPE;
@@ -39,4 +41,15 @@ export class UploadRequestDto {
     required: true,
   })
   mediaType: MediaType;
+}
+
+export class UploadThumbnailRequestDto {
+  @ApiProperty({
+    example: 'KakaoTalk_Photo_2021-08-11-01-13-45.json',
+    description: '업로드 파일',
+    required: true,
+    type: 'string',
+    format: 'binary',
+  })
+  file: Express.Multer.File;
 }

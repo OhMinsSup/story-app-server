@@ -82,14 +82,10 @@ export class AuthService {
 
     const decrypted = this.klaytn.decrypt(parsedKeystore, input.password);
 
-    this.klaytn.walletAdd(decrypted);
-
-    const keyring = this.klaytn.getKeyring(decrypted.address);
-
     const existsByUser = await this.prisma.user.findFirst({
       where: {
         wallet: {
-          address: keyring.address,
+          address: decrypted.address,
         },
       },
       select: {
@@ -228,14 +224,10 @@ export class AuthService {
 
     const decrypted = this.klaytn.decrypt(parsedKeystore, input.password);
 
-    this.klaytn.walletAdd(decrypted);
-
-    const keyring = this.klaytn.getKeyring(decrypted.address);
-
     const existsByWallet = await this.prisma.user.findFirst({
       where: {
         wallet: {
-          address: keyring.address,
+          address: decrypted.address,
         },
       },
       select: {
@@ -259,6 +251,9 @@ export class AuthService {
     const wallet = await this.prisma.userWallet.create({
       data: {
         address: decrypted.address,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        privateKey: decrypted.key.privateKey,
       },
     });
 
@@ -334,6 +329,7 @@ export class AuthService {
     const wallet = await this.prisma.userWallet.create({
       data: {
         address: inMemoryWallet.address,
+        privateKey: inMemoryWallet.key.privateKey,
       },
     });
 

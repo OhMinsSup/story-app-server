@@ -55,6 +55,12 @@ export class FileService {
           userId: user.id,
         });
         break;
+      case 'THUMBNAIL':
+        resp = await this.cloudinary.itemThumbnailUpload({
+          file,
+          userId: user.id,
+        });
+        break;
       default:
         throw new BadRequestException({
           status: 404,
@@ -69,6 +75,27 @@ export class FileService {
         message: ['업로드 정보가 없습니다.'],
         error: 'Empty Data Uploaded Response',
       });
+    }
+
+    if (input.mediaType === 'THUMBNAIL') {
+      const data = await this.prisma.thumbnail.create({
+        data: {
+          url: resp.url,
+          secureUrl: resp.secure_url,
+        },
+      });
+
+      return {
+        resultCode: EXCEPTION_CODE.OK,
+        message: null,
+        error: null,
+        result: {
+          id: data.id,
+          publicId: resp.public_id,
+          secureUrl: resp.secure_url,
+          mediaType: input.mediaType,
+        },
+      };
     }
 
     const data = await this.prisma.file.create({

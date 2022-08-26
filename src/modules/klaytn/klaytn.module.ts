@@ -17,7 +17,10 @@ export class KlaytnModule {
         },
         {
           provide: FEE_PAYER_WALLET,
-          useValue: options.feePayerAddress,
+          useValue: {
+            feePayerAddress: options.feePayerAddress,
+            feePayerPrivateKey: options.feePayerPrivateKey,
+          },
         },
         KlaytnService,
       ],

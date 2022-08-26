@@ -8,6 +8,8 @@ interface ItemUploadParams {
   userId: number;
 }
 
+type ItemThumbnailParams = Omit<ItemUploadParams, 'uploadType'>;
+
 @Injectable()
 export class CloudinaryService {
   /**
@@ -24,6 +26,20 @@ export class CloudinaryService {
     const month = now.getMonth() + 1; // 월
     const date = now.getDate(); // 날
     return `${year}_${month}_${date}`;
+  }
+
+  /**
+   * @description - 썸네일을 업로드하는 함수
+   * @param {ItemThumbnailParams} params - 파일 업로드 파라미터
+   */
+  itemThumbnailUpload(params: ItemThumbnailParams) {
+    const { file, userId } = params;
+    const dataURL = this.makeDataURL(file);
+    return v2.uploader.upload(dataURL, {
+      resource_type: 'image',
+      folder: `media/${userId}/thumbnail/${this.currentDate()}`,
+      allowed_formats: ['jpg', 'png', 'jpeg', 'webp', 'gif'],
+    });
   }
 
   /**

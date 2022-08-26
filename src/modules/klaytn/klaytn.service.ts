@@ -19,7 +19,11 @@ export class KlaytnService {
 
   constructor(
     @Inject(KLAYTN) private readonly caver: Caver,
-    @Inject(FEE_PAYER_WALLET) private readonly feePayerAddress: string,
+    @Inject(FEE_PAYER_WALLET)
+    private readonly feePayer: Record<
+      'feePayerPrivateKey' | 'feePayerAddress',
+      string
+    >,
   ) {
     if ([DEPLOYED_ABI, DEPLOYED_ADDRESS].every(Boolean)) {
       const contractInstance = this.caver.contract.create(
@@ -59,9 +63,10 @@ export class KlaytnService {
   /**
    * @description caver-js에서 제공하는 인메모리 지갑을 사용하면 쉽게 Keyring을 사용할 수 있습니다.
    * @param {string} address
+   * @param {string} privateKey
    */
-  getKeyring(address: string) {
-    return this.caver.wallet.getKeyring(address);
+  getKeyring(address: string, privateKey: string) {
+    return this.caver.wallet.keyring.createWithSingleKey(address, privateKey);
   }
 
   /**
@@ -76,14 +81,23 @@ export class KlaytnService {
   /**
    * @description 데이터를 contract에 minting한다.
    * @param {string} address
+   * @param {string} privateKey
    * @param {number} itemId
    * @param {string} tokenURI
    */
-  async mint(address: string, itemId: number, tokenURI: string) {
-    const toKerging = this.getKeyring(address);
+  async mint(
+    address: string,
+    privateKey: string,
+    itemId: number,
+    tokenURI: string,
+  ) {
+    const toKerging = this.getKeyring(address, privateKey);
     this.walletAdd(toKerging);
 
-    const feeKerging = this.getKeyring(this.feePayerAddress);
+    const feeKerging = this.getKeyring(
+      this.feePayer.feePayerAddress,
+      this.feePayer.feePayerPrivateKey,
+    );
     this.walletAdd(feeKerging);
 
     const signed = (await this.contract.sign(
@@ -102,19 +116,20 @@ export class KlaytnService {
 
     const receipt = await this.caver.rpc.klay.sendRawTransaction(signed);
 
-    this.contract.events
-      .Mint(receipt.transactionHash)
-      .on('data', (event) => {
-        console.log(event);
-      })
-      .on('error', (error) => {
-        console.log(error);
-      })
-      .on('end', () => {
-        console.log('Mint event ended');
-      })
-      .start();
+    console.log(receipt.events.Minting);
+    const tokenId = (receipt as any).events.Minting?.returnValues?.[0];
 
-    return receipt;
+    return {
+      receipt,
+      tokenId,
+    };
+  }
+
+  /**
+   * @description 트랜잭션 해시로 조회한 트랜잭션의 영수증을 반환합니다.
+   * @param {string} transactionHash
+   */
+  getReceipt(transactionHash: string) {
+    return this.caver.rpc.klay.getTransactionReceipt(transactionHash);
   }
 }

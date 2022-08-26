@@ -24,6 +24,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const error = exception.getResponse() as Exception;
 
+    console.log(error);
+
     // 401
     if (status === HttpStatus.UNAUTHORIZED) {
       res.clearCookie(this.config.get('COOKIE_TOKEN_NAME'), {
