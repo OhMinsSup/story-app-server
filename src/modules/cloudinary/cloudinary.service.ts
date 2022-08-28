@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { v2 } from 'cloudinary';
 import type { UploadType } from '../../file/dto/upload.request.dto';
 
@@ -12,6 +13,8 @@ type ItemThumbnailParams = Omit<ItemUploadParams, 'uploadType'>;
 
 @Injectable()
 export class CloudinaryService {
+  constructor(private readonly config: ConfigService) {}
+
   /**
    * @description - This method is used to make a data url from a file
    * @param {Express.Multer.File} file - file to make data url
@@ -26,6 +29,13 @@ export class CloudinaryService {
     const month = now.getMonth() + 1; // 월
     const date = now.getDate(); // 날
     return `${year}_${month}_${date}`;
+  }
+
+  /**
+   * @description cloudinary static url
+   */
+  getStaticUrl() {
+    return this.config.get('CLOUDINARY_URL');
   }
 
   /**

@@ -6,7 +6,6 @@ import {
   UseInterceptors,
   ParseFilePipeBuilder,
   Res,
-  UseGuards,
   HttpStatus,
 } from '@nestjs/common';
 import {
@@ -19,8 +18,6 @@ import {
 import { CookiInterceptor } from '../libs/cookie.interceptor';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
-
-import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 
 import {
   CreateKeystoreRequestDto,
@@ -121,7 +118,6 @@ export class AuthController {
   @ApiOkResponse({
     type: LogoutResponseDto,
   })
-  @UseGuards(LoggedInGuard)
   logout(@Res() res: Response) {
     return res.status(HttpStatus.OK).json(this.service.logout(res));
   }

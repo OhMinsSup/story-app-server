@@ -57,8 +57,6 @@ export class IpfsService {
       image: thumbnailBlob,
       properties: {
         content: contentBlob,
-        contentUrl,
-        thumbnailUrl,
         price,
         ...(tags && { tags }),
         ...(backgroundColor && {

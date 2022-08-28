@@ -41,6 +41,7 @@ const isProd = process.env.NODE_ENV === 'production';
         SALT_ROUNDS: joi.number().optional().default(8),
         PRIVATE_KEY: joi.string().required(),
         KLAYTN_NET_RPC_URL: joi.string().uri().required(),
+        CLOUDINARY_URL: joi.string().required(),
         CLOUDINARY_CLOUD_NAME: joi.string().required(),
         CLOUDINARY_API_KEY: joi.string().required(),
         CLOUDINARY_API_SECRET: joi.string().required(),

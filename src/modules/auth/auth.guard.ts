@@ -26,6 +26,18 @@ export class AuthGuard implements CanActivate {
   ) {}
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
+    if (
+      [
+        '/api/auth/logout',
+        '/api/auth/signin',
+        '/api/auth/keystore/signin',
+      ].includes(request.url)
+    ) {
+      console.log('AuthGuard: canActivate: true');
+      return true;
+    }
+    console.log('AuthGuard: canActivate: false');
+
     let accessToken: string | undefined = request.cookies?.access_token;
 
     const { authorization } = request.headers;

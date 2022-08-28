@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { KlaytnService } from '../modules/klaytn/klaytn.service';
 import { PrismaService } from '../database/prisma.service';
 import { IpfsService } from '../modules/ipfs/ipfs.service';
@@ -8,7 +12,7 @@ import { CreateRequestDto } from './dto/create.request.dto';
 import { AuthUserSchema } from 'src/libs/get-user.decorator';
 
 import { EXCEPTION_CODE } from 'src/constants/exception.code';
-import { isEmpty, isNull, isUndefined } from '../libs/assertion';
+import { isEmpty, isNull, isNumber, isUndefined } from '../libs/assertion';
 import { escapeForUrl } from 'src/libs/utils';
 
 import type { Tag } from '@prisma/client';
@@ -21,6 +25,84 @@ export class ItemService {
     private readonly nftClient: IpfsService,
     private readonly config: ConfigService,
   ) {}
+
+  /**
+   * @description 아이템 상세
+   * @param {number} id
+   */
+  async detail(id: number) {
+    const item = await this.prisma.item.findFirst({
+      where: { AND: [{ id }, { isPublic: true }] },
+      select: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            username: true,
+            profileUrl: true,
+            wallet: {
+              select: {
+                address: true,
+              },
+            },
+          },
+        },
+        title: true,
+        description: true,
+        price: true,
+        beginDate: true,
+        endDate: true,
+        backgroundColor: true,
+        externalSite: true,
+        status: true,
+        tags: {
+          select: {
+            tag: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        thumbnail: {
+          select: {
+            secureUrl: true,
+          },
+        },
+        file: {
+          select: {
+            publicId: true,
+            version: true,
+            foramt: true,
+            secureUrl: true,
+            mediaType: true,
+          },
+        },
+        nft: {
+          select: {
+            tokenId: true,
+            cid: true,
+          },
+        },
+      },
+    });
+
+    if (!item) {
+      throw new NotFoundException({
+        status: EXCEPTION_CODE.NOT_EXIST,
+        msg: ['존재하지 않는 아이템입니다.'],
+        error: 'NOT_EXIST',
+      });
+    }
+
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: item,
+    };
+  }
 
   /**
    * @description 아이템 등록
@@ -127,9 +209,7 @@ export class ItemService {
         ),
       );
 
-      const isDev = this.config.get('NODE_ENV') === 'development';
-      // 개발 상태에서는 무시하고 개발 진행
-      if (!isDev) {
+      if (this.config.get('NODE_ENV') === 'production') {
         const metadata = await this.nftClient.add({
           name: item.title,
           description: item.description,
@@ -148,9 +228,17 @@ export class ItemService {
           metadata.url,
         );
 
+        if (!tokenId) {
+          throw new BadRequestException({
+            status: EXCEPTION_CODE.NFT_FAIL,
+            msg: ['토큰 아이디 생성이 실패하였습니다.'],
+            error: 'NFT Create Fail',
+          });
+        }
+
         const nft = await tx.nFT.create({
           data: {
-            tokenId: typeof tokenId === 'number' ? tokenId.toString() : tokenId,
+            tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
             cid: metadata.ipnft,
             ipfsUrl: metadata.url,
           },

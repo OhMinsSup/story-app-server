@@ -1,4 +1,12 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthUser, AuthUserSchema } from 'src/libs/get-user.decorator';
 import { LoggedInGuard } from 'src/modules/auth/logged-in.guard';
@@ -20,5 +28,11 @@ export class ItemController {
   @UseGuards(LoggedInGuard)
   create(@AuthUser() user: AuthUserSchema, @Body() input: CreateRequestDto) {
     return this.service.create(user, input);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: '아이템 조회' })
+  detail(@Param('id', ParseIntPipe) id: number) {
+    return this.service.detail(id);
   }
 }
