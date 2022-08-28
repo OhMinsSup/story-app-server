@@ -123,11 +123,12 @@ export class CreateRequestDto {
   })
   fileId: number;
 
-  @IsNumber()
+  @IsString()
+  @IsUrl()
   @ApiProperty({
-    example: 1,
-    description: '썸네일 아이디',
+    example: 'string',
+    description: '썸네일 주소',
     required: true,
   })
-  thumbnailId: number;
+  thumbnailUrl: string;
 }

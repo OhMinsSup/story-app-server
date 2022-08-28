@@ -101,15 +101,13 @@ model Item {
 
   userId Int //  유저 아이디
 
-  thumbnailId Int // 썸네일 아이디
+  thumbnailUrl String // 썸네일 주소
 
   nftId Int? // nft 아아디
 
   user User @relation(fields: [userId], references: [id]) // 유저
 
   file File @relation(fields: [fileId], references: [id]) // 파일
-
-  thumbnail Thumbnail @relation(fields: [thumbnailId], references: [id]) // 썸네일
 
   nft NFT? @relation(fields: [nftId], references: [id]) // nft
 
@@ -191,8 +189,6 @@ model Thumbnail {
   createdAt DateTime @default(now()) // 생성일
 
   updatedAt DateTime @updatedAt // 업데이트일
-
-  items Item[]
 }
 
 model File {

@@ -49,6 +49,7 @@ export class ItemService {
         },
         title: true,
         description: true,
+        thumbnailUrl: true,
         price: true,
         beginDate: true,
         endDate: true,
@@ -63,11 +64,6 @@ export class ItemService {
                 name: true,
               },
             },
-          },
-        },
-        thumbnail: {
-          select: {
-            secureUrl: true,
           },
         },
         file: {
@@ -133,19 +129,6 @@ export class ItemService {
         });
       }
 
-      const thumbnail = await tx.thumbnail.findUnique({
-        where: {
-          id: input.thumbnailId,
-        },
-      });
-      if (!thumbnail) {
-        throw new NotFoundException({
-          status: EXCEPTION_CODE.NOT_EXIST,
-          msg: ['존재하지 않는 썸네일입니다.'],
-          error: 'Not Found Thumbnail',
-        });
-      }
-
       let createdTags: Tag[] = [];
       // 태크 체크
       if (!isEmpty(input.tags) && input.tags) {
@@ -174,7 +157,7 @@ export class ItemService {
         data: {
           userId: user.id,
           fileId: file.id,
-          thumbnailId: thumbnail.id,
+          thumbnailUrl: input.thumbnailUrl,
           nftId: null,
           title: input.title,
           description: input.description,
@@ -213,7 +196,7 @@ export class ItemService {
         const metadata = await this.nftClient.add({
           name: item.title,
           description: item.description,
-          thumbnailUrl: thumbnail.secureUrl,
+          thumbnailUrl: input.thumbnailUrl,
           contentUrl: file.secureUrl,
           tags: input.tags ?? [],
           price: item.price,
