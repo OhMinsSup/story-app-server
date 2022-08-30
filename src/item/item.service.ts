@@ -192,57 +192,55 @@ export class ItemService {
         ),
       );
 
-      if (this.config.get('NODE_ENV') === 'production') {
-        const metadata = await this.nftClient.add({
-          name: item.title,
-          description: item.description,
-          thumbnailUrl: input.thumbnailUrl,
-          contentUrl: file.secureUrl,
-          tags: input.tags ?? [],
-          price: item.price,
-          backgroundColor: item.backgroundColor ?? null,
-          externalSite: item.externalSite ?? null,
-        });
+      const metadata = await this.nftClient.add({
+        name: item.title,
+        description: item.description,
+        thumbnailUrl: input.thumbnailUrl,
+        contentUrl: file.secureUrl,
+        tags: input.tags ?? [],
+        price: item.price,
+        backgroundColor: item.backgroundColor ?? null,
+        externalSite: item.externalSite ?? null,
+      });
 
-        const { receipt, tokenId } = await this.klaytn.mint(
-          user.wallet.address,
-          wallet.privateKey,
-          item.id,
-          metadata.url,
-        );
+      const { receipt, tokenId } = await this.klaytn.mint(
+        user.wallet.address,
+        wallet.privateKey,
+        item.id,
+        metadata.url,
+      );
 
-        if (!tokenId) {
-          throw new BadRequestException({
-            status: EXCEPTION_CODE.NFT_FAIL,
-            msg: ['토큰 아이디 생성이 실패하였습니다.'],
-            error: 'NFT Create Fail',
-          });
-        }
-
-        const nft = await tx.nFT.create({
-          data: {
-            tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
-            cid: metadata.ipnft,
-            ipfsUrl: metadata.url,
-          },
-        });
-
-        await tx.transactionReceipt.create({
-          data: {
-            transactionHash: receipt.transactionHash,
-            nftId: nft.id,
-          },
-        });
-
-        await tx.item.update({
-          where: {
-            id: item.id,
-          },
-          data: {
-            nftId: nft.id,
-          },
+      if (!tokenId) {
+        throw new BadRequestException({
+          status: EXCEPTION_CODE.NFT_FAIL,
+          msg: ['토큰 아이디 생성이 실패하였습니다.'],
+          error: 'NFT Create Fail',
         });
       }
+
+      const nft = await tx.nFT.create({
+        data: {
+          tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
+          cid: metadata.ipnft,
+          ipfsUrl: metadata.url,
+        },
+      });
+
+      await tx.transactionReceipt.create({
+        data: {
+          transactionHash: receipt.transactionHash,
+          nftId: nft.id,
+        },
+      });
+
+      await tx.item.update({
+        where: {
+          id: item.id,
+        },
+        data: {
+          nftId: nft.id,
+        },
+      });
 
       return {
         resultCode: EXCEPTION_CODE.OK,

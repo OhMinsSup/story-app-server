@@ -1,11 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import type Caver from 'caver-js';
-import type {
-  FeeDelegatedTransaction,
-  Contract,
-  Keyring,
-  Keystore,
-} from 'caver-js';
+import type { Contract, Keyring, Keystore } from 'caver-js';
 import {
   DEPLOYED_ABI,
   DEPLOYED_ADDRESS,
@@ -24,6 +20,7 @@ export class KlaytnService {
       'feePayerPrivateKey' | 'feePayerAddress',
       string
     >,
+    private readonly config: ConfigService,
   ) {
     if ([DEPLOYED_ABI, DEPLOYED_ADDRESS].every(Boolean)) {
       const contractInstance = this.caver.contract.create(
@@ -94,35 +91,67 @@ export class KlaytnService {
     const toKerging = this.getKeyring(address, privateKey);
     this.walletAdd(toKerging);
 
-    const feeKerging = this.getKeyring(
-      this.feePayer.feePayerAddress,
-      this.feePayer.feePayerPrivateKey,
-    );
-    this.walletAdd(feeKerging);
+    switch (this.config.get('DEPLOY_GROUP')) {
+      case 'development': {
+        const receipt = await this.contract.send(
+          {
+            from: toKerging.address,
+            gas: 1000000,
+          },
+          'mint',
+          itemId,
+          tokenURI,
+          toKerging.address,
+        );
 
-    const signed = (await this.contract.sign(
-      {
-        from: toKerging.address,
-        gas: 1000000,
-        feeDelegation: true,
-      },
-      'mint',
-      itemId,
-      tokenURI,
-      toKerging.address,
-    )) as FeeDelegatedTransaction;
+        let tokenId = null;
+        if (Array.isArray(receipt.events.Minting)) {
+          const values = receipt.events.Minting[0].returnValues;
+          console.log('values ===>', values);
+          tokenId = values.tokenId;
+        } else {
+          const values = receipt.events.Minting.returnValues;
+          console.log('values ===>', values);
+          tokenId = values.tokenId;
+        }
 
-    await this.caver.wallet.signAsFeePayer(feeKerging.address, signed);
+        return {
+          receipt,
+          tokenId,
+        };
+      }
+      case 'production': {
+        const signed = await this.contract.sign(
+          {
+            from: toKerging.address,
+            gas: 1000000,
+          },
+          'mint',
+          itemId,
+          tokenURI,
+          toKerging.address,
+        );
 
-    const receipt = await this.caver.rpc.klay.sendRawTransaction(signed);
+        const receipt = await this.caver.rpc.klay.sendRawTransaction(signed);
+        let tokenId = null;
+        if (Array.isArray(receipt.events.Minting)) {
+          const values = receipt.events.Minting[0].returnValues;
+          console.log('values ===>', values);
+          tokenId = values.tokenId;
+        } else {
+          const values = receipt.events.Minting.returnValues;
+          console.log('values ===>', values);
+          tokenId = values.tokenId;
+        }
 
-    console.log(receipt.events.Minting);
-    const tokenId = (receipt as any).events.Minting?.returnValues?.[0];
-
-    return {
-      receipt,
-      tokenId,
-    };
+        return {
+          receipt,
+          tokenId,
+        };
+      }
+      default:
+        throw new Error('DEPLOY_GROUP is not defined');
+    }
   }
 
   /**

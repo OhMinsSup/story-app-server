@@ -1,3 +1,5 @@
 {
-  "solidity.compileUsingRemoteVersion": "^0.8.0"
+  "solidity.compileUsingRemoteVersion": "^0.8.0",
+  "editor.fontLigatures": true,
+  "editor.fontWeight": "600"
 }

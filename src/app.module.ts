@@ -35,6 +35,10 @@ const isProd = process.env.NODE_ENV === 'production';
           .string()
           .valid('test', 'development', 'production')
           .required(),
+        DEPLOY_GROUP: joi
+          .string()
+          .valid('local', 'development', 'production')
+          .required(),
         DATABASE_URL: joi.string().required(),
         COOKIE_SECRET: joi.string().required(),
         PORT: joi.number().optional().default(8000),
