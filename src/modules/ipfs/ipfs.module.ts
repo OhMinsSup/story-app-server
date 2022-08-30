@@ -2,7 +2,7 @@ import { NFTStorage } from 'nft.storage';
 import { type DynamicModule, Global, Module } from '@nestjs/common';
 import { IpfsService } from './ipfs.service';
 import type { Ipfs } from './ipfs.interface';
-import { NFT_STORAGE } from 'src/constants/config';
+import { NFT_STORAGE } from '../../constants/config';
 
 @Module({})
 @Global()

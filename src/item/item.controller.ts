@@ -8,8 +8,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthUser, AuthUserSchema } from 'src/libs/get-user.decorator';
-import { LoggedInGuard } from 'src/modules/auth/logged-in.guard';
+import { AuthUser, AuthUserSchema } from '../libs/get-user.decorator';
+import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 import { CreateRequestDto } from './dto/create.request.dto';
 import { ItemService } from './item.service';
 

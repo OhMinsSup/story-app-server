@@ -13,9 +13,9 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { FileService } from './file.service';
 
-import { LoggedInGuard } from 'src/modules/auth/logged-in.guard';
+import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 import { UploadRequestDto } from './dto/upload.request.dto';
-import { AuthUser, AuthUserSchema } from 'src/libs/get-user.decorator';
+import { AuthUser, AuthUserSchema } from '../libs/get-user.decorator';
 
 @ApiTags('파일')
 @Controller('api/files')

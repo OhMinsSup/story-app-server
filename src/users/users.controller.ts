@@ -1,6 +1,6 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EXCEPTION_CODE } from 'src/constants/exception.code';
+import { EXCEPTION_CODE } from '../constants/exception.code';
 import { AuthUser, type AuthUserSchema } from '../libs/get-user.decorator';
 import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 import { MeOkResponseDto } from './dto/me.dto';

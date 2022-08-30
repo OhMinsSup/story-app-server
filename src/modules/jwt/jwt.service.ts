@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CONFIG_OPTIONS } from 'src/constants/config';
+import { CONFIG_OPTIONS } from '../../constants/config';
 import jwt from 'jsonwebtoken';
 
 // types

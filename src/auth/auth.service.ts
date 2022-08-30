@@ -6,12 +6,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { EXCEPTION_CODE } from 'src/constants/exception.code';
+import { EXCEPTION_CODE } from '../constants/exception.code';
 
-import { PrismaService } from 'src/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from 'src/modules/jwt/jwt.service';
-import { KlaytnService } from 'src/modules/klaytn/klaytn.service';
+import { JwtService } from '../modules/jwt/jwt.service';
+import { KlaytnService } from '../modules/klaytn/klaytn.service';
 
 import {
   CreateKeystoreRequestDto,

@@ -1,16 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+require('dotenv').config({
+  path: '.env.development',
+});
 const HDWalletProvider = require('truffle-hdwallet-provider-klaytn');
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require('dotenv');
-
-/**
- * 트러플 네트워크 변수
- * klaytn 네트워크에 계약을 배포하기 위한 것입니다. */
-const NETWORK_ID = process.env.NETWORK_ID;
-const GASLIMIT = process.env.GASLIMIT;
-
-console.log(process.env.KLAYTN_NET_RPC_URL, NETWORK_ID);
 
 /**
  * URL: 사용할 원격 노드의 URL
@@ -18,24 +9,23 @@ console.log(process.env.KLAYTN_NET_RPC_URL, NETWORK_ID);
 
 module.exports = {
   networks: {
-    ganache: {
-      host: 'localhost',
+    development: {
+      host: '127.0.0.1',
       port: 8545,
       network_id: '*', // Match any network id
     },
-
     baobab: {
-      provider: () =>
-        new HDWalletProvider(
+      provider: () => {
+        return new HDWalletProvider(
           process.env.KLAYTN_FEE_PAYER_PRIVATE_KEY,
           process.env.KLAYTN_NET_RPC_URL,
-        ),
-      network_id: NETWORK_ID,
-      gas: GASLIMIT,
+        );
+      },
+      network_id: '1001',
+      gas: '8500000',
       gasPrice: null,
     },
   },
-
   // Specify the version of compiler, we use 0.5.6
   compilers: {
     solc: {

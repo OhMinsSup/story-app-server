@@ -10,7 +10,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 // types
 import type { JwtPayload } from 'jsonwebtoken';
-import { EXCEPTION_CODE } from 'src/constants/exception.code';
+import { EXCEPTION_CODE } from '../../constants/exception.code';
 
 interface Payload {
   authId: number;
