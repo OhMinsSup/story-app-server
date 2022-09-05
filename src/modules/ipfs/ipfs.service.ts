@@ -35,68 +35,64 @@ export class IpfsService {
       price,
     } = params;
 
-    const [thumbnail, content] = await Promise.all([
-      axios.get(thumbnailUrl, {
-        responseType: 'arraybuffer',
-      }),
-      axios.get(contentUrl, {
-        responseType: 'arraybuffer',
-      }),
-    ]);
+    const resp = await axios.get(thumbnailUrl, {
+      responseType: 'arraybuffer',
+    });
 
-    const thumbResult = parseByBytes(thumbnail.data);
-    const contentResult = parseByBytes(content.data);
-
+    const thumbResult = parseByBytes(resp.data);
     const guessedThumb = thumbResult?.[0];
-    const guessedContent = contentResult?.[0];
 
-    if (!guessedThumb || !guessedContent) {
+    if (!guessedThumb) {
       const error = new Error();
       error.name = 'InvalidFile';
       error.message = '업로드 할 수 없는 파일입니다.';
       throw error;
     }
 
-    // arraybuffer -> blob -> file
-
-    const thumbBlob = new Blob([thumbnail.data], {
+    const blob = new Blob([resp.data], {
       type: guessedThumb.mime,
     });
-    const contentBlob = new Blob([content.data], {
-      type: guessedContent.mime,
-    });
 
-    const thumbFile = new File(
-      [thumbBlob],
+    const thumbnail = new File(
+      [blob],
       `${name}_thumbnail.${guessedThumb.extension}`,
       {
         type: guessedThumb.mime,
       },
     );
 
-    const contentFile = new File(
-      [contentBlob],
-      `${name}_content.${guessedContent.extension}`,
-      {
-        type: guessedContent.mime,
-      },
-    );
-
-    return this.client.store({
+    const nft = {
       name,
       description,
-      image: thumbFile,
+      image: thumbnail,
       properties: {
-        content: contentFile,
-        price,
-        ...(tags && { tags }),
-        ...(backgroundColor && {
-          backgroundColor,
-        }),
-        ...(externalSite && {
-          externalSite,
-        }),
+        thumbnail: {
+          type: 'string',
+          value: thumbnailUrl,
+        },
+        content: {
+          type: 'string',
+          value: contentUrl,
+        },
+        price: {
+          type: 'number',
+          value: price,
+        },
+        tags: {
+          type: 'array',
+          value: tags ?? [],
+        },
+        backgroundColor: {
+          type: 'string',
+          value: backgroundColor ?? '',
+        },
+        externalSite: {
+          type: 'string',
+          value: externalSite ?? '',
+        },
       },
-    });
+    };
+
+    return this.client.store(nft);
   }
 }

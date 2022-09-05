@@ -17,7 +17,7 @@ module.exports = {
     baobab: {
       provider: () => {
         return new HDWalletProvider(
-          process.env.KLAYTN_FEE_PAYER_PRIVATE_KEY,
+          process.env.KLAYTN_CONTRACT_PRIVATE_KEY,
           process.env.KLAYTN_NET_RPC_URL,
         );
       },

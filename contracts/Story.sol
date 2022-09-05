@@ -2,92 +2,111 @@
 
 pragma solidity ^0.8.0;
 
-import '@openzeppelin/contracts/access/Ownable.sol';
-import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/token/ERC721/ERC721.sol';
 import '@openzeppelin/contracts/access/Ownable.sol';
 import '@openzeppelin/contracts/utils/Counters.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
-import '@openzeppelin/contracts/utils/math/SafeMath.sol';
-import '@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol';
 
-contract Story is Ownable, ERC721URIStorage {
-    using Strings for string;
-    using SafeMath for uint256;
+contract Story is ERC721, Ownable {
+    using Strings for uint256;
+    event CreateItem(uint256 indexed tokenId);
+
     using Counters for Counters.Counter;
 
-    event Transfer(address indexed from, address indexed to);
-    event Minting(uint256 indexed tokenId, uint256 indexed idx);
+    Counters.Counter private _tokenIds;
 
-    struct StoryItem {
-        uint256 _idx;
+    // Optional mapping for token URIs
+    mapping(uint256 => string) private _tokenURIs;
+
+    mapping(uint256 => Item) private _itemList;
+
+    // Base URI
+    string private _baseURIextended;
+
+    struct Item {
+        uint256 tokenId;
+        uint256 itemId;
+        string tokenURL;
+        address[] ownerHistory; // History of all previous owners
     }
-
-    mapping(uint256 => StoryItem) _storiesItems;
-    mapping(uint256 => uint256) _storiesIdxs;
-
-    /**
-     * We rely on the OZ Counter util to keep track of the next available ID.
-     * We track the nextTokenId instead of the currentTokenId to save users on gas costs.
-     * Read more about it here: https://shiny.mirror.xyz/OUampBbIz9ebEicfGnQf5At_ReMHlZy0tB4glb9xQ0E
-     */
-    Counters.Counter private _nextTokenId;
 
     constructor(string memory _name, string memory _symbol)
         ERC721(_name, _symbol)
+    {}
+
+    function setBaseURI(string memory baseURI_) external onlyOwner {
+        _baseURIextended = baseURI_;
+    }
+
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
     {
-        // nextTokenId is initialized to 1, since starting at 0 leads to higher gas cost for the first minter
-        _nextTokenId.increment();
+        require(
+            _exists(tokenId),
+            'ERC721Metadata: URI set of nonexistent token'
+        );
+        _tokenURIs[tokenId] = _tokenURI;
     }
 
-    /**
-     * @dev Mints a token to an address with a tokenURI.
-     * @param _to address of the future owner of the token
-     */
-    function mintTo(address _to) public onlyOwner {
-        uint256 currentTokenId = _nextTokenId.current();
-        _nextTokenId.increment();
-        _safeMint(_to, currentTokenId);
+    function _baseURI() internal view virtual override returns (string memory) {
+        return _baseURIextended;
     }
 
-    /**
-        @dev Returns the total tokens minted so far.
-        1 is always subtracted from the Counter since it tracks the next available tokenId.
-     */
-    function totalSupply() public view returns (uint256) {
-        return _nextTokenId.current() - 1;
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            'ERC721Metadata: URI query for nonexistent token'
+        );
+
+        string memory _tokenURI = _tokenURIs[tokenId];
+        string memory base = _baseURI();
+
+        // If there is no base URI, return the token URI.
+        if (bytes(base).length == 0) {
+            return _tokenURI;
+        }
+        // If both are set, concatenate the baseURI and tokenURI (via abi.encodePacked).
+        if (bytes(_tokenURI).length > 0) {
+            return string(abi.encodePacked(base, _tokenURI));
+        }
+
+        // If there is a baseURI but no tokenURI, concatenate the tokenID to the baseURI.
+        return string(abi.encodePacked(base, tokenId.toString()));
     }
 
-    function transferOwnership(address newOwner) public override onlyOwner {
-        address _prevOwner = owner();
-        super.transferOwnership(newOwner);
-        fireTransferEvents(_prevOwner, newOwner);
-    }
-
-    function fireTransferEvents(address _from, address _to) private {
-        emit Transfer(_from, _to);
-    }
-
-    function setTokenURI(uint256 _tokenId, string memory _tokenURI) private {
-        _setTokenURI(_tokenId, _tokenURI);
-    }
-
-    function mint(
+    function createItem(
+        address _toAddress,
         uint256 _idx,
-        string memory _tokenURI,
-        address _toAddress
-    ) public {
-        assert(owner() == _msgSender());
+        string memory _tokenURI
+    ) public returns (uint256) {
+        _tokenIds.increment();
 
-        require(_storiesIdxs[_idx] == 0, 'idx has already been created');
+        uint256 newTokenId = _tokenIds.current();
 
-        uint256 _currentTokenId = _nextTokenId.current();
-        _storiesItems[_currentTokenId] = StoryItem(_idx);
-        _storiesIdxs[_idx] = _currentTokenId;
+        _mint(_toAddress, newTokenId);
+        _setTokenURI(newTokenId, _tokenURI);
 
-        mintTo(_toAddress);
-        setTokenURI(_currentTokenId, _tokenURI);
+        address[] memory ownerHistory;
 
-        emit Minting(_currentTokenId, _idx);
+        Item memory item = Item({
+            tokenId: newTokenId,
+            itemId: _idx,
+            tokenURL: _tokenURI,
+            ownerHistory: ownerHistory
+        });
+
+        _itemList[newTokenId] = item;
+        _itemList[newTokenId].ownerHistory.push(_toAddress);
+
+        emit CreateItem(newTokenId);
+
+        return newTokenId;
     }
 }

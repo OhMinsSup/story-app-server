@@ -204,7 +204,6 @@ export class ItemService {
       });
 
       const { receipt, tokenId } = await this.klaytn.mint(
-        user.wallet.address,
         wallet.privateKey,
         item.id,
         metadata.url,
