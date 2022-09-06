@@ -1,4 +1,15 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { TxService } from './tx.service';
 
-@Controller('tx')
-export class TxController {}
+@ApiTags('거래')
+@Controller('/api/tx')
+export class TxController {
+  constructor(private readonly service: TxService) {}
+
+  @Get(':txHash')
+  @ApiOperation({ summary: '영수증 조회' })
+  getTransactionReceipt(@Param('txHash') txHash: string) {
+    return this.service.getTransactionReceipt(txHash);
+  }
+}
