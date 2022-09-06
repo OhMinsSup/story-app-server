@@ -16,6 +16,7 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FileModule } from './file/file.module';
 import { ItemModule } from './item/item.module';
 import { IpfsModule } from './modules/ipfs/ipfs.module';
+import { TxModule } from './tx/tx.module';
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = process.env.NODE_ENV === 'production';
@@ -78,6 +79,7 @@ const isProd = process.env.NODE_ENV === 'production';
     UsersModule,
     FileModule,
     ItemModule,
+    TxModule,
   ],
 })
 export class AppModule {}

@@ -1,12 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type Caver from 'caver-js';
-import type {
-  Contract,
-  FeeDelegatedTransaction,
-  Keyring,
-  Keystore,
-} from 'caver-js';
+import type { Contract, Keyring, Keystore, Unit } from 'caver-js';
 import {
   DEPLOYED_ABI,
   DEPLOYED_ADDRESS,
@@ -121,6 +116,23 @@ export class KlaytnService {
       receipt,
       tokenId,
     };
+  }
+
+  fromPeb(value: string | number, unit?: Unit) {
+    const price = this.caver.utils.fromPeb(value, unit ?? 'KLAY');
+    return {
+      price,
+      unit: unit ?? 'KLAY',
+    };
+  }
+
+  /**
+   * @description 내가 소유한 금액을 조회한다.
+   * @param {string} address
+   * @link https://medium.com/klaytn/kas%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%98%EC%97%AC-klaytn-%EC%A7%80%EA%B0%91-%EA%B8%B0%EB%8A%A5-%EA%B0%9C%EB%B0%9C%ED%95%98%EA%B8%B0-1-ced7b6d97668
+   */
+  getBalance(address: string) {
+    return this.caver.rpc.klay.getBalance(address);
   }
 
   /**

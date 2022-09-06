@@ -27,6 +27,18 @@ export class ItemService {
   ) {}
 
   /**
+   * @description 아이템 목록
+   */
+  async list() {
+    return {
+      resultCode: EXCEPTION_CODE.OK,
+      message: null,
+      error: null,
+      result: {},
+    };
+  }
+
+  /**
    * @description 아이템 상세
    * @param {number} id
    */

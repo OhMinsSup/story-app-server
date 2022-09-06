@@ -35,4 +35,10 @@ export class ItemController {
   detail(@Param('id', ParseIntPipe) id: number) {
     return this.service.detail(id);
   }
+
+  @Get()
+  @ApiOperation({ summary: '아이템 목록 조회' })
+  list() {
+    return this.service.list();
+  }
 }
