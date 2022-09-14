@@ -5,9 +5,11 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ListRequestDto } from './dto/list.request.dto';
 import { AuthUser, AuthUserSchema } from '../libs/get-user.decorator';
 import { LoggedInGuard } from '../modules/auth/logged-in.guard';
 import { CreateRequestDto } from './dto/create.request.dto';
@@ -38,7 +40,13 @@ export class ItemController {
 
   @Get()
   @ApiOperation({ summary: '아이템 목록 조회' })
-  list() {
-    return this.service.list();
+  @ApiQuery({
+    name: 'query',
+    type: ListRequestDto,
+    required: false,
+    description: '페이지네이션',
+  })
+  list(@Query() query: ListRequestDto) {
+    return this.service.list(query);
   }
 }

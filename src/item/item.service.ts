@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { CreateRequestDto } from './dto/create.request.dto';
 import { AuthUserSchema } from '../libs/get-user.decorator';
+import { ListRequestDto } from './dto/list.request.dto';
 
 import { EXCEPTION_CODE } from '../constants/exception.code';
 import { isEmpty, isNull, isNumber, isUndefined } from '../libs/assertion';
@@ -27,14 +28,115 @@ export class ItemService {
   ) {}
 
   /**
-   * @description 아이템 목록
+   * @description 아이템 리스트
+   * @param {ListRequestDto} listRequestDto
    */
-  async list() {
+  private async _getRecentItems({ cursor, limit }: ListRequestDto) {
+    const [totalCount, list] = await Promise.all([
+      this.prisma.item.count(),
+      this.prisma.item.findMany({
+        orderBy: {
+          id: 'desc',
+        },
+        where: {
+          id: cursor
+            ? {
+                lt: cursor,
+              }
+            : undefined,
+        },
+        select: {
+          id: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              username: true,
+              profileUrl: true,
+              wallet: {
+                select: {
+                  address: true,
+                },
+              },
+            },
+          },
+          title: true,
+          description: true,
+          thumbnailUrl: true,
+          price: true,
+          beginDate: true,
+          endDate: true,
+          backgroundColor: true,
+          externalSite: true,
+          status: true,
+          tags: {
+            select: {
+              tag: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+          file: {
+            select: {
+              publicId: true,
+              version: true,
+              foramt: true,
+              secureUrl: true,
+              mediaType: true,
+            },
+          },
+          nft: {
+            select: {
+              tokenId: true,
+              cid: true,
+            },
+          },
+        },
+        take: limit,
+      }),
+    ]);
+
+    const endCursor = list.at(-1)?.id ?? null;
+    const hasNextPage = endCursor
+      ? (await this.prisma.item.count({
+          where: {
+            id: {
+              lt: endCursor,
+            },
+          },
+          orderBy: {
+            id: 'desc',
+          },
+        })) > 0
+      : false;
+
+    return { totalCount, list, endCursor, hasNextPage };
+  }
+
+  /**
+   * @description 아이템 목록
+   * @param {ListRequestDto} query
+   */
+  async list(query: ListRequestDto) {
+    const result = await this._getRecentItems(query);
+
+    const { list, totalCount, endCursor, hasNextPage } = result;
+
     return {
       resultCode: EXCEPTION_CODE.OK,
       message: null,
       error: null,
-      result: {},
+      result: {
+        list,
+        totalCount,
+        pageInfo: {
+          endCursor: hasNextPage ? endCursor : null,
+          hasNextPage,
+        },
+      },
     };
   }
 
@@ -46,6 +148,7 @@ export class ItemService {
     const item = await this.prisma.item.findFirst({
       where: { AND: [{ id }, { isPublic: true }] },
       select: {
+        id: true,
         user: {
           select: {
             id: true,
