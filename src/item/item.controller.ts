@@ -24,7 +24,7 @@ export class ItemController {
   @ApiOperation({ summary: '아이템 등록' })
   @ApiBody({
     required: true,
-    description: '회원가입 API',
+    description: '아이템 API',
     type: CreateRequestDto,
   })
   @UseGuards(LoggedInGuard)
