@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "@nestjs/bull": "^0.6.1",
     "@nestjs/common": "^9.0.8",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.8",
@@ -38,6 +39,7 @@
     "@prisma/client": "^4.2.1",
     "axios": "^0.27.2",
     "bcrypt": "^5.0.1",
+    "bull": "^4.10.1",
     "caver-js": "^1.9.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",

@@ -221,29 +221,21 @@ export class ItemService {
    * @param {CreateRequestDto} input
    */
   async create(user: AuthUserSchema, input: CreateRequestDto) {
-    return this.prisma.$transaction(async (tx) => {
-      const wallet = await tx.userWallet.findFirst({
-        where: {
-          address: user.wallet.address,
-        },
-        select: {
-          privateKey: true,
-        },
-      });
+    const file = await this.prisma.file.findUnique({
+      where: {
+        id: input.fileId,
+      },
+    });
 
-      const file = await tx.file.findUnique({
-        where: {
-          id: input.fileId,
-        },
+    if (!file) {
+      throw new NotFoundException({
+        status: EXCEPTION_CODE.NOT_EXIST,
+        msg: ['존재하지 않는 파일입니다.'],
+        error: 'Not Found File',
       });
-      if (!file) {
-        throw new NotFoundException({
-          status: EXCEPTION_CODE.NOT_EXIST,
-          msg: ['존재하지 않는 파일입니다.'],
-          error: 'Not Found File',
-        });
-      }
+    }
 
+    const tx = await this.prisma.$transaction(async (tx) => {
       let createdTags: Tag[] = [];
       // 태크 체크
       if (!isEmpty(input.tags) && input.tags) {
@@ -307,55 +299,6 @@ export class ItemService {
         ),
       );
 
-      const metadata = await this.nftClient.add({
-        name: item.title,
-        description: item.description,
-        thumbnailUrl: input.thumbnailUrl,
-        contentUrl: file.secureUrl,
-        tags: input.tags ?? [],
-        price: item.price,
-        backgroundColor: item.backgroundColor ?? null,
-        externalSite: item.externalSite ?? null,
-      });
-
-      const { receipt, tokenId } = await this.klaytn.mint(
-        wallet.privateKey,
-        item.id,
-        metadata.url,
-      );
-
-      if (!tokenId) {
-        throw new BadRequestException({
-          status: EXCEPTION_CODE.NFT_FAIL,
-          msg: ['토큰 아이디 생성이 실패하였습니다.'],
-          error: 'NFT Create Fail',
-        });
-      }
-
-      const nft = await tx.nFT.create({
-        data: {
-          tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
-          cid: metadata.ipnft,
-          ipfsUrl: metadata.url,
-        },
-      });
-
-      await tx.transactionReceipt.create({
-        data: {
-          transactionHash: receipt.transactionHash,
-          nftId: nft.id,
-        },
-      });
-
-      await tx.item.update({
-        where: {
-          id: item.id,
-        },
-        data: {
-          nftId: nft.id,
-        },
-      });
-
       return {
         resultCode: EXCEPTION_CODE.OK,
         message: null,
@@ -365,5 +308,80 @@ export class ItemService {
         },
       };
     });
+
+    const wallet = await this.prisma.userWallet.findFirst({
+      where: {
+        address: user.wallet.address,
+      },
+      select: {
+        privateKey: true,
+      },
+    });
+
+    const meta = {
+      name: input.title,
+      description: input.description,
+      thumbnailUrl: input.thumbnailUrl,
+      contentUrl: file.secureUrl,
+      tags: input.tags ?? [],
+      price: input.price,
+      backgroundColor: input.backgroundColor ?? null,
+      externalSite: input.externalSite ?? null,
+    };
+
+    const metadata = await this.nftClient.add({
+      name: input.title,
+      description: input.description,
+      thumbnailUrl: input.thumbnailUrl,
+      contentUrl: file.secureUrl,
+      tags: input.tags ?? [],
+      price: input.price,
+      backgroundColor: input.backgroundColor ?? null,
+      externalSite: input.externalSite ?? null,
+    });
+
+    const { receipt, tokenId } = await this.klaytn.mint(
+      wallet.privateKey,
+      tx.result.dataId,
+      metadata.url,
+    );
+
+    if (!tokenId) {
+      throw new BadRequestException({
+        status: EXCEPTION_CODE.NFT_FAIL,
+        msg: ['토큰 아이디 생성이 실패하였습니다.'],
+        error: 'NFT Create Fail',
+      });
+    }
+
+    try {
+      const nft = await this.prisma.nFT.create({
+        data: {
+          tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
+          cid: metadata.ipnft,
+          ipfsUrl: metadata.url,
+        },
+      });
+
+      await this.prisma.transactionReceipt.create({
+        data: {
+          transactionHash: receipt.transactionHash,
+          nftId: nft.id,
+        },
+      });
+
+      await this.prisma.item.update({
+        where: {
+          id: tx.result.dataId,
+        },
+        data: {
+          nftId: nft.id,
+        },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
+    return tx;
   }
 }

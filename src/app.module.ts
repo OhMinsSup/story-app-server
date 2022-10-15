@@ -8,20 +8,27 @@ import joi from '@hapi/joi';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { AuthModule } from './auth/auth.module';
-import { JwtModule } from './modules/jwt/jwt.module';
-import { KlaytnModule } from './modules/klaytn/klaytn.module';
 import { UsersModule } from './users/users.module';
-import { AuthGuardModule } from './modules/auth/auth.module';
-import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { FileModule } from './file/file.module';
 import { ItemModule } from './item/item.module';
-import { IpfsModule } from './modules/ipfs/ipfs.module';
 import { TxModule } from './tx/tx.module';
+
+import { JwtModule } from './modules/jwt/jwt.module';
+import { KlaytnModule } from './modules/klaytn/klaytn.module';
+import { AuthGuardModule } from './modules/auth/auth.module';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { IpfsModule } from './modules/ipfs/ipfs.module';
+import { QueueModule } from './modules/queue/queue.module';
+
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 const isDev = process.env.NODE_ENV === 'development';
 const isProd = process.env.NODE_ENV === 'production';
 
 @Module({
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -74,6 +81,7 @@ const isProd = process.env.NODE_ENV === 'production';
     IpfsModule.forRoot({
       nftStorageApiKey: process.env.NFT_STORAGE_API_KEY,
     }),
+    QueueModule.forRoot(),
     AuthGuardModule,
     AuthModule,
     UsersModule,
