@@ -1,4 +1,7 @@
+import type { AuthUserSchema } from '../../libs/get-user.decorator';
+
 export interface QueueJobData {
+  user: AuthUserSchema;
   name: string;
   description: string;
   thumbnailUrl: string;

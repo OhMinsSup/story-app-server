@@ -1,19 +1,16 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { KlaytnService } from '../modules/klaytn/klaytn.service';
 import { PrismaService } from '../database/prisma.service';
 import { IpfsService } from '../modules/ipfs/ipfs.service';
 import { ConfigService } from '@nestjs/config';
+import { QueueService } from '../modules/queue/queue.service';
 
 import { CreateRequestDto } from './dto/create.request.dto';
 import { AuthUserSchema } from '../libs/get-user.decorator';
 import { ListRequestDto } from './dto/list.request.dto';
 
 import { EXCEPTION_CODE } from '../constants/exception.code';
-import { isEmpty, isNull, isNumber, isUndefined } from '../libs/assertion';
+import { isEmpty, isNull, isUndefined } from '../libs/assertion';
 import { escapeForUrl } from '../libs/utils';
 
 import type { Tag } from '@prisma/client';
@@ -25,6 +22,7 @@ export class ItemService {
     private readonly klaytn: KlaytnService,
     private readonly nftClient: IpfsService,
     private readonly config: ConfigService,
+    private readonly queue: QueueService,
   ) {}
 
   /**
@@ -309,77 +307,20 @@ export class ItemService {
       };
     });
 
-    const wallet = await this.prisma.userWallet.findFirst({
-      where: {
-        address: user.wallet.address,
-      },
-      select: {
-        privateKey: true,
-      },
-    });
-
-    const meta = {
-      name: input.title,
-      description: input.description,
-      thumbnailUrl: input.thumbnailUrl,
-      contentUrl: file.secureUrl,
-      tags: input.tags ?? [],
-      price: input.price,
-      backgroundColor: input.backgroundColor ?? null,
-      externalSite: input.externalSite ?? null,
-    };
-
-    const metadata = await this.nftClient.add({
-      name: input.title,
-      description: input.description,
-      thumbnailUrl: input.thumbnailUrl,
-      contentUrl: file.secureUrl,
-      tags: input.tags ?? [],
-      price: input.price,
-      backgroundColor: input.backgroundColor ?? null,
-      externalSite: input.externalSite ?? null,
-    });
-
-    const { receipt, tokenId } = await this.klaytn.mint(
-      wallet.privateKey,
-      tx.result.dataId,
-      metadata.url,
-    );
-
-    if (!tokenId) {
-      throw new BadRequestException({
-        status: EXCEPTION_CODE.NFT_FAIL,
-        msg: ['토큰 아이디 생성이 실패하였습니다.'],
-        error: 'NFT Create Fail',
-      });
-    }
-
-    try {
-      const nft = await this.prisma.nFT.create({
-        data: {
-          tokenId: isNumber(tokenId) ? tokenId.toString() : tokenId,
-          cid: metadata.ipnft,
-          ipfsUrl: metadata.url,
-        },
-      });
-
-      await this.prisma.transactionReceipt.create({
-        data: {
-          transactionHash: receipt.transactionHash,
-          nftId: nft.id,
-        },
-      });
-
-      await this.prisma.item.update({
-        where: {
-          id: tx.result.dataId,
-        },
-        data: {
-          nftId: nft.id,
-        },
-      });
-    } catch (error) {
-      console.log(error);
+    if (tx.result.dataId) {
+      setTimeout(() => {
+        this.queue.minting(tx.result.dataId, {
+          user,
+          name: input.title,
+          description: input.description,
+          thumbnailUrl: input.thumbnailUrl,
+          contentUrl: file.secureUrl,
+          tags: input.tags,
+          price: input.price,
+          backgroundColor: input.backgroundColor,
+          externalSite: input.externalSite,
+        });
+      }, 0);
     }
 
     return tx;

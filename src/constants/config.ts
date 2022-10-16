@@ -10,12 +10,12 @@ export const KLAYTN_NET_RPC_URL = process.env.KLAYTN_NET_RPC_URL;
 
 export const QUEUE_CONSTANTS = {
   MINTING: '@queue:minting',
-  MINT: '@queue:mint',
+  ITEM: '@queue:item',
 };
 
 export const TASK_CONSTANTS = {
   MINTING: '@task:minting',
-  MINT: '@task:mint',
+  ITEM: '@task:item',
 };
 
 const addressPath = __dirname + '/../../deployed/deployedAddress';

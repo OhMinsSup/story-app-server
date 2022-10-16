@@ -4,7 +4,7 @@ import { QUEUE, QUEUE_CONSTANTS } from '../../constants/config';
 import { QueueService } from './queue.service';
 import { PrismaService } from '../../database/prisma.service';
 import { MintingConsumer } from './minting.consumer';
-import { MintConsumer } from './mint.consumer';
+import { ItemConsumer } from './item.consumer';
 
 @Module({
   providers: [PrismaService],
@@ -24,7 +24,7 @@ export class QueueModule {
           },
         }),
         BullModule.registerQueue({
-          name: QUEUE_CONSTANTS.MINT,
+          name: QUEUE_CONSTANTS.ITEM,
           redis: {
             host: 'localhost',
             port: 6379,
@@ -39,7 +39,7 @@ export class QueueModule {
         },
         QueueService,
         MintingConsumer,
-        MintConsumer,
+        ItemConsumer,
       ],
       exports: [QueueService],
     };

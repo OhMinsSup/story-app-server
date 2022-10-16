@@ -8,14 +8,14 @@ export class MintingConsumer {
   private readonly logger = new Logger(MintingConsumer.name);
 
   constructor(
-    @InjectQueue(QUEUE_CONSTANTS.MINT)
+    @InjectQueue(QUEUE_CONSTANTS.ITEM)
     private readonly mintQueue: Queue<Record<string, any>>,
   ) {}
 
   @Process(TASK_CONSTANTS.MINTING)
   async popTaskByMinting(job: Job<Record<string, any>>) {
     const { itemId, data } = job.data;
-    return this.mintQueue.add(TASK_CONSTANTS.MINT, {
+    return this.mintQueue.add(TASK_CONSTANTS.ITEM, {
       itemId,
       data,
     });
