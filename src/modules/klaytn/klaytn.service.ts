@@ -35,6 +35,14 @@ export class KlaytnService {
   }
 
   /**
+   * @description 컨트렉트 정보를 조회한다.
+   * @returns
+   */
+  getContract() {
+    return this.contract;
+  }
+
+  /**
    * @description 인 메모리에 지갑 등록
    * @param {Keyring} keyring
    */

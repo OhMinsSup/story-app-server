@@ -153,11 +153,6 @@ export class ItemService {
             email: true,
             username: true,
             profileUrl: true,
-            wallet: {
-              select: {
-                address: true,
-              },
-            },
           },
         },
         title: true,
@@ -192,6 +187,11 @@ export class ItemService {
           select: {
             tokenId: true,
             cid: true,
+            transactionReceipt: {
+              select: {
+                transactionHash: true,
+              },
+            },
           },
         },
       },
@@ -205,11 +205,16 @@ export class ItemService {
       });
     }
 
+    const contract = this.klaytn.getContract();
+
     return {
       resultCode: EXCEPTION_CODE.OK,
       message: null,
       error: null,
-      result: item,
+      result: {
+        ...item,
+        contractHash: contract._address,
+      },
     };
   }
 
